@@ -79,11 +79,13 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $ruta = $_SESSION['urlin'] . '/images/logos/logo.png';
 ?>
 <div class="text-right py-3">
-    <!--<a type="button" id="btnReporteGral" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
-        <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
-    </a>-->
-    <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"> Imprimir</a>
-    <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
+    <div>
+        <a type="" id="btnReporteGral" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
+            <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
+        </a>
+        <a type="button" class="btn btn-primary btn-sm" title="Imprimir" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"><span class="fas fa-print fa-lg" aria-hidden="true"></span></a>
+        <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" title="Cerrar"><span class="fas fa-times fa-lg" aria-hidden="true"></span></a>
+    </div>
 </div>
 <div class="contenedor bg-light" id="areaImprimir">
     <style>

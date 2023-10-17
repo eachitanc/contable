@@ -64,71 +64,80 @@ try {
 }
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 ?>
-<div class="text-right py-3">
-    <div class=" form-row">
-        <div class="form-group col-md-8">
-            <input type="text" class="form-control form-control-sm" id="buscaBienAlmacen" placeholder="Artículo o producto a listar" value="<?php echo $nombre ?>">
-            <input type="hidden" id="id_prod" value="<?php echo $id_prod ?>">
-        </div>
-        <div class="form-group col-md-1">
-            <button type="button" class="btn btn-light btn-sm" id="filtraBusqueda">Filtrar</button>
-        </div>
-        <div class="form-group col-md-3">
-            <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"> Imprimir</a>
-            <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
+<div class="form-row">
+    <div class="form-group col-md-8">
+        <label class="small">artículo</label>
+        <input type="text" class="form-control form-control-sm" id="buscaBienAlmacen" placeholder="Artículo o producto a listar" value="<?php echo $nombre ?>">
+        <input type="hidden" id="id_prod" value="<?php echo $id_prod ?>">
+    </div>
+    <div class="form-group col-md-1 text-left">
+        <label class="small">&nbsp;</label>
+        <div>
+            <button class="btn btn-outline-info btn-sm" id="filtraBusqueda"><span class="fas fa-search fa-lg" aria-hidden="true"></span></button>
         </div>
     </div>
-    <div class="contenedor bg-light" id="areaImprimir">
-        <style>
-            @media print {
-                body {
-                    font-family: Arial, sans-serif;
-                }
+    <div class="form-group col-md-3 text-right">
+        <label class="small">&nbsp;</label>
+        <div>
+            <a type="" id="btnReporteGral" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
+                <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
+            </a>
+            <a type="button" class="btn btn-primary btn-sm" title="Imprimir" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"><span class="fas fa-print fa-lg" aria-hidden="true"></span></a>
+            <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" title="Cerrar"><span class="fas fa-times fa-lg" aria-hidden="true"></span></a>
+        </div>
+    </div>
+</div>
+<div class="contenedor bg-light" id="areaImprimir">
+    <style>
+        @media print {
+            body {
+                font-family: Arial, sans-serif;
             }
+        }
 
-            .resaltar:nth-child(even) {
-                background-color: #F8F9F9;
-            }
+        .resaltar:nth-child(even) {
+            background-color: #F8F9F9;
+        }
 
-            .resaltar:nth-child(odd) {
-                background-color: #ffffff;
-            }
-        </style>
-        <div class="p-4 text-left">
-            <table class="page_break_avoid" style="width:100% !important;">
-                <thead style="background-color: white !important;font-size:80%">
-                    <tr style="padding: bottom 3px; color:black">
-                        <td colspan="10">
-                            <table style="width:100% !important;">
-                                <tr>
-                                    <td rowspan="3" class='text-center' style="width:18%"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
-                                    <td colspan="9" style="text-align:center">
-                                        <strong><?php echo $empresa['nombre']; ?> </strong>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colspan="9" style="text-align:center">
-                                        NIT <?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                    <tr style="background-color: #CED3D3; text-align:center">
-                        <th rowspan="2">Lote</th>
-                        <th rowspan="2">Vence</th>
-                        <th rowspan="2">Invima</th>
-                        <th rowspan="2">Marca</th>
-                        <th rowspan="2">Val.Und.</th>
-                        <th colspan="2">Existe</th>
-                    </tr>
-                </thead>
-                <tbody style="font-size: 80%;">
-                    <?php
-                    if (!empty($datos)) {
-                        foreach ($datos as $d) {
-                            $valu = pesos($d['valu_ingresa'] * (1 + ($d['iva'] / 100)));
-                            echo "  <tr class='resaltar'>
+        .resaltar:nth-child(odd) {
+            background-color: #ffffff;
+        }
+    </style>
+    <div class="p-4 text-left">
+        <table class="page_break_avoid" style="width:100% !important;">
+            <thead style="background-color: white !important;font-size:80%">
+                <tr style="padding: bottom 3px; color:black">
+                    <td colspan="10">
+                        <table style="width:100% !important;">
+                            <tr>
+                                <td rowspan="3" class='text-center' style="width:18%"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
+                                <td colspan="9" style="text-align:center">
+                                    <strong><?php echo $empresa['nombre']; ?> </strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="9" style="text-align:center">
+                                    NIT <?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr style="background-color: #CED3D3; text-align:center">
+                    <th rowspan="2">Lote</th>
+                    <th rowspan="2">Vence</th>
+                    <th rowspan="2">Invima</th>
+                    <th rowspan="2">Marca</th>
+                    <th rowspan="2">Val.Und.</th>
+                    <th colspan="2">Existe</th>
+                </tr>
+            </thead>
+            <tbody style="font-size: 80%;">
+                <?php
+                if (!empty($datos)) {
+                    foreach ($datos as $d) {
+                        $valu = pesos($d['valu_ingresa'] * (1 + ($d['iva'] / 100)));
+                        echo "  <tr class='resaltar'>
                                         <td>$d[lote]</td>
                                         <td>$d[fecha_vence]</td>
                                         <td>$d[invima]</td>
@@ -136,13 +145,13 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                         <td style='text-align:right'>$valu</td>
                                         <td style='text-align:right'>$d[existencia]</td>
                                     </tr>";
-                        }
-                    } else {
-                        echo "<tr><td colspan='10' class='text-center'>No hay datos para mostrar</td></tr>";
                     }
-                    ?>
-                </tbody>
-            </table>
-        </div>
-
+                } else {
+                    echo "<tr><td colspan='10' class='text-center'>No hay datos para mostrar</td></tr>";
+                }
+                ?>
+            </tbody>
+        </table>
     </div>
+
+</div>

@@ -190,12 +190,12 @@ foreach ($datos as $dt) {
 }
 $grantotal = $subtotal + $iva;
 ?>
-<div class="text-right py-3">
-    <a type="button" id="btnExcelEntrada" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
+<div class="py-3 text-right">
+    <a type="" id="btnExcelEntrada" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
         <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
     </a>
-    <a type="button" class="btn btn-primary btn-sm" id="btnImprimir">Imprimir</a>
-    <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
+    <a type="button" class="btn btn-primary btn-sm" title="Imprimir" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"><span class="fas fa-print fa-lg" aria-hidden="true"></span></a>
+    <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" title="Cerrar"><span class="fas fa-times fa-lg" aria-hidden="true"></span></a>
 </div>
 <div class="content bg-light" id="areaImprimir">
     <style>
@@ -224,7 +224,7 @@ $grantotal = $subtotal + $iva;
                     <td colspan="10">
                         <table style="width:100% !important;">
                             <tr>
-                                <td rowspan="3" class='text-center' style="width:18%"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
+                                <td rowspan="2" class='text-center' style="width:18%"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
                                 <td colspan="9" style="text-align:center">
                                     <header><strong><?php echo $empresa['nombre']; ?> </strong></header>
                                 </td>
@@ -241,17 +241,10 @@ $grantotal = $subtotal + $iva;
                                 <td colspan="3">
                                     <b>TIPO: <?php echo $datos[0]['tipo_entrada'] ?>
                                 </td>
-                                <td colspan="3" style="font-size:9px;text-align: right;">
-                                    <table style="width:100% !important;">
-                                        <tr>
-                                            <td style="text-align: right;">Fecha entrada.</td>
-                                            <td><?php echo date('Y/m/d', strtotime($datos[0]['fec_entrada'])) ?></td>
-                                        </tr>
-                                        <tr>
-                                            <td style="text-align: right;">Fecha Imp.</td>
-                                            <td><?php echo $date->format('Y/m/d') ?></td>
-                                    </table>
-                                </td>
+                                <td colspan="4" style="text-align: right;">Fecha entrada: <?php echo date('Y/m/d', strtotime($datos[0]['fec_entrada'])) ?></td>
+                            </tr>
+                            <tr>
+                                <td colspan="10" style="text-align: right;">Fecha Imp: <?php echo $date->format('Y/m/d H:m:s') ?></td>
                             </tr>
                             <tr style="font-size: 85%;">
                                 <td colspan="4">
@@ -260,19 +253,13 @@ $grantotal = $subtotal + $iva;
                                 <td colspan="3">
                                     NIT: <?php echo $ccnit ?>
                                 </td>
-                                <td colspan="3">
+                                <td colspan="3" style="text-align:right">
                                     RECIBE: <?php echo mb_strtoupper($datos[0]['sede'] . ' - ' .   $datos[0]['bodega']) ?>
-                                </td>
-                                <td colspan="1">
-                                    <span id="numero-pagina"></span>
                                 </td>
                             </tr>
                             <tr style="font-size: 85%;">
-                                <td colspan="8" style="text-align:right">
+                                <td colspan="10" style="text-align:right">
                                     <span>ESTADO: <b><?php echo $datos[0]['estado'] <= 2 ? 'BORRADOR' : 'DEFINITIVO' ?></b></span>
-                                </td>
-                                <td colspan="2" style="text-align:right">
-                                    <div class="page-number"></div>
                                 </td>
                             </tr>
                         </table>
@@ -393,7 +380,7 @@ $grantotal = $subtotal + $iva;
                 echo $totalExistencia;
                 ?>
                 <tr>
-                    <td colspan="10" style="text-align: left;">
+                    <td colspan="10" style="text-align: left; padding:5px;">
                         <span>OBSERVACIÓN: <b><?php echo $datos[0]['observacion'] ?></b></span>
                     </td>
                 <tr>
@@ -407,13 +394,13 @@ $grantotal = $subtotal + $iva;
                                     Elaboró:
                                 </td>
                                 <td colspan="3">
-                                    _____________________________________________
+                                    _________________________________________
                                 </td>
                                 <td colspan="2">
                                     Recibido por:
                                 </td>
                                 <td colspan="3">
-                                    _____________________________________________
+                                    _________________________________________
                                 </td>
                             </tr>
                             <tr>
@@ -434,14 +421,6 @@ $grantotal = $subtotal + $iva;
                     </td>
                 </tr>
             </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="10">
-                        <div class="footer">
-                        </div>
-                    </td>
-                </tr>
-            </tfoot>
         </table>
     </div>
 </div>

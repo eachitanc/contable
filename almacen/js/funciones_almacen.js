@@ -2640,6 +2640,15 @@
         if (id == '5') {
             ruta = window.urlin + '/almacen/informes/imp_entrada_x_tercero';
         }
+        if (id == '6') {
+            ruta = window.urlin + '/almacen/informes/imp_traslado_multiple';
+        }
+        if (id == '7') {
+            ruta = window.urlin + '/almacen/informes/imp_consec_traslado';
+        }
+        if (id == '8') {
+            ruta = window.urlin + '/almacen/informes/imp_vencimiento';
+        }
         $.post(ruta + '.php', function (he) {
             $('#divTamModalForms').removeClass('modal-xl');
             $('#divTamModalForms').removeClass('modal-sm');
@@ -2722,7 +2731,7 @@
         let id = $('#id_pdo').val();
         let fecha1 = $('#fecha1').val();
         let fecha2 = $('#fecha2').val();
-        $.post('../../informes/imp_consumo.php', { id: id, fecha1: fecha1, fecha2: fecha2 }, function (he) {
+        $.post(window.urlin+'/almacen/informes/imp_consumo.php', { id: id, fecha1: fecha1, fecha2: fecha2 }, function (he) {
             $('#divTamModalForms').removeClass('modal-xl');
             $('#divTamModalForms').removeClass('modal-sm');
             $('#divTamModalForms').addClass('modal-lg');
@@ -2984,6 +2993,29 @@
             });
         }
     });
+    $('#divModalForms').on('click', '#btnGenInfVence', function () {
+        $('.is-invalid').removeClass('is-invalid');
+        if ($('#sedevence').val() == '0') {
+            $('#sedevence').addClass('is-invalid');
+            $('#sedevence').focus();
+            $('#divModalError').modal('show');
+            $('#divMsgError').html("Debe seleccionar una sede");
+        } else if ($('#bodega').val() == '0') {
+            $('#bodega').addClass('is-invalid');
+            $('#bodega').focus();
+            $('#divModalError').modal('show');
+            $('#divMsgError').html("Debe seleccionar una bodega");
+        } else {
+            let data = $('#formInfExiste').serialize();
+            $.post(window.urlin + '/almacen/informes/imp_vencimiento.php', data, function (he) {
+                $('#divTamModalForms').removeClass('modal-xl');
+                $('#divTamModalForms').removeClass('modal-sm');
+                $('#divTamModalForms').addClass('modal-lg');
+                $('#divModalForms').modal('show');
+                $("#divForms").html(he);
+            });
+        }
+    });
     $('#divModalForms').on('change', '#sede', function () {
         let sede = $(this).val();
         $.post(window.urlin + '/almacen/informes/imp_control_existencia.php', { sede: sede }, function (he) {
@@ -2997,6 +3029,16 @@
     $('#divModalForms').on('change', '#sedeif', function () {
         let sede = $(this).val();
         $.post(window.urlin + '/almacen/informes/imp_inventario_fisico.php', { sede: sede }, function (he) {
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').addClass('modal-lg');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+    });
+    $('#divModalForms').on('change', '#sedevence', function () {
+        let sede = $(this).val();
+        $.post(window.urlin + '/almacen/informes/imp_vencimiento.php', { sede: sede }, function (he) {
             $('#divTamModalForms').removeClass('modal-xl');
             $('#divTamModalForms').removeClass('modal-sm');
             $('#divTamModalForms').addClass('modal-lg');
@@ -3053,10 +3095,40 @@
             $("#divForms").html(he);
         });
     });
+    $('#divModalForms').on('click', '#btnListTraslMult', function () {
+        let inicia = $("#idInicia").val();
+        let fin = $("#idFinal").val();
+        let fec_inicia = $("#fecInicia").val();
+        let fec_final = $("#fecFinal").val();
+        let tipo = $("input[name='categoria']:checked").val();
+        if (inicia > fin && tipo == 1) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('El ID inicial debe ser menos que el ID Final');
+        }
+        $.post(window.urlin + '/almacen/informes/imp_traslado_multiple.php', {
+            inicia: inicia, fin: fin, fec_inicia: fec_inicia, fec_final: fec_final, tipo: tipo
+        }, function (he) {
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').addClass('modal-lg');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+    });
     $('#divModalForms').on('click', '#filtraBusqueda', function () {
         let id = $("#id_prod").val();
         let nombre = $("#buscaBienAlmacen").val();
         $.post(window.urlin + '/almacen/informes/imp_existencia_producto.php', { id: id, nombre: nombre }, function (he) {
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').addClass('modal-lg');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+    });
+    $('#divModalForms').on('change', '#slcVigenia', function () {
+        let vigencia = $("#slcVigenia").val();
+        $.post(window.urlin + '/almacen/informes/imp_consec_traslado.php', { vigencia: vigencia }, function (he) {
             $('#divTamModalForms').removeClass('modal-xl');
             $('#divTamModalForms').removeClass('modal-sm');
             $('#divTamModalForms').addClass('modal-lg');

@@ -142,14 +142,14 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
             <button class="btn btn-outline-info btn-sm" id="btnFiltraConsumo"><span class="fas fa-search fa-lg" aria-hidden="true"></span></button>
         </div>
     </div>
-    <div class="form-group col-md-3">
-        <label for="bodega" class="small">&nbsp;</label>
+    <div class="form-group col-md-3 text-right">
+        <label class="small">&nbsp;</label>
         <div>
-            <a type="button" id="btnReporteGral" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
+            <a type="" id="btnReporteGral" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
                 <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
             </a>
-            <a type="button" class="btn btn-primary btn-sm" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"> Imprimir</a>
-            <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
+            <a type="button" class="btn btn-primary btn-sm" title="Imprimir" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"><span class="fas fa-print fa-lg" aria-hidden="true"></span></a>
+            <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" title="Cerrar"><span class="fas fa-times fa-lg" aria-hidden="true"></span></a>
         </div>
     </div>
 </div>

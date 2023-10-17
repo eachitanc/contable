@@ -404,13 +404,7 @@ try {
 }
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 ?>
-<div class="text-right py-3">
-    <a type="button" id="btnExcelEntrada" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
-        <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
-    </a>
-    <a type="button" class="btn btn-primary btn-sm" onclick="printJS('areaImprimir', 'html')">Imprimir</a>
-    <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
-</div>
+
 <div class="form-row">
     <div class="form-group col-md-3">
         <label for="fecha1" class="small">Fecha Inicial</label>
@@ -433,9 +427,21 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
             <?php } ?>
         </select>
     </div>
-    <div class="form-group col-md-2">
-        <label for="kardeXfecha" class="small">&nbsp;</label>
-        <button type="button" class="btn btn-light btn-sm btn-block" id="kardeXfecha">Filtrar</button>
+    <div class="form-group col-md-1 text-left">
+        <label class="small">&nbsp;</label>
+        <div>
+            <button class="btn btn-outline-info btn-sm" id="kardeXfecha"><span class="fas fa-search fa-lg" aria-hidden="true"></span></button>
+        </div>
+    </div>
+    <div class="form-group col-md-2 text-right">
+        <label class="small">&nbsp;</label>
+        <div>
+            <a type="" id="btnReporteGral" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
+                <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
+            </a>
+            <a type="button" class="btn btn-primary btn-sm" title="Imprimir" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"><span class="fas fa-print fa-lg" aria-hidden="true"></span></a>
+            <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" title="Cerrar"><span class="fas fa-times fa-lg" aria-hidden="true"></span></a>
+        </div>
     </div>
 </div>
 <div class="content bg-light" id="areaImprimir">

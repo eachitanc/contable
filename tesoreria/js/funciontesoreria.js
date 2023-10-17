@@ -199,8 +199,8 @@ function cambiaListadoTesoreria(dato) {
   $(
     '<form action="lista_documentos_com.php" method="post">\n\
     <input type="hidden" name="tipo_doc" value="' +
-      dato +
-      '" /></form>'
+    dato +
+    '" /></form>'
   )
     .appendTo("body")
     .submit();
@@ -339,12 +339,12 @@ function cargarListaDetallePago(id_doc) {
   console.log(id_doc);
   $(
     '<form action="lista_documentos_pag.php" method="post"><input type="hidden" name="id_cop" value="' +
-      id_doc +
-      '" /><input type="hidden" name="tipo_dato" value="' +
-      tipo_dato +
-      '" /><input type="hidden" name="tipo_var" value="' +
-      tipo_movi +
-      '" />/n</form>'
+    id_doc +
+    '" /><input type="hidden" name="tipo_dato" value="' +
+    tipo_dato +
+    '" /><input type="hidden" name="tipo_var" value="' +
+    tipo_movi +
+    '" />/n</form>'
   )
     .appendTo("body")
     .submit();
@@ -357,12 +357,12 @@ function cargarListaArqueoConsignacion(id_doc) {
   console.log(id_doc);
   $(
     '<form action="lista_documentos_pag.php" method="post"><input type="hidden" name="id_arq" value="' +
-      id_doc +
-      '" /><input type="hidden" name="tipo_dato" value="' +
-      tipo_dato +
-      '" /><input type="hidden" name="tipo_var" value="' +
-      tipo_movi +
-      '" />/n</form>'
+    id_doc +
+    '" /><input type="hidden" name="tipo_dato" value="' +
+    tipo_dato +
+    '" /><input type="hidden" name="tipo_var" value="' +
+    tipo_movi +
+    '" />/n</form>'
   )
     .appendTo("body")
     .submit();
@@ -374,12 +374,12 @@ function cargarListaDetallePagoEdit(id_doc) {
 
   $(
     '<form action="lista_documentos_pag.php" method="post"><input type="hidden" name="id_doc" value="' +
-      id_doc +
-      '" /><input type="hidden" name="tipo_dato" value="' +
-      tipo_dato +
-      '" /><input type="hidden" name="tipo_var" value="' +
-      tipo_movi +
-      '" />/n</form>'
+    id_doc +
+    '" /><input type="hidden" name="tipo_dato" value="' +
+    tipo_dato +
+    '" /><input type="hidden" name="tipo_var" value="' +
+    tipo_movi +
+    '" />/n</form>'
   )
     .appendTo("body")
     .submit();
@@ -397,10 +397,10 @@ let terminarDetalleTes = function (dato, tipo) {
 function cambiaListadoTesoreria(dato, tipo) {
   $(
     '<form action="lista_documentos_com.php" method="post"><input type="hidden" name="tipo_doc" value="' +
-      dato +
-      '" /> <input type="hidden" name="var" value="' +
-      tipo +
-      '" /></form>'
+    dato +
+    '" /> <input type="hidden" name="var" value="' +
+    tipo +
+    '" /></form>'
   )
     .appendTo("body")
     .submit();
@@ -1070,7 +1070,9 @@ const imprimirFormatoTes = (id) => {
   });
 };
 const imprSelecTes = (nombre, id) => {
-  cerrarDocumentoCtb(id);
+  if (id > 0) {
+    cerrarDocumentoCtb(id);
+  }
   var ficha = document.getElementById(nombre);
   var ventimp = window.open(" ", "popimpr");
   ventimp.document.write(ficha.innerHTML);
@@ -1219,7 +1221,7 @@ const valorMovTeroreria = () => {
   }
 };
 // ========================================= scrip para modificar la fecha inicial del formulario  ===============================
-const buscarFechaDoc = () => {};
+const buscarFechaDoc = () => { };
 
 //================================================ Script para autocompletado de cuentas =================================================
 // Autocomplete para la selección del tercero que se asigna al registro presupuestal
@@ -1698,13 +1700,13 @@ function redireccionar4(ruta) {
   setTimeout(() => {
     $(
       '<form action="' +
-        ruta.url +
-        '" method="post">\n\
+      ruta.url +
+      '" method="post">\n\
     <input type="hidden" name="' +
-        ruta.name +
-        '" value="' +
-        ruta.valor +
-        '" />\n\
+      ruta.name +
+      '" value="' +
+      ruta.valor +
+      '" />\n\
     </form>'
     )
       .appendTo("body")
@@ -1716,28 +1718,28 @@ function redireccionar5(ruta) {
   setTimeout(() => {
     $(
       '<form action="' +
-        ruta.url +
-        '" method="post"><input type="hidden" name="' +
-        ruta.name1 +
-        '" value="' +
-        ruta.valor1 +
-        '" />    <input type="hidden" name="' +
-        ruta.name2 +
-        '" value="' +
-        ruta.valor2 +
-        '" />    <input type="hidden" name="' +
-        ruta.name3 +
-        '" value="' +
-        ruta.valor3 +
-        '" />    <input type="hidden" name="' +
-        ruta.name4 +
-        '" value="' +
-        ruta.valor4 +
-        '" />    <input type="hidden" name="' +
-        ruta.name5 +
-        '" value="' +
-        ruta.valor5 +
-        '" />    </form>'
+      ruta.url +
+      '" method="post"><input type="hidden" name="' +
+      ruta.name1 +
+      '" value="' +
+      ruta.valor1 +
+      '" />    <input type="hidden" name="' +
+      ruta.name2 +
+      '" value="' +
+      ruta.valor2 +
+      '" />    <input type="hidden" name="' +
+      ruta.name3 +
+      '" value="' +
+      ruta.valor3 +
+      '" />    <input type="hidden" name="' +
+      ruta.name4 +
+      '" value="' +
+      ruta.valor4 +
+      '" />    <input type="hidden" name="' +
+      ruta.name5 +
+      '" value="' +
+      ruta.valor5 +
+      '" />    </form>'
     )
       .appendTo("body")
       .submit();
@@ -1750,13 +1752,13 @@ function redireccionar6(ruta) {
   setTimeout(() => {
     $(
       '<form action="' +
-        ruta.url +
-        '" method="post">\n\
+      ruta.url +
+      '" method="post">\n\
     <input type="hidden" name="' +
-        ruta.name +
-        '" value="' +
-        ruta.valor +
-        '" />\n\
+      ruta.name +
+      '" value="' +
+      ruta.valor +
+      '" />\n\
     </form>'
     )
       .appendTo("body")

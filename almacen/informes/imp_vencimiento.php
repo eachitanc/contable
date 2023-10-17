@@ -124,15 +124,7 @@ $datas = [];
 $resp = '';
 $datos = [];
 if (isset($_POST['bodega'])) {
-    if (!isset($_POST['optionCeros']) || $_POST['optionCeros'] == 2) {
-        $cond_ceros = 'WHERE `t1`.`existe` >= 0';
-    } else {
-        if ($_POST['optionCeros'] == 1) {
-            $cond_ceros = 'WHERE `t1`.`existe` = 0';
-        } else {
-            $cond_ceros = 'WHERE `t1`.`existe` > 0';
-        }
-    }
+    $cond_ceros = 'WHERE `t1`.`existe` > 0';
     try {
         if ($id_bodega == -1) {
             $id_bg = $allbg;
@@ -343,9 +335,9 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 ?>
 <form id="formInfExiste">
     <div class="form-row">
-        <div class="form-group col-md-4">
-            <label for="sede" class="small">SEDE</label>
-            <select class="form-control form-control-sm" id="sede" name="sede">
+        <div class="form-group col-md-3">
+            <label for="sedevence" class="small">SEDE</label>
+            <select class="form-control form-control-sm" id="sedevence" name="sede">
                 <option value="0">--Selecionar--</option>
                 <?php
                 foreach ($sedes as $fila) {
@@ -358,7 +350,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                 ?>
             </select>
         </div>
-        <div class="form-group col-md-4">
+        <div class="form-group col-md-3">
             <label for="bodega" class="small">BODEGA</label>
             <select class="form-control form-control-sm" id="bodega" name="bodega">
                 <option value="0">--Selecionar--</option>
@@ -379,10 +371,14 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                 ?>
             </select>
         </div>
+        <div class="form-group col-md-2">
+            <label for="fecha" class="small">CORTE</label>
+            <input type="date" class="form-control form-control-sm" id="fecha" name="fecha" value="<?php echo $fecha == '2999-12-31 23:59:59' ? '' : substr($fecha, 0, 10); ?>">
+        </div>
         <div class="form-group col-md-1">
             <label class="small">&nbsp;</label>
             <div>
-                <a type="button" id="btnGenInfExistencias" class="btn btn-outline-warning btn-sm" title="Filtrar">
+                <a type="button" id="btnGenInfVence" class="btn btn-outline-warning btn-sm" title="Filtrar">
                     <span class="fas fa-filter fa-lg" aria-hidden="true"></span>
                 </a>
             </div>
@@ -396,32 +392,6 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                 <a type="button" class="btn btn-primary btn-sm" title="Imprimir" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"><span class="fas fa-print fa-lg" aria-hidden="true"></span></a>
                 <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" title="Cerrar"><span class="fas fa-times fa-lg" aria-hidden="true"></span></a>
             </div>
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group col-md-5 text-left pt-1">
-            <?php
-            if (isset($_POST['optionCeros'])) {
-                $cero = $_POST['optionCeros'];
-            } else {
-                $cero = 2;
-            }
-            ?>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="optionCeros" id="soloCeros" value="1" <?php echo $cero == 1 ? 'checked' : '' ?>>
-                <label class="form-check-label small" for="soloCeros">Solo Ceros</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="optionCeros" id="conCeros" value="2" <?php echo $cero == 2 ? 'checked' : '' ?>>
-                <label class="form-check-label small" for="conCeros">Con Ceros</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="optionCeros" id="sinCeros" value="3" <?php echo $cero == 3 ? 'checked' : '' ?>>
-                <label class="form-check-label small" for="sinCeros">Sin Ceros</label>
-            </div>
-        </div>
-        <div class="form-group col-md-3">
-            <input type="date" class="form-control form-control-sm" id="fecha" name="fecha" value="<?php echo $fecha == '2999-12-31 23:59:59' ? '' : substr($fecha, 0, 10); ?>">
         </div>
     </div>
 </form>
@@ -448,7 +418,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                     <td colspan="9">
                         <table id="lista" class="bg-light" style="width:100% !important;">
                             <tr>
-                                <td rowspan="2" class='text-center' style="width:18%"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
+                                <td rowspan="2" class='text-center' style="width:18%"><span class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></span></td>
                                 <td colspan="8" style="text-align:center">
                                     <strong><?php echo $empresa['nombre']; ?> </strong>
                                     <div>NIT <?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?></div>
@@ -456,15 +426,12 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                             </tr>
                             <tr>
                                 <td colspan="4">
-                                    <center>CONTROL DE EXISTENCIAS EN <?php echo mb_strtoupper($bodegaslc) ?></center>
+                                    <b>ARTICULOS CON VENCIMIENTOS EN <?php echo mb_strtoupper($bodegaslc) ?></b>
                                 </td>
                                 <td colspan="4" style="text-align: right; font-size:70%">Imp. <?php echo $date->format('d/m/Y H:i') ?></td>
                             </tr>
                             <tr>
-                                <td colspan="8" style="font-size: 90%;text-align:left">
-                                    RESPONSABLE: <?php echo mb_strtoupper($resp) ?>
-                                </td>
-                                <td style="font-size: 90%; text-align:right">
+                                <td colspan="9" style="font-size: 90%; text-align:right">
                                     <span><b>CORTE:</b> <?php echo $fecha == '2999-12-31 23:59:59' ? date('Y/m/d') : substr($fecha, 0, 10); ?></span>
                                 </td>
                             </tr>
@@ -479,12 +446,12 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                     <th>Lote</th>
                     <th>Marca</th>
                     <th>Cant.</th>
-                    <th>Costo</th>
-                    <th>Total</th>
+                    <th>Días</th>
                 </tr>
             </thead>
             <tbody style="font-size: 60%;">
                 <?php
+                $inicio = date('Y-m-d', strtotime($fecha));
                 if (!empty($datas)) {
                     $total = 0;
                     $row_tipo = '';
@@ -518,6 +485,19 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                                 $keyinicial = array_search($keylt, array_column($inicial, 'lote'));
                                                 $inv_ini =  $keyinicial !== false ? $inicial[$keyinicial]['cantidad'] : 0;
                                                 $disponible =  $lote['cantd'] - $con_far + $inv_ini;
+                                                if ($lote['datos']['vence'] == '') {
+                                                    $vencimiento = 'N/A';
+                                                } else {
+                                                    if ($lote['datos']['vence'] > $inicio) {
+                                                        $date1 = new DateTime($inicio);
+                                                        $date2 = new DateTime($lote['datos']['vence']);
+                                                        $diff = $date1->diff($date2);
+                                                        $dias = $diff->days;
+                                                        $vencimiento = $dias;
+                                                    } else {
+                                                        $vencimiento = 'VENCIDO';
+                                                    }
+                                                }
                                                 if ($numLotes > 1) {
                                                     $sumaLote += $disponible;
                                                     $row_lote .= '<tr class="resaltar" style="font-size: 90%;">
@@ -528,8 +508,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                                     <td>' . $keylt . '</td>
                                                     <td>' . $lote['datos']['marca'] . '</td>
                                                     <td>' . $disponible . '</td>
-                                                    <td style="text-align: right;">' . pesos($lote['datos']['costo']) . '</td>
-                                                    <td style="text-align: right;">' . pesos(($disponible) * $lote['datos']['costo']) . '</td>
+                                                    <td style="text-align: right;">' . $vencimiento . '</td>
                                                     </tr>';
                                                     if (($disponible) > 0) {
                                                         $cant_prom++;
@@ -546,8 +525,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                                     <td>' . $keylt . '</td>
                                                     <td>' . $lote['datos']['marca'] . '</td>
                                                     <th>' . $disponible . '</th>
-                                                    <td style="text-align: right;">' . pesos($lote['datos']['costo']) . '</td>
-                                                    <td style="text-align: right;">' . pesos($sumaLote * $lote['datos']['costo']) . '</td>
+                                                    <td style="text-align: right;">' . $vencimiento . '</td>
                                                     </tr>';
                                                     $cant_prom = 1;
                                                     $suma_val =  $lote['datos']['costo'];
@@ -570,8 +548,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                                 <td></td>
                                                 <td></td>
                                                 <th>' . $sumaLote . '</th>
-                                                <td style="text-align: right;">' . pesos($prom_valunid) . '</td>
-                                                <td style="text-align: right;">' . pesos($sumaLote * $prom_valunid) . '</td>
+                                                <td style="text-align: right;"></td>
                                                 </tr>' . $row_lote;
                                             }
                                             $prom_valunid =  $val_prom == 0 ? $suma_val / $cant_prom : $val_prom;
@@ -583,22 +560,20 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                     $row_tipo .= '<tr style="font-size: 11px;"  class="resaltar">
                                     <th>' . $id_tipo . '</th>
                                     <th style="text-align: left;" colspan="7">' . $keytb . '</th>
-                                    <th style="text-align: right;">' . pesos($totalBien) . '</th>
                                     </tr>' . $row_bien;
                                     $totalBodega += $totalBien;
                                 }
                             }
-                            $row_bodega = '<tr  class="resaltar"><th colspan="6" style="text-align:center; font-size:13px;">' . $allbodegas[$bc]['nombre'] . '</th><th colspan="3" style="text-align:right; font-size:13px;">' . pesos($totalBodega) . '</th></tr>';
+                            $row_bodega = '<tr  class="resaltar"><th colspan="8" style="text-align:center; font-size:13px;">' . $allbodegas[$bc]['nombre'] . '</th></tr>';
                             $row_bg .= $row_bodega . $row_tipo;
                         }
                     }
                     $totalExistencia = '<tr style="font-size:14px"  class="resaltar">
-                                    <th style="text-align: left;" colspan="7">ELEMENTOS DE CONSUMO O CARGO DIFERIDO</th>
-                                    <th style="text-align: right;" colspan="2">' . pesos($total) . '</th>
+                                    <th style="text-align: left;" colspan="8">ELEMENTOS DE CONSUMO O CARGO DIFERIDO</th>
                                 </tr>' . $row_bg;
                     echo $totalExistencia;
                 } else {
-                    echo '<tr  class="resaltar"><td colspan="9" style="text-align:center">No hay datos para mostrar</td></tr>';
+                    echo '<tr  class="resaltar"><td colspan="8" style="text-align:center">No hay datos para mostrar</td></tr>';
                 }
                 ?>
             </tbody>

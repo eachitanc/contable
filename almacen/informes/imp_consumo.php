@@ -93,7 +93,7 @@ $fecha1 = isset($_POST['fecha1']) ? $_POST['fecha1'] : $fec_in;
 $fecha2 = isset($_POST['fecha2']) ? $_POST['fecha2'] : $date->format('Y-m-d');
 $condicicon = " AND `seg_salidas_almacen`.`fec_reg` BETWEEN '" . $fecha1 . "' AND '" . $fecha2 . " 23:59:59'";
 try {
-        $sql = "SELECT
+    $sql = "SELECT
                     `seg_salida_dpdvo`.`id_tipo_salida`
                     , `seg_tipo_salidas`.`descripcion`
                     , `seg_salida_dpdvo`.`id_pedido`
@@ -191,25 +191,31 @@ if (!empty($datos)) {
 }
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 ?>
-<div class="text-right py-3">
-    <a type="button" id="btnExcelEntrada" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
-        <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
-    </a>
-    <a type="button" class="btn btn-primary btn-sm" onclick="printJS('areaImprimir', 'html')">Imprimir</a>
-    <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal"> Cerrar</a>
-</div>
 <div class="form-row">
-    <div class="form-group col-md-5">
+    <input type="hidden" id="id_pdo" name="id_pdo" value="<?php echo $id_pedido ?>" />
+    <div class=" form-group col-md-4">
         <label for="fecha1" class="small">Fecha Inicial</label>
         <input type="date" class="form-control form-control-sm" id="fecha1" value="<?php echo $fecha1 ?>">
     </div>
-    <div class="form-group col-md-5">
+    <div class="form-group col-md-4">
         <label for="fecha2" class="small">Fecha Final</label>
         <input type="date" class="form-control form-control-sm" id="fecha2" value="<?php echo $fecha2 ?>">
     </div>
-    <div class="form-group col-md-2">
-        <label for="consumoXfechas" class="small">&nbsp;</label>
-        <button type="button" class="btn btn-light btn-sm btn-block" id="consumoXfechas">Filtrar</button>
+    <div class="form-group col-md-1 text-left">
+        <label class="small">&nbsp;</label>
+        <div>
+            <button class="btn btn-outline-info btn-sm" id="consumoXfechas"><span class="fas fa-search fa-lg" aria-hidden="true"></span></button>
+        </div>
+    </div>
+    <div class="form-group col-md-3 text-right">
+        <label class="small">&nbsp;</label>
+        <div>
+            <a type="" id="btnReporteGral" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
+                <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
+            </a>
+            <a type="button" class="btn btn-primary btn-sm" title="Imprimir" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"><span class="fas fa-print fa-lg" aria-hidden="true"></span></a>
+            <a type="button" class="btn btn-secondary btn-sm" data-dismiss="modal" title="Cerrar"><span class="fas fa-times fa-lg" aria-hidden="true"></span></a>
+        </div>
     </div>
 </div>
 <div class="content bg-light" id="areaImprimir">
@@ -234,7 +240,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                 <td colspan="10">
                     <table style="width:100% !important;">
                         <tr>
-                            <td rowspan="3" class='text-center' style="width:18%"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
+                            <td rowspan="3" class='text-center' style="width:18%"><span class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></span></td>
                             <td colspan="9" style="text-align:center">
                                 <header><strong><?php echo $empresa['nombre']; ?> </strong></header>
                             </td>
@@ -435,6 +441,4 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
             </tr>
         <?php } ?>
     </table>
-    <script src="https://printjs-4de6.kxcdn.com/print.min.js"></script>
-    <script src="https://printjs-4de6.kxcdn.com/print.min.css"></script>
 </div>
