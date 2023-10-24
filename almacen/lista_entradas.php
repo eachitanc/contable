@@ -73,62 +73,50 @@ try {
                             if ($tipo != 4) {
                             ?>
                                 <input type="hidden" id="peReg" value="<?php echo $permisos['registrar'] ?>">
-                                <?php
-                            }
-                            switch ($tipo) {
-                                case '-1':
-                                ?>
-                                    <table id="tableEntradasAlmacenProveedor" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
-                                        <thead>
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>Objeto</th>
-                                                <th>Fecha</th>
-                                                <th>Acción</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="modificarEntradasAlmacen">
-                                        </tbody>
-                                    </table>
-                                <?php
-                                    break;
-                                case '2':
-                                case '3':
-                                case '4':
-                                case '5':
-                                case '6':
-                                case '7':
-                                case '8':
-                                case '9':
-                                ?>
-                                    <table id="tableEntradasAlmacenPresDona" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
-                                        <thead>
-                                            <tr class="text-center">
-                                                <th>ID</th>
-                                                <th>Consecutivo</th>
-                                                <th>CC o NIT</th>
-                                                <th>Nombre Prestador</th>
-                                                <th>Acta/Remisión</th>
-                                                <th>Fecha <br>Acta/Remisión</th>
-                                                <th>Observación</th>
-                                                <th>Total</th>
-                                                <th>Estado</th>
-                                                <th>Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="modificarEntradasAlmacenPresDon">
-                                        </tbody>
-                                    </table>
-                                <?php
-                                    break;
-                                default:
-                                ?>
-                                    <div class="alert alert-info text-center" role="alert">
-                                        SELECCIONAR UN TIPO DE ENTRADA PARA ALMACÉN.
-                                    </div>
                             <?php
-
-                                    break;
+                            }
+                            if ($tipo == -1) {
+                            ?>
+                                <table id="tableEntradasAlmacenProveedor" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Objeto</th>
+                                            <th>Fecha</th>
+                                            <th>Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="modificarEntradasAlmacen">
+                                    </tbody>
+                                </table>
+                            <?php
+                            } elseif ($tipo >= 2) {
+                            ?>
+                                <table id="tableEntradasAlmacenPresDona" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                    <thead>
+                                        <tr class="text-center">
+                                            <th>ID</th>
+                                            <th>Consecutivo</th>
+                                            <th>CC o NIT</th>
+                                            <th>Nombre Prestador</th>
+                                            <th>Acta/Remisión</th>
+                                            <th>Fecha <br>Acta/Remisión</th>
+                                            <th>Observación</th>
+                                            <th>Total</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="modificarEntradasAlmacenPresDon">
+                                    </tbody>
+                                </table>
+                            <?php
+                            } else {
+                            ?>
+                                <div class="alert alert-info text-center" role="alert">
+                                    SELECCIONAR UN TIPO DE ENTRADA PARA ALMACÉN.
+                                </div>
+                            <?php
                             } ?>
                         </div>
                     </div>
@@ -218,8 +206,6 @@ try {
         <!-- Modal -->
     </div>
     <?php include '../scripts.php' ?>
-    <script src="https://printjs-4de6.kxcdn.com/print.min.js"></script>
-    <link rel="stylesheet" href="https://printjs-4de6.kxcdn.com/print.min.css">
 </body>
 
 </html>

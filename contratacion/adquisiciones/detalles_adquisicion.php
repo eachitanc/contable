@@ -150,7 +150,8 @@ try {
             WHERE `id_compra` = '$id_adq' LIMIT 1";
     $rs = $cmd->query($sql);
     $estudios = $rs->fetch();
-    $id_estudio = $estudios['id_est_prev'];
+
+    $id_estudio = !empty($estudios['id_est_prev']) ? $estudios['id_est_prev'] : '';
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -305,7 +306,7 @@ if (!empty($adquisicion)) {
                                                         <div class="div-mostrar col-md-2">
                                                             <label class="lbl-mostrar pb-2">ADQUISICIÓN</label>
                                                             <input type="hidden" id="id_compra" value="<?php echo $id_adq ?>">
-                                                            <input type="hidden" id="id_contrato_compra" value="<?php echo $contrato['id_contrato_compra'] ?>">
+                                                            <input type="hidden" id="id_contrato_compra" value="<?php echo isset($contrato['id_contrato_compra']) ? $contrato['id_contrato_compra'] : '' ?>">
                                                             <div class="div-cont pb-2">ADQ-<?php echo mb_strtoupper($adquisicion['id_adquisicion']) ?></div>
                                                         </div>
                                                         <div class="div-mostrar col-md-3">

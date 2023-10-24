@@ -1212,6 +1212,39 @@
             }
         });
     });
+    $("#divForms").on('input', '#muestraExistencias', function () {
+        $(this).autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "../datos/listar/datos_bien_servicio.php",
+                    dataType: "json",
+                    data: {
+                        term: request.term
+                    },
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 2,
+            select: function (event, ui) {
+                let id_3 = ui.item.id;
+                $('#id_prod').val(id_3);
+                if (id_3 > 0) {
+                    $.ajax({
+                        type: 'POST',
+                        url: '../datos/listar/existencias.php',
+                        data: { id_3: id_3 },
+                        success: function (r) {
+                            $('#existencias').html(r);
+                        }
+                    });
+                } else {
+                    $('#existencias').html('xs');
+                }
+            }
+        });
+    });
     $("#listaLotes").on('click', function () {
         var id_prod = $('#id_articulo').val();
         var id_bodega = $('#slcBodega').val();
@@ -1628,15 +1661,20 @@
     });
     //registrar devolución 
     $('#divModalForms').on('click', '#btnAddSalidaXDevol', function () {
+        var validar = 1;
         if ($('#id_tercero_pd').length) {
             if ($('#compleTerecero').val() == '') {
                 $('#divModalError').modal('show');
                 $('#divMsgError').html('Debe ingresar un tercero');
+                validar = 0;
             } else if ($('#id_tercero_pd').val() == '0') {
                 $('#divModalError').modal('show');
                 $('#divMsgError').html('No se ha ingresado ningun tercero válido');
+                validar = 0;
             }
-            return false;
+            if (validar == 0) {
+                return false;
+            }
         } else {
             if ($('#slcFianza').val() == '0') {
                 $('#divModalError').modal('show');
@@ -1755,45 +1793,71 @@
     });
     //agregar detalles devolucion
     $('#divModalForms').on('click', '#btnAddDetallesDevol', function () {
-        if ($('#numLoteDev').val() == '') {
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Debe ingresar un número de lote');
-        } else if ($('#id_proDev').val() == '0') {
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('No se ha ingresado un número de lote válido');
-        } else if ($('#numCantDev').val() == '') {
-            $('#divModalError').modal('show');
-            $('#divMsgError').html('Debe ingresar un número mayor a cero');
+        $('.is-invalid').removeClass('is-invalid');
+        var boton = $(this);
+        var aprobar = 1;
+        var suma = 0;
+        if ($('.xdisponiblex').length) {
+            $('.xdisponiblex').each(function () {
+                var valor = Number($(this).val());
+                var nan = ($(this).val());
+                var max = Number($(this).attr('max'));
+                if (nan == '') {
+                    aprobar = 0;
+                    $(this).focus();
+                    $(this).addClass('is-invalid');
+                    $('#divModalError').modal('show');
+                    $('#divMsgError').html('Debe indicar la cantidad por cada unidad transformada');
+                } else if (valor < 0 || valor > max) {
+                    aprobar = 0;
+                    $(this).focus();
+                    $(this).addClass('is-invalid');
+                    $('#divModalError').modal('show');
+                    $('#divMsgError').html('El valor debe ser mayor a 0 y menor o igual a ' + max);
+                }
+                if (aprobar == 0) {
+                    return false;
+                } else {
+                    suma = suma + valor;
+                }
+            });
+
         } else {
-            let max = parseInt($('#numCantDev').attr('max'));
-            let min = parseInt($('#numCantDev').attr('min'));
-            let valor = parseInt($('#numCantDev').val());
-            if (valor < min || valor > max) {
-                $('#divModalError').modal('show');
-                $('#divMsgError').html('Cantidad debe estar entre ' + min + ' y ' + max);
-            } else {
-                let detalle = $('#formAddDetalleDevol').serialize();
-                let masdet = $('#formDatosDevolucion').serialize();
-                let datos = detalle + '&' + masdet
-                $.ajax({
-                    type: 'POST',
-                    url: '../registrar/new_detalle_devolucion_kardex.php',
-                    data: datos,
-                    success: function (r) {
-                        if (r == '1') {
-                            let id = 'tableDetallesDevolucion';
-                            reloadtable(id);
-                            $('#divModalForms').modal('hide');
-                            $('#divModalDone').modal('show');
-                            $('#divMsgDone').html("Orden de entrada agregada correctamente");
-                        } else {
-                            $('#divModalError').modal('show');
-                            $('#divMsgError').html(r);
-                        }
-                    }
-                });
-            }
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Para el producto actual no existen cantidades disponibles');
         }
+        if (aprobar == 1 && suma > 0) {
+            boton.find('i').addClass('fa-spin');
+            boton.attr('disabled', true);
+            let detalle = $('#formAddDetalleDevol').serialize();
+            let masdet = $('#formDatosDevolucion').serialize();
+            let datos = detalle + '&' + masdet
+            $.ajax({
+                type: 'POST',
+                url: '../registrar/new_detalle_devolucion_kardex.php',
+                data: datos,
+                success: function (r) {
+                    if (r == '1') {
+                        let id = 'tableDetallesDevolucion';
+                        reloadtable(id);
+                        $('#divModalForms').modal('hide');
+                        $('#divModalDone').modal('show');
+                        $('#divMsgDone').html("Orden de entrada agregada correctamente");
+                    } else {
+                        $('#divModalError').modal('show');
+                        $('#divMsgError').html(r);
+                    }
+                }
+            });
+
+        } else {
+            $('.xdisponiblex').focus();
+            $('.xdisponiblex').addClass('is-invalid');
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Revisar Cantidades, por lo menos debe ser 1');
+        }
+        boton.find('i').removeClass('fa-spin');
+        boton.attr('disabled', false);
     });
     //actualizar detalles devoluvión
     $('#modificarDetalleDev').on('click', '.editar', function () {
@@ -2719,7 +2783,13 @@
     });
     $('#tableListDevoluciones').on('click', '.btnImprimirConsumo', function () {
         let id = $(this).attr('value');
-        $.post('informes/imp_consumo.php', { id: id }, function (he) {
+        var url;
+        if ($('#slctipoSalida').val() == 7) {
+            url = 'informes/imp_consumo.php';
+        } else {
+            url = 'informes/imp_salida';
+        }
+        $.post(url, { id: id }, function (he) {
             $('#divTamModalForms').removeClass('modal-xl');
             $('#divTamModalForms').removeClass('modal-sm');
             $('#divTamModalForms').addClass('modal-lg');
@@ -2731,7 +2801,7 @@
         let id = $('#id_pdo').val();
         let fecha1 = $('#fecha1').val();
         let fecha2 = $('#fecha2').val();
-        $.post(window.urlin+'/almacen/informes/imp_consumo.php', { id: id, fecha1: fecha1, fecha2: fecha2 }, function (he) {
+        $.post(window.urlin + '/almacen/informes/imp_consumo.php', { id: id, fecha1: fecha1, fecha2: fecha2 }, function (he) {
             $('#divTamModalForms').removeClass('modal-xl');
             $('#divTamModalForms').removeClass('modal-sm');
             $('#divTamModalForms').addClass('modal-lg');
@@ -3084,15 +3154,24 @@
         });
     });
     $('#divModalForms').on('click', '#btnLisEntradaXTercero', function () {
-        let inicia = $("#fecInicia").val();
-        let fin = $("#fecFin").val();
-        let tipo = $("input[name='tipo']:checked").val();
-        $.post(window.urlin + '/almacen/informes/imp_entrada_x_tercero.php', { inicia: inicia, fin: fin, tipo: tipo }, function (he) {
+        let datos = $('#formMoVXTercero').serialize();
+        $.post(window.urlin + '/almacen/informes/imp_entrada_x_tercero.php', datos, function (he) {
             $('#divTamModalForms').removeClass('modal-xl');
             $('#divTamModalForms').removeClass('modal-sm');
             $('#divTamModalForms').addClass('modal-lg');
             $('#divModalForms').modal('show');
             $("#divForms").html(he);
+        });
+    });
+    $('#divModalForms').on('change', '#slcTipoMv', function () {
+        let tipo = $('#slcTipoMv').val();
+        $.ajax({
+            type: 'POST',
+            url: window.urlin + '/almacen/datos/listar/tipo_mvto.php',
+            data: { tipo: tipo },
+            success: function (r) {
+                $('#slcMovimiento').html(r)
+            }
         });
     });
     $('#divModalForms').on('click', '#btnListTraslMult', function () {

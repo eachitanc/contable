@@ -25,22 +25,14 @@ try {
         <div class="px-2">
             <form id="formAddDetalleDevol">
                 <div class="form-row text-center">
-                    <div class="form-group col-md-6">
-                        <label for="txtLoteDev" class="small">buscar # lote</label>
-                        <input type="text" id="numLoteDev" class="form-control form-control-sm">
-                        <input type="hidden" id="id_proDev" name="id_proDev">
-                        <input type="hidden" id="id_entrada_dev" name="id_entradaDev">
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="numCantDev" class="small">cantidad</label>
-                        <input type="number" id="numCantDev" name="numCantDev" min="1" class="form-control form-control-sm">
+                    <div class="form-group col-md-12">
+                        <label for="muestraExistencias " class="small">Bien y/o producto</label>
+                        <input id="muestraExistencias" type="text" class="form-control form-control-sm" placeholder="Buscar">
+                        <input type="hidden" id="id_prod" name="id_prod" value="0">
                     </div>
                 </div>
-                <div class="form-row text-center">
-                    <div class="form-group col-md-12">
-                        <label for="txtaObservacionDev" class="small">Observaciones</label>
-                        <textarea class="form-control" id="txtaObservacionDev" name="txtaObservacionDev" rows="3"></textarea>
-                    </div>
+                <div id="existencias">
+
                 </div>
             </form>
         </div>

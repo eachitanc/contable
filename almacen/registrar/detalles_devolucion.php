@@ -100,8 +100,12 @@ switch ($estado) {
                                 <?php
                                 $estado_dev = $devolucion['estado'];
                                 if ($estado_dev < 3) {
-                                    echo '<input type="hidden" id="peReg" value="0">'; //' . $permisos['registrar'] . '
-                                    echo '<a id="btnEntregaPedido" type="button" class="btn btn-success btn-sm" value="FIANZA">Entregar ' . mb_strtolower($devolucion['descripcion']) . ' </a>';
+                                    if ($tipo_salida == 3 || $tipo_salida == 4 || $tipo_salida == 5 || $tipo_salida == 9) {
+                                        echo '<input type="hidden" id="peReg" value="1">';
+                                    }
+                                    if ($tipo_salida == 8) {
+                                        echo '<a id="btnEntregaPedido" type="button" class="btn btn-success btn-sm" value="FIANZA">Entregar ' . mb_strtolower($devolucion['descripcion']) . ' </a>';
+                                    }
                                 } else {
                                     echo '<button type="button" class="btn btn-secondary btn-sm" disabled>Cerrado</button>';
                                 }

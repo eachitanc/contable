@@ -42,7 +42,7 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 try {
-    $estado = 2;
+    $estado = 1;
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
     $sql = "INSERT INTO `seg_salida_dpdvo` (`id_tercero_api`, `id_tipo_salida`,  `acta_remision`, `fec_acta_remision`, `observacion`, `vigencia`, `id_user_reg`, `fec_reg`, `consecutivo`, `estado`)
@@ -60,13 +60,13 @@ try {
     $sql->bindParam(10, $estado, PDO::PARAM_INT);
     $sql->execute();
     $id_salida = $cmd->lastInsertId();
-    if ($id_salida > 0) {
+    if ($id_salida > 0 && isset($id_fianza)) {
         $sql = "UPDATE `seg_entrada_almacen` SET `id_devolucion` = $id_salida WHERE `id_entrada` = $id_fianza";
         $sql = $cmd->prepare($sql);
         $sql->execute();
         echo 1;
     } else {
-        echo $sql->errorInfo()[2];
+        echo '1', $sql->errorInfo()[2];
     }
     $cmd = null;
 } catch (PDOException $e) {

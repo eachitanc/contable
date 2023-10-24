@@ -12,6 +12,7 @@ function pesos($valor)
     return '$' . number_format($valor, 2, ",", ".");
 }
 include '../../conexion.php';
+$rango = isset($_POST['rango']) ? $_POST['rango'] : '';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 // consulto el nombre de la empresa de la tabla seg_empresas
@@ -124,7 +125,8 @@ $datas = [];
 $resp = '';
 $datos = [];
 if (isset($_POST['bodega'])) {
-    $cond_ceros = 'WHERE `t1`.`existe` > 0';
+    $cond_ceros = 'WHERE `t1`.`existe` > 0 AND `seg_detalle_entrada_almacen`.`fecha_vence` IS NOT NULL';
+    $cond_rango = $rango == '' ? '' : 'WHERE dias <= ' . $rango;
     try {
         if ($id_bodega == -1) {
             $id_bg = $allbg;
@@ -142,13 +144,14 @@ if (isset($_POST['bodega'])) {
                                 , `cant_ingresa`
                             FROM
                                 `seg_detalle_entrada_almacen`
-                            WHERE (`id_bodega` = " . $ib . " AND `seg_detalle_entrada_almacen`.`fec_reg` <= '" . $fecha . "')) AS `proveedor` 
+                            WHERE (`id_bodega` = $ib)) AS `proveedor` 
                             LEFT JOIN";
                 $suma = 'IFNULL(`proveedor`.`cant_ingresa`,0) + IFNULL(`entradas`.`cant_entra`,0)';
                 $on = 'ON (`proveedor`.`id_entrada` = `entradas`.`id_entrada`)';
                 $tabla = '`proveedor`';
             }
-            $sql = "SELECT 
+            $sql = "SELECT * FROM 
+                    (SELECT 
                     `t1`.`id_entrada`
                     , CASE WHEN `t1`.`existe`  < 0 THEN 0 ELSE `t1`.`existe` END AS `queda`
                     , `seg_marcas`.`descripcion` as `marca`
@@ -163,6 +166,7 @@ if (isset($_POST['bodega'])) {
                     , `seg_bien_servicio`.`bien_servicio` 
                     , `seg_tipo_bien_servicio`.`id_tipo_cotrato`
                     , `seg_tipo_bien_servicio`.`tipo_bn_sv`
+                    , DATEDIFF(DATE(`seg_detalle_entrada_almacen`.`fecha_vence`),DATE('$fecha')) AS `dias` 
                 FROM 
                 (SELECT
                     $tabla.`id_entrada`
@@ -176,7 +180,7 @@ if (isset($_POST['bodega'])) {
                         `seg_traslados_almacen`
                         LEFT JOIN `seg_detalles_traslado` 
                             ON (`seg_detalles_traslado`.`id_traslado` = `seg_traslados_almacen`.`id_trasl_alm`)
-                    WHERE (`seg_detalles_traslado`.`estado` > 0 AND `seg_traslados_almacen`.`id_bodega_entra` = $ib AND `seg_traslados_almacen`.`fec_reg` <= '$fecha')
+                    WHERE (`seg_detalles_traslado`.`estado` > 0 AND `seg_traslados_almacen`.`id_bodega_entra` = $ib)
                     GROUP BY `seg_detalles_traslado`.`id_entrada`) AS `entradas`
                         $on
                 LEFT JOIN 
@@ -187,7 +191,7 @@ if (isset($_POST['bodega'])) {
                         `seg_traslados_almacen`
                         LEFT JOIN `seg_detalles_traslado` 
                             ON (`seg_detalles_traslado`.`id_traslado` = `seg_traslados_almacen`.`id_trasl_alm`)
-                    WHERE (`seg_detalles_traslado`.`estado` > 0 AND `seg_traslados_almacen`.`id_bodega_sale` = $ib AND `seg_traslados_almacen`.`fec_reg` <= '$fecha')
+                    WHERE (`seg_detalles_traslado`.`estado` > 0 AND `seg_traslados_almacen`.`id_bodega_sale` = $ib)
                     GROUP BY `seg_detalles_traslado`.`id_entrada`) AS `salidas`
                         ON ($tabla.`id_entrada` = `salidas`.`id_entrada`)
                 LEFT JOIN 
@@ -202,7 +206,7 @@ if (isset($_POST['bodega'])) {
                             ON (`seg_salida_dpdvo`.`id_tipo_salida` = `seg_tipo_salidas`.`id_salida`)
                         INNER JOIN `seg_pedidos_almacen` 
                             ON (`seg_salida_dpdvo`.`id_pedido` = `seg_pedidos_almacen`.`id_pedido`)
-                    WHERE (`seg_salidas_almacen`.`estado` > 0 AND `seg_pedidos_almacen`.`id_bodega` = $ib AND `seg_salidas_almacen`.`fec_reg` <= '$fecha')
+                    WHERE (`seg_salidas_almacen`.`estado` > 0 AND `seg_pedidos_almacen`.`id_bodega` = $ib)
                     GROUP BY `seg_salidas_almacen`.`id_entrada`) AS `consumo` 
                         ON ($tabla.`id_entrada` = `consumo`.`id_entrada`)) AS `t1`
                 INNER JOIN `seg_detalle_entrada_almacen`
@@ -214,7 +218,8 @@ if (isset($_POST['bodega'])) {
                 INNER JOIN `seg_tipo_bien_servicio`
                     ON (`seg_bien_servicio`.`id_tipo_bn_sv` = `seg_tipo_bien_servicio`.`id_tipo_b_s`)
                 $cond_ceros
-                ORDER BY `seg_tipo_bien_servicio`.`tipo_bn_sv`,`seg_bien_servicio`.`bien_servicio`,`seg_detalle_entrada_almacen`.`lote` DESC";
+                ORDER BY `seg_tipo_bien_servicio`.`tipo_bn_sv`,`seg_bien_servicio`.`bien_servicio`,`seg_detalle_entrada_almacen`.`lote` DESC) AS `ts` 
+                $cond_rango";
             $res = $cmd->query($sql);
             $datos[$ib] = $res->fetchAll(PDO::FETCH_ASSOC);
         }
@@ -242,6 +247,7 @@ if (isset($_POST['bodega'])) {
                 $datas[$key][$tps][$bs][$lt]['datos']['id_tb'] =  $fl['id_tipo_bn_sv'];
                 $datas[$key][$tps][$bs][$lt]['datos']['invima'] =  $fl['invima'];
                 $datas[$key][$tps][$bs][$lt]['datos']['marca'] =  $fl['marca'];
+                $datas[$key][$tps][$bs][$lt]['datos']['dias'] =  $fl['dias'];
                 $idProd = $fl['id_prod'];
                 $productos[$idProd] = $idProd;
             }
@@ -376,6 +382,10 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
             <input type="date" class="form-control form-control-sm" id="fecha" name="fecha" value="<?php echo $fecha == '2999-12-31 23:59:59' ? '' : substr($fecha, 0, 10); ?>">
         </div>
         <div class="form-group col-md-1">
+            <label for="rango" class="small">RANGO</label>
+            <input type="number" class="form-control form-control-sm" id="rango" name="rango" value="<?php echo $rango; ?>">
+        </div>
+        <div class="form-group col-md-1">
             <label class="small">&nbsp;</label>
             <div>
                 <a type="button" id="btnGenInfVence" class="btn btn-outline-warning btn-sm" title="Filtrar">
@@ -383,7 +393,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                 </a>
             </div>
         </div>
-        <div class="form-group col-md-3 text-right">
+        <div class="form-group col-md-2 text-right">
             <label class="small">&nbsp;</label>
             <div>
                 <a type="" id="btnReporteGral" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
@@ -426,7 +436,11 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                             </tr>
                             <tr>
                                 <td colspan="4">
-                                    <b>ARTICULOS CON VENCIMIENTOS EN <?php echo mb_strtoupper($bodegaslc) ?></b>
+                                    <?php
+                                    $dias_vence = $rango == '' ? '' : ', MENOR O IGUAL A ' . $rango . ' DÍAS';
+                                    $en = $id_bodega == -1 ? '' : ' EN LA BODEGA ';
+                                    ?>
+                                    <b>ARTICULOS CON VENCIMIENTOS <?php echo $en . mb_strtoupper($bodegaslc) . $dias_vence ?></b>
                                 </td>
                                 <td colspan="4" style="text-align: right; font-size:70%">Imp. <?php echo $date->format('d/m/Y H:i') ?></td>
                             </tr>
@@ -485,19 +499,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                                 $keyinicial = array_search($keylt, array_column($inicial, 'lote'));
                                                 $inv_ini =  $keyinicial !== false ? $inicial[$keyinicial]['cantidad'] : 0;
                                                 $disponible =  $lote['cantd'] - $con_far + $inv_ini;
-                                                if ($lote['datos']['vence'] == '') {
-                                                    $vencimiento = 'N/A';
-                                                } else {
-                                                    if ($lote['datos']['vence'] > $inicio) {
-                                                        $date1 = new DateTime($inicio);
-                                                        $date2 = new DateTime($lote['datos']['vence']);
-                                                        $diff = $date1->diff($date2);
-                                                        $dias = $diff->days;
-                                                        $vencimiento = $dias;
-                                                    } else {
-                                                        $vencimiento = 'VENCIDO';
-                                                    }
-                                                }
+                                                $vencimiento = $lote['datos']['dias'];
                                                 if ($numLotes > 1) {
                                                     $sumaLote += $disponible;
                                                     $row_lote .= '<tr class="resaltar" style="font-size: 90%;">

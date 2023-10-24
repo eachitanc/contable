@@ -68,7 +68,7 @@ $rol = $_SESSION['rol'];
                         <tr>
                             <td><?php echo $id;
                                 $id++ ?></td>
-                            <td class="text-left">ENTRADAS POR TERCERO (DETALLE - CONSOLIDADO)</td>
+                            <td class="text-left">ENTRADAS O SALIDA POR TERCERO (DETALLE - CONSOLIDADO)</td>
                             <td class="text-center">
                                 <button value="5" class="btn btn-outline-warning btn-sm btn-circle shadow-gb informe" title="VER INFORME"><span class="fas fa-eye fa-lg"></span></button>
                             </td>

@@ -19,9 +19,9 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_entrada`,`id_tercero_api`,`acta_remision` 
+    $sql = "SELECT `id_entrada`, `consecutivo`, `id_tercero_api`, `acta_remision` 
             FROM `seg_entrada_almacen`
-            WHERE `id_cronhis` = 0 AND `id_devolucion` IS NULL AND `estado` > 0 AND `id_tipo_entrada` = 8";
+            WHERE `id_cronhis` > 0 AND `id_devolucion` IS NULL AND `estado` > 0 AND `id_tipo_entrada` = 8";
     $rs = $cmd->query($sql);
     $fianzas = $rs->fetchAll();
     $cmd = null;
@@ -75,8 +75,9 @@ $terceros = $terceros != '0' ? $terceros : [];
                                     $key = array_search($f['id_tercero_api'], array_column($terceros, 'id_tercero'));
                                     $terc = $key !== false ? $terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social'] : '';
                                     $terc = trim($terc);
+                                    $terc = $terc == '' ? $terc : ' -> ' . $terc;
                                 ?>
-                                    <option value="<?php echo $f['id_entrada'] ?>"><?php echo $f['acta_remision'] . ' -> ' . $terc ?></option>
+                                    <option value="<?php echo $f['id_entrada'] ?>"><?php echo 'FIANZA ENTRADA ' . str_pad($f['consecutivo'], 5, "0", STR_PAD_LEFT) . $terc ?></option>
                                 <?php
                                 }
                                 ?>

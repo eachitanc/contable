@@ -5,6 +5,7 @@ if (!isset($_SESSION['user'])) {
 }
 include 'conexion.php';
 include 'permisos.php';
+$rol = $_SESSION['rol'];
 ?>
 <div id="layoutSidenav_nav">
     <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
@@ -533,7 +534,6 @@ include 'permisos.php';
                 <?php
                 }
                 ?>
-
                 <a class="nav-link collapsed sombra" href="#" data-toggle="collapse" data-target="#collapseAlmacen" aria-expanded="false" aria-controls="collapsePages2">
                     <div class="form-row">
                         <div class="div-icono">
@@ -558,8 +558,7 @@ include 'permisos.php';
                             </div>
                         </a>
                         <?php
-                        $key = array_search('7', array_column($perm_modulos, 'id_modulo'));
-                        if (false !== $key) {
+                        if ($rol == 3 || $rol == 1) {
                         ?>
                             <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/lista_entradas.php">
                                 <div class="form-row">
@@ -571,36 +570,38 @@ include 'permisos.php';
                                     </div>
                                 </div>
                             </a>
-                            <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/lista_salidas.php">
-                                <div class="form-row">
-                                    <div class="div-icono">
-                                        <i class="fas fa-sign-out-alt" style="color: #F1C40F;"></i>
-                                    </div>
-                                    <div>
-                                        Salidas
-                                    </div>
+                        <?php } ?>
+                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/lista_salidas.php">
+                            <div class="form-row">
+                                <div class="div-icono">
+                                    <i class="fas fa-sign-out-alt" style="color: #F1C40F;"></i>
                                 </div>
-                            </a>
-                            <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/kardex.php">
-                                <div class="form-row">
-                                    <div class="div-icono">
-                                        <i class="fas fa-table" style="color: #FF5733;"></i>
-                                    </div>
-                                    <div>
-                                        Kardex
-                                    </div>
+                                <div>
+                                    Salidas
                                 </div>
-                            </a>
-                            <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/traslados.php">
-                                <div class="form-row">
-                                    <div class="div-icono">
-                                        <i class="fas fa-exchange-alt" style="color: #2ECC71;"></i>
-                                    </div>
-                                    <div>
-                                        Traslados
-                                    </div>
+                            </div>
+                        </a>
+                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/kardex.php">
+                            <div class="form-row">
+                                <div class="div-icono">
+                                    <i class="fas fa-table" style="color: #FF5733;"></i>
                                 </div>
-                            </a>
+                                <div>
+                                    Kardex
+                                </div>
+                            </div>
+                        </a>
+                        <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/traslados.php">
+                            <div class="form-row">
+                                <div class="div-icono">
+                                    <i class="fas fa-exchange-alt" style="color: #2ECC71;"></i>
+                                </div>
+                                <div>
+                                    Traslados
+                                </div>
+                            </div>
+                        </a>
+                        <?php if (false) { ?>
                             <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/ajuste_inventario.php">
                                 <div class="form-row">
                                     <div class="div-icono">
@@ -611,16 +612,18 @@ include 'permisos.php';
                                     </div>
                                 </div>
                             </a>
-                            <a class="nav-link sombra" href="#" id="listInfAlmacen">
-                                <div class="form-row">
-                                    <div class="div-icono">
-                                        <i class="fas fa-info-circle" style="color: #8E44AD;"></i>
-                                    </div>
-                                    <div>
-                                        Informes
-                                    </div>
+                        <?php } ?>
+                        <a class="nav-link sombra" href="#" id="listInfAlmacen">
+                            <div class="form-row">
+                                <div class="div-icono">
+                                    <i class="fas fa-info-circle" style="color: #8E44AD;"></i>
                                 </div>
-                            </a>
+                                <div>
+                                    Informes
+                                </div>
+                            </div>
+                        </a>
+                        <?php if ($rol == 3 || $rol == 1) { ?>
                             <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/almacen/configuracion.php">
                                 <div class="form-row">
                                     <div class="div-icono">
@@ -631,6 +634,7 @@ include 'permisos.php';
                                     </div>
                                 </div>
                             </a>
+
                         <?php
                         }
                         ?>

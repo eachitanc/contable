@@ -111,7 +111,7 @@ if (empty($fianza)) {
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-        $sql = "SELECT 
+        $sql = "SELECT  *FROM (SELECT 
                     `t1`.`id_entrada`
                     , CASE WHEN `t1`.`existe`  < 0 THEN 0 ELSE `t1`.`existe` END AS `existencia`
                     , `seg_marcas`.`descripcion`
@@ -167,7 +167,8 @@ if (empty($fianza)) {
                 INNER JOIN `seg_marcas` 
                         ON (`seg_detalle_entrada_almacen`.`id_marca` = `seg_marcas`.`id_marca`)
                 WHERE `seg_detalle_entrada_almacen`.`id_prod` IN ($ids)
-                ORDER BY `seg_detalle_entrada_almacen`.`fecha_vence` ASC";
+                ORDER BY `seg_detalle_entrada_almacen`.`fecha_vence` ASC) AS `t1`
+                WHERE `t1`.`existencia` > 0";
         $rs = $cmd->query($sql);
         $existencias = $rs->fetchAll(PDO::FETCH_ASSOC);
         $cmd = null;

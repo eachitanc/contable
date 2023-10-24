@@ -97,6 +97,7 @@ if (!empty($id_t)) {
     $result = curl_exec($ch);
     curl_close($ch);
     $dat_ter = json_decode($result, true);
+    $dat_ter = $dat_ter == 0 ? [] : $dat_ter;
 } else {
     $dat_ter = [];
 }
@@ -104,9 +105,8 @@ $idusuario = 0;
 $data = [];
 if (!empty($devoluciones)) {
     foreach ($devoluciones as $d) {
-        $id_dev = $d['id_devolucion'];
-        $key = array_search($d['id_tercero_api'], array_column($dat_ter, 'id_tercero'));
-
+        $id_dev = $d['id_devolucion'] != '' ? $d['id_devolucion'] : 0;
+        $key = array_search($id_dev, array_column($dat_ter, 'id_tercero'));
         if (false !== $key) {
             $tercer = $dat_ter[$key]['apellido1'] . ' ' . $dat_ter[$key]['apellido2'] . ' ' . $dat_ter[$key]['nombre2'] . ' ' . $dat_ter[$key]['nombre1'] . ' ' . $dat_ter[$key]['razon_social'];
         } else {
@@ -128,8 +128,10 @@ if (!empty($devoluciones)) {
                 $borrar = '<a value="' . $id_dev . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb borrar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
             }
         }
-        if ($d['estado'] >= 2) {
+        if ($d['estado'] >= 2 && $d['id_tipo_salida'] == 7) {
             $imprimir = '<a value="' . $d['id_pedido'] . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btnImprimirConsumo" title="Imprimir"><span class="fas fa-print fa-lg"></span></a>';
+        } else {
+            $imprimir = '<a value="' . $id_dev . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btnImprimirConsumo" title="Imprimir"><span class="fas fa-print fa-lg"></span></a>';
         }
         switch ($d['estado']) {
             case 1:
