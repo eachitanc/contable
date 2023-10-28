@@ -496,6 +496,94 @@ EOT;
         $diasLab = 0;
         $total_conceptos = 0;
         $nom_concepto = '';
+        $netos = [];
+        foreach ($obj as $o) {
+            $devengado = 0;
+            $deducido = 0;
+            $id_empleado = $o['id_empleado'];
+            $key = array_search($id_empleado, array_column($dlab, 'id_empleado'));
+            $val_sueldo = $key !== false ? $dlab[$key]['val_liq_dias'] : 0;
+            $key = array_search($id_empleado, array_column($dlab, 'id_empleado'));
+            $val_auxt = $key !== false ? $dlab[$key]['val_liq_auxt'] : 0;
+            $key = array_search($id_empleado, array_column($dlab, 'id_empleado'));
+            $val_auxal = $key !== false ? $dlab[$key]['aux_alim'] : 0;
+            $key = array_search($id_empleado, array_column($bsp, 'id_empleado'));
+            $val_bsp = $key !== false ? $bsp[$key]['val_bsp'] : 0;
+            $key = array_search($id_empleado, array_column($vac, 'id_empleado'));
+            $val_vac = $key !== false ? $vac[$key]['val_liq'] : 0;
+            $key = array_search($id_empleado, array_column($vac, 'id_empleado'));
+            $val_pri_vac = $key !== false ? $vac[$key]['val_prima_vac'] : 0;
+            $key = array_search($id_empleado, array_column($vac, 'id_empleado'));
+            $val_recrea = $key !== false ? $vac[$key]['val_bon_recrea'] : 0;
+            $key = array_search($id_empleado, array_column($lic, 'id_empleado'));
+            $val_lic = $key !== false ? $lic[$key]['val_liq'] : 0;
+            $key = array_search($id_empleado, array_column($indemnizaciones, 'id_empleado'));
+            $val_indem = $key !== false ? $indemnizaciones[$key]['val_liq'] : 0;
+            $key = array_search($id_empleado, array_column($segsoc, 'id_empleado'));
+            $val_salud = $key !== false ? $segsoc[$key]['aporte_salud_emp'] : 0;
+            $key = array_search($id_empleado, array_column($segsoc, 'id_empleado'));
+            $val_pension = $key !== false ? $segsoc[$key]['aporte_pension_emp'] : 0;
+            $key = array_search($id_empleado, array_column($segsoc, 'id_empleado'));
+            $val_solidaria = $key !== false ? $segsoc[$key]['aporte_solidaridad_pensional'] : 0;
+            $key = array_search($id_empleado, array_column($retfte, 'id_empleado'));
+            $val_rtefte = $key !== false ? $retfte[$key]['val_ret'] : 0;
+            $representacion = $o['representacion'] == 1 ? $grepre['valor'] : 0;
+            $filtro = [];
+            $filtro = array_filter($hoex, function ($hoex) use ($id_empleado) {
+                return $hoex["id_empleado"] == $id_empleado;
+            });
+            $val_hoext = 0;
+            if (count($filtro) > 0) {
+                foreach ($filtro as $f) {
+                    $val_hoext += $f['val_liq'];
+                }
+            }
+            $filtro = [];
+            $filtro = array_filter($incap, function ($incap) use ($id_empleado) {
+                return $incap["id_empleado"] == $id_empleado;
+            });
+            $val_incap = 0;
+            if (count($filtro) > 0) {
+                foreach ($filtro as $f) {
+                    $valor_cp = $f['pago_empresa'] + $f['pago_eps'] + $f['pago_arl'];
+                    $val_incap += $valor_cp;
+                }
+            }
+            $filtro = [];
+            $filtro = array_filter($lib, function ($lib) use ($id_empleado) {
+                return $lib["id_empleado"] == $id_empleado;
+            });
+            $val_libr = 0;
+            if (count($filtro) > 0) {
+                foreach ($filtro as $f) {
+                    $val_libr += $f['val_mes_lib'];
+                }
+            }
+            $filtro = [];
+            $filtro = array_filter($emb, function ($emb) use ($id_empleado) {
+                return $emb["id_empleado"] == $id_empleado;
+            });
+            $val_embar = 0;
+            if (count($filtro) > 0) {
+                foreach ($filtro as $f) {
+                    $val_embar += $f['val_mes_embargo'];
+                }
+            }
+            $filtro = [];
+            $filtro = array_filter($sind, function ($sind) use ($id_empleado) {
+                return $sind["id_empleado"] == $id_empleado;
+            });
+            $val_sind = 0;
+            if (count($filtro) > 0) {
+                foreach ($filtro as $f) {
+                    $val_sind += $f['val_aporte'];
+                }
+            }
+            $devengado = $val_sueldo + $val_auxt + $val_auxal + $val_bsp + $val_vac + $val_pri_vac + $val_recrea + $val_lic + $val_indem + $representacion + $val_hoext + $val_incap;
+            $deducido = $val_salud + $val_pension + $val_solidaria + $val_rtefte + $val_libr + $val_embar + $val_sind;
+            $val_neto = $devengado - $deducido;
+            $netos[$id_empleado] = $val_neto;
+        }
         foreach ($obj as $o) {
             $id_empleado = $o['id_empleado'];
             $nom_empleado = mb_strtoupper($o['nombre1'] . ' ' . $o['nombre2'] . ' ' . $o['apellido1'] . ' ' . $o['apellido2']);
@@ -779,13 +867,13 @@ EOT;
                             </tr>';
                         }
                     }
-                    $key = array_search($id_empleado, array_column($saln, 'id_empleado'));
+                    $pagado = isset($netos[$id_empleado]) ? $netos[$id_empleado] : 0;
                     $topdf .= '
                     <tr>
                         <td>NETO</td>
                         <td>' . $o['no_documento'] . '</td>
                         <td>' . $diasLab . '</td>
-                        <td style="text-align: right;">' . pesos($saln[$key]['val_liq']) . '</td>
+                        <td style="text-align: right;">' . pesos($pagado) . '</td>
                     </tr>';
 
                     break;
@@ -1160,14 +1248,15 @@ EOT;
                                     <td>" . $tipo . "</td>
                                     <td>" . $o['cuenta_bancaria'] . "</td>";
                     }
+                    $pagado = isset($netos[$id_empleado]) ? $netos[$id_empleado] : 0;
                     $topdf .= '
                     <tr>
                         <td>' . $o['nom_municipio'] . '</td>
                         <td>' . $o['no_documento'] . '</td>' . $getBanco .
                         '<td>' . $diasLab . '</td>
-                        <td>' . pesos($saln[$key]['val_liq']) . '</td>
+                        <td>' . pesos($pagado) . '</td>
                     </tr>';
-                    $total_conceptos += $saln[$key]['val_liq'];
+                    $total_conceptos += $pagado;
                     break;
             }
         }

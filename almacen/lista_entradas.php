@@ -24,7 +24,7 @@ $tipo = isset($_POST['tipo']) ? $_POST['tipo'] : '0';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_entrada`, `descripcion` FROM  `seg_tipo_entrada`";
+    $sql = "SELECT `id_entrada`, `descripcion` FROM  `seg_tipo_entrada` ORDER BY `descripcion` ASC";
     $rs = $cmd->query($sql);
     $tentradas = $rs->fetchAll();
     $cmd = null;

@@ -108,6 +108,7 @@ try {
                 , `seg_marcas`.`descripcion` as `marca`
                 , `seg_detalle_entrada_almacen`.`invima`
                 , `seg_detalle_entrada_almacen`.`fecha_vence`
+                , `seg_detalle_entrada_almacen`.`marca` as `marca2`
                 , `seg_tipo_entrada`.`descripcion` as `tipo_entrada`
             FROM
                 `seg_detalle_entrada_almacen`
@@ -178,7 +179,7 @@ foreach ($datos as $fila) {
     $datas[$tps][$bs][$lt]['datos']['id_bn'] =  $fila['id_prod'];
     $datas[$tps][$bs][$lt]['datos']['id_tb'] =  $fila['id_tipo_b_s'];
     $datas[$tps][$bs][$lt]['datos']['invima'] = $fila['invima'];
-    $datas[$tps][$bs][$lt]['datos']['marca'] =  $fila['marca'];
+    $datas[$tps][$bs][$lt]['datos']['marca'] =  $fila['marca'] == '' ? $fila['marca2'] : $fila['marca'];
     $datas[$tps][$bs][$lt]['datos']['iva'] =  $fila['iva'];
 }
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));

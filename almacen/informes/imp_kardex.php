@@ -162,38 +162,31 @@ if ($bodega == 40) {
                         ON (`seg_ids_farmacia`.`id_med` = `t1`.`id_med`)
                     WHERE `seg_ids_farmacia`.`id_prod` = $id_art
                     UNION ALL 
-                    SELECT * FROM (SELECT 
-                        '' AS `id_trasl_alm`
-                        , '' AS `id_entrada`  
-                        , `seg_detalle_entrada_almacen`.`id_prod`
+                    SELECT
+                        `vista_salidas_farmacia`.`id_egreso`AS `id_trasl_alm`
+                        , '' AS `id_entrada` 
+                        , `seg_ids_farmacia`.`id_prod`
                         , '40' AS `id_bodega_sale`
                         , 'FARMACIA' AS  `nombre`
                         , '' AS `id_sede`
                         , '' AS `sede`
                         , '0' AS `tercero`
                         , '' AS `acta_remision`
-                        , t2.`cantidad` AS consumo
-                        , `seg_detalle_entrada_almacen`.`valu_ingresa` * (1 + `seg_detalle_entrada_almacen`.`iva`/100) AS valor
-                        , `seg_detalle_entrada_almacen`.`lote`
-                        , `seg_detalle_entrada_almacen`.`id_marca`
-                        , `seg_detalle_entrada_almacen`.`invima`
-                        , `seg_detalle_entrada_almacen`.`fecha_vence`
-                        , t2.`fecha`
-                        , 'CONSUMO FARMACIA' AS `tipo_entrada`
-                        , '4' AS `tipo` 
-                    FROM 
-                        (SELECT
-                            lote, DATE(fec_cierre) fecha, SUM(cantidad) AS cantidad
-                        FROM
-                            `seg_ids_farmacia`
-                        INNER JOIN `vista_salidas_farmacia` 
-                            ON (`seg_ids_farmacia`.`id_med` = `vista_salidas_farmacia`.`id_med`)
-                        WHERE (`seg_ids_farmacia`.`id_prod` = $id_art AND `vista_salidas_farmacia`.`fec_cierre` <= '$fecha2 23:59:59')
-                        GROUP BY id_lote, fecha)AS t2
-                    LEFT JOIN `seg_detalle_entrada_almacen` 
-                            ON (`t2`.`lote` = `seg_detalle_entrada_almacen`.`lote`)
-                    WHERE t2.`cantidad` > 0
-                    ORDER BY t2.`fecha` ASC) AS `tabla`";
+                        , `vista_salidas_farmacia`.`cantidad`  AS `consumo`
+                        , `vista_salidas_farmacia`.`val_promedio`  AS `valor`
+                        , `vista_salidas_farmacia`.`lote`
+                        , '0' AS `id_marca`
+                        , `vista_salidas_farmacia`.`reg_invima`
+                        , `vista_salidas_farmacia`.`fec_vencimiento`
+                        , `vista_salidas_farmacia`.`fec_cierre`
+                        , `vista_salidas_farmacia`.`nom_tipo_egreso`
+                        , '4' AS `tipo`
+                        
+                    FROM
+                        `vista_salidas_farmacia`
+                        INNER JOIN `seg_ids_farmacia` 
+                            ON (`vista_salidas_farmacia`.`id_med` = `seg_ids_farmacia`.`id_med`)
+                    WHERE (`seg_ids_farmacia`.`id_prod` = $id_art AND `vista_salidas_farmacia`.`fec_cierre` <= '$fecha2 23:59:59')";
 }
 try {
     $sql = "SELECT * FROM 
@@ -607,6 +600,4 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
             </tr>
         <?php } ?>
     </table>
-    <script src="https://printjs-4de6.kxcdn.com/print.min.js"></script>
-    <script src="https://printjs-4de6.kxcdn.com/print.min.css"></script>
 </div>

@@ -1182,7 +1182,7 @@
         $(this).autocomplete({
             source: function (request, response) {
                 $.ajax({
-                    url: "datos/listar/datos_bien_servicio.php",
+                    url: window.urlin + "/almacen/datos/listar/datos_bien_servicio.php",
                     dataType: "json",
                     data: {
                         term: request.term
@@ -1200,7 +1200,7 @@
                 if (id_3 > 0) {
                     $.ajax({
                         type: 'POST',
-                        url: 'datos/listar/existencias.php',
+                        url: window.urlin + "/almacen/datos/listar/existencias.php",
                         data: { id_3: id_3 },
                         success: function (r) {
                             $('#existencias').html(r);
@@ -1384,7 +1384,7 @@
         $('#divModalConfDel').modal('hide');
         $.ajax({
             type: 'POST',
-            url: 'actualizar/transformar_articulo.php',
+            url: window.urlin + '/almacen/actualizar/transformar_articulo.php',
             data: datos,
             success: function (r) {
                 if (r == 'ok') {
@@ -1396,6 +1396,8 @@
                     $('#basic-addon3').html(' ');
                     $('#basic-addon4').html(' ');
                     $('#existencias').html('');
+                    let id = 'tableRegPresDona';
+                    reloadtable(id);
                     $('#divModalDone').modal('show');
                     $('#divMsgDone').html("Artículos unificados correctamente");
                 } else {
@@ -3223,13 +3225,36 @@
             data: { id_pdo: id_pdo },
             success: function (r) {
                 if (r == 'ok') {
+                    $('#divModalDone a').attr('data-dismiss', '');
+                    $('#divModalDone a').attr('href', 'javascript:location.reload()');
                     $('#divModalDone').modal('show');
                     $('#divMsgDone').html("Consumo cerrado correctamente");
                 } else {
                     $('#divModalError').modal('show');
                     $('#divMsgError').html(r);
                     $('#btnCerrarConsumo').html('Cerrado');
-                    $('#btnCerrarConsumo').attr('disabled', 'disabled');
+                    $('#btnCerrarConsumo').attr('disabled', false);
+                }
+            }
+        });
+    });
+    $('#btnCerrarSalida').on('click', function () {
+        let id_salida = $('#id_dev_det').val();
+        $.ajax({
+            type: 'POST',
+            url: '../actualizar/cerrar_salida.php',
+            data: { id_salida: id_salida },
+            success: function (r) {
+                if (r == 'ok') {
+                    $('#divModalDone a').attr('data-dismiss', '');
+                    $('#divModalDone a').attr('href', 'javascript:location.reload()');
+                    $('#divModalDone').modal('show');
+                    $('#divMsgDone').html("Salida cerrada correctamente");
+                } else {
+                    $('#divModalError').modal('show');
+                    $('#divMsgError').html(r);
+                    $('#btnCerrarConsumo').html('Cerrado');
+                    $('#btnCerrarConsumo').attr('disabled', true);
                 }
             }
         });

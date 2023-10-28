@@ -78,7 +78,7 @@ if ($cronhis[0]['id_cronhis'] > 0) {
             $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
             $sql->bindParam(6, $id_pd, PDO::PARAM_INT);
             $sql->bindParam(7, $consec, PDO::PARAM_INT);
-            $sql->bindParam(7, $entrega, PDO::PARAM_INT);
+            $sql->bindParam(8, $entrega, PDO::PARAM_INT);
             $sql->execute();
             $id_pedido = $cmd->lastInsertId();
             if ($id_pedido > 0) {

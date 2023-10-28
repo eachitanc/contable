@@ -297,13 +297,13 @@ $inicial = [];
 if ($id_bodega == 40 && $_POST['optionCeros'] != 1) {
     try {
         $sql = "SELECT
-                    `lote`, SUM(`cantidad`) AS `cantidad`
+                     `id_prod`, `lote`,`id_lote`, SUM(`cantidad`) AS `cantidad`
                 FROM
                     `seg_ids_farmacia`
                 INNER JOIN `vista_salidas_farmacia` 
                     ON (`seg_ids_farmacia`.`id_med` = `vista_salidas_farmacia`.`id_med`)
                 WHERE (`vista_salidas_farmacia`.`fec_cierre` <= '$fecha')
-                GROUP BY `lote`";
+                GROUP BY `lote`, `id_lote`,  `id_prod`";
         $res = $cmd->query($sql);
         $farmacia = $res->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
@@ -331,7 +331,7 @@ if ($id_bodega == 40 && $_POST['optionCeros'] != 1) {
                         INNER JOIN $bd_base_f.`far_medicamentos` 
                             ON (`far_medicamento_lote`.`id_med` = `far_medicamentos`.`id_med`)
                     WHERE `far_orden_ingreso`.`id_ingreso` IN (1,2,3,4,6)
-                        AND `far_orden_ingreso`.`fec_cierre` <= '2023-12-31 23:59:59') AS `t1`
+                        AND `far_orden_ingreso`.`fec_cierre` <= '$fecha 23:59:59') AS `t1`
                 GROUP BY `t1`.`lote`";
         $res = $cmd->query($sql);
         $inicial = $res->fetchAll(PDO::FETCH_ASSOC);
@@ -513,9 +513,16 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                                 $id_bien = $lote['datos']['id_bn'];
                                                 $id_tipo = $lote['datos']['id_tb'];
                                                 $keylt = strncmp($keylt, 'EACII', strlen('EACII')) === 0 ? '' : $keylt;
-                                                $keyconsumo = array_search($keylt, array_column($farmacia, 'lote'));
+                                                $keyconsumo  = false;
+                                                foreach ($farmacia as $key => $item) {
+                                                    if ($item['lote'] == $keylt && $item['id_prod'] == $id_bien) {
+                                                        $keyconsumo = $key;
+                                                        break;
+                                                    }
+                                                }
                                                 $con_far = $keyconsumo !== false ? $farmacia[$keyconsumo]['cantidad'] : 0;
-                                                $keyinicial = array_search($keylt, array_column($inicial, 'lote'));
+                                                $id_lotex = $keyconsumo !== false ? $farmacia[$keyconsumo]['id_lote'] : 0;
+                                                $keyinicial = array_search($keylt, array_column($inicial, 'id_lote'));
                                                 $inv_ini =  $keyinicial !== false ? $inicial[$keyinicial]['cantidad'] : 0;
                                                 $disponible =  $lote['cantd'] - $con_far + $inv_ini;
                                                 if ($numLotes > 1) {

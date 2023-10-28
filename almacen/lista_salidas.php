@@ -18,19 +18,9 @@ $tipodev = isset($_POST['tipodev']) ? $_POST['tipodev'] : '0';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_salida`, `descripcion` FROM  `seg_tipo_salidas`";
+    $sql = "SELECT `id_salida`, `descripcion` FROM  `seg_tipo_salidas` ORDER BY `descripcion` ASC";
     $rs = $cmd->query($sql);
     $tsalidas = $rs->fetchAll();
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT `id_entrada`, `descripcion` FROM  `seg_tipo_entrada`";
-    $rs = $cmd->query($sql);
-    $tentradas = $rs->fetchAll();
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();

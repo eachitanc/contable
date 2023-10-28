@@ -96,7 +96,7 @@ switch ($estado) {
                                 <input type="hidden" id="id_dev_det" name="id_dev_det" value="<?php echo $id_dev ?>">
                             </form>
                             <div class="form-group text-right">
-                                <a type="button" class="btn btn-secondary  btn-sm" href="../lista_salidas.php">Regresar</a>
+                                <a type="button" class="btn btn-warning  btn-sm" href="../lista_salidas.php">Regresar</a>
                                 <?php
                                 $estado_dev = $devolucion['estado'];
                                 if ($estado_dev < 3) {
@@ -106,6 +106,7 @@ switch ($estado) {
                                     if ($tipo_salida == 8) {
                                         echo '<a id="btnEntregaPedido" type="button" class="btn btn-success btn-sm" value="FIANZA">Entregar ' . mb_strtolower($devolucion['descripcion']) . ' </a>';
                                     }
+                                    echo '<button id="btnCerrarSalida" type="button" class="btn btn-secondary btn-sm">Cerrar</button>';
                                 } else {
                                     echo '<button type="button" class="btn btn-secondary btn-sm" disabled>Cerrado</button>';
                                 }

@@ -70,6 +70,16 @@ try {
                     INNER JOIN `seg_pedidos_almacen` 
                         ON (`seg_salida_dpdvo`.`id_pedido` = `seg_pedidos_almacen`.`id_pedido`)
                 WHERE (`seg_salidas_almacen`.`estado` > 0 AND `seg_pedidos_almacen`.`id_bodega` = $bodega)
+                GROUP BY `seg_salidas_almacen`.`id_entrada`
+                UNION ALL
+                SELECT
+                    `seg_salidas_almacen`.`id_entrada`
+                    , SUM(`seg_salidas_almacen`.`cantidad`) AS `salidas`
+                FROM
+                    `seg_salidas_almacen`
+                    INNER JOIN `seg_salida_dpdvo` 
+                        ON (`seg_salidas_almacen`.`id_devolucion` = `seg_salida_dpdvo`.`id_devolucion`)
+                WHERE (`seg_salida_dpdvo`.`id_tipo_salida` <> 7)
                 GROUP BY `seg_salidas_almacen`.`id_entrada`) AS `consumo` 
                     ON ($tabla.`id_entrada` = `consumo`.`id_entrada`)) AS `t1`
             INNER JOIN `seg_detalle_entrada_almacen`

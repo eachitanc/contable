@@ -86,7 +86,7 @@ switch ($estado) {
                         </div>
                         <div class="card-body" id="divCuerpoPag">
                             <?php
-                            if ($entraxpresta['estado'] < 3) {
+                            if ($entraxpresta['estado'] < 3 && $tipo != 11) {
                                 echo '<input type="hidden" id="peReg" value="' . $permisos['registrar'] . '">';
                             }
                             ?>
@@ -132,6 +132,65 @@ switch ($estado) {
                                     </div>
                                 </div>
                             </div>
+                            <?php
+                            if ($tipo == 11 && $entraxpresta['estado'] < 3) {
+                            ?>
+                                <form id="formExisteTransform">
+                                    <input type="hidden" name="id_entra" value="<?php echo $id_pd ?>">
+                                    <div class="form-row">
+                                        <div class="form-group col-md-4 text-center">
+                                            <label for="articulo3" class="small text-left">Buscar artículo a transformar</label>
+                                            <div class="input-group input-group-sm">
+                                                <input id="articulo3" type="text" class="form-control searchArticle">
+                                                <input id="idArtc3" name="idArtc3" type="hidden" value="0" class="valArt">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text" id="basic-addon3"> </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-4 text-center">
+                                            <label for="articulo4" class="small text-left">Buscar artículo transformado</label>
+                                            <div class="input-group input-group-sm">
+                                                <input id="articulo4" class="form-control form-control-sm searchArticle" style="width: 60%;">
+                                                <input id="numArt4" name="numArt4" type="number" class="form-control" placeholder="Cantidad" title="Indicar la cantidad de unidades a la que se transforma una sola unidad del producto anterior">
+                                                <input id="idArtc4" name="idArtc4" type="hidden" value="0" class="valArt">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text" id="basic-addon4"> </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-2 text-center">
+                                            <label class="small">Tipo</label>
+                                            <div class="form-control form-control-sm" id="tipoT">
+                                                <div class="form-check form-check-inline" title="Varios a uno">
+                                                    <input class="form-check-input" type="radio" name="radTransfor" id="unir" value="1">
+                                                    <label class="form-check-label text-secondary" for="unir">UNIR</label>
+                                                </div>
+                                                <div class="form-check form-check-inline" title="Uno a Varios">
+                                                    <input class="form-check-input" type="radio" name="radTransfor" id="dividir" value="2">
+                                                    <label class="form-check-label text-secondary" for="dividir">DIVIDIR</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-2 text-center">
+                                            <label class="small">&nbsp;</label>
+                                            <div>
+                                                <button id="btnTransformaArt" class="btn btn-outline-success btn-sm btn-block" title="Transformar Artículo"><i class="fas fa-sync-alt mr-2" aria-hidden="true"></i>Transformar</button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="col-md-12">
+                                            <div id="existencias">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            <?php
+                            }
+                            ?>
                             <table id="tableRegPresDona" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
                                 <thead>
                                     <tr>

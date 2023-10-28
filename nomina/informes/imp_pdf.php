@@ -730,11 +730,11 @@ $logo = $_SERVER['HTTP_HOST'] . $_SESSION['urlin'] . '/images/logos/logo.png';
                                     <?php
                                     if (false !== $keydlab) {
                                         echo pesos($dlab[$keydlab]['val_liq_auxt']);
-                                        $e = $dlab[$keydlab]['val_liq_auxt'];
-                                        $tot_auxtra += $e;
+                                        $e1 = $dlab[$keydlab]['val_liq_auxt'];
+                                        $tot_auxtra += $e1;
                                     } else {
                                         echo '$0.00';
-                                        $e = 0;
+                                        $e1 = 0;
                                     } ?>
                                 </td>
                                 <td style="border: 1px solid black;" class="text-right">
@@ -866,9 +866,9 @@ $logo = $_SERVER['HTTP_HOST'] . $_SESSION['urlin'] . '/images/logos/logo.png';
                                 <td style="border: 1px solid black;" class="text-right">
                                     <?php
                                     $l = 0;
-                                    foreach ($emb as $e) {
-                                        if ($e['id_empleado'] == $id) {
-                                            $l += $e['val_mes_embargo'];
+                                    foreach ($emb as $em) {
+                                        if ($em['id_empleado'] == $id) {
+                                            $l += $em['val_mes_embargo'];
                                         }
                                     }
                                     echo pesos($l);
@@ -899,22 +899,13 @@ $logo = $_SERVER['HTTP_HOST'] . $_SESSION['urlin'] . '/images/logos/logo.png';
                                 </td>
                                 <td style="border: 1px solid black;" class="text-right">
                                     <?php
-                                    if (false !== $keysaln) {
-                                        echo pesos($saln[$keysaln]['val_liq']);
-                                        $n = $saln[$keysaln]['val_liq'];
-                                        $tot_saln += $n;
-                                    } else {
-                                        echo '$0.00';
-                                    } ?>
+                                    $deducido = $g + $i + $j + $k + $l + $m + $n;
+                                    $devengado = $valluto + $a + $b + $c + $d1 + $d + $e + $e1 + $f + $c3 + $c4 + $cgrp + $c5 + $ps + $pn + $ces + $ices + $comp;
+                                    $netop = $devengado - $deducido;
+                                    $tot_saln += $netop;
+                                    echo pesos($netop);
+                                    ?>
                                 </td>
-                                <!--<td style="border: 1px solid black;">
-                                                <?php
-                                                // pesos($a + $b + $c + $d + $e + $f - $g - $i - $j - $k - $l - $m);
-                                                //$o = $a + $b + $c + $d + $e + $f - $g - $i - $j - $k - $l - $m;
-                                                ?>
-                                            </td>
-                                            <td style="border: 1px solid black;"><?php //echo pesos($n - $o) 
-                                                                                    ?></td>-->
                             </tr>
                     <?php
                         }

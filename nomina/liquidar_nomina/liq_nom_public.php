@@ -159,11 +159,21 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+//cambio
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "SELECT id_empleado, salario_integral, no_documento,sub_alimentacion,tipo_empleado,representacion, CONCAT(nombre1, ' ', nombre2, ' ',apellido1, ' ', apellido2) AS nombre, cargo FROM seg_empleado
-            WHERE  estado = '1'";
+    $sql = "SELECT `id_empleado`
+                , `salario_integral`
+                , `no_documento`
+                , `sub_alimentacion`
+                , `tipo_empleado`
+                ,`representacion`
+                , CONCAT(`nombre1`, ' ', `nombre2`, ' ',`apellido1`, ' ', `apellido2`) AS `nombre`
+                , `cargo` 
+                , `subtipo_empleado`
+            FROM `seg_empleado`
+            WHERE  `estado` = '1'";
     $rs = $cmd->query($sql);
     $emple = $rs->fetchAll();
     $cmd = null;
@@ -496,6 +506,7 @@ if (isset($_POST['check'])) {
             $key = array_search($i, array_column($emple, 'id_empleado'));
             $sal_integ = false !== $key ? $emple[$key]['salario_integral'] : null;
             $tipo_emp = false !== $key ? $emple[$key]['tipo_empleado'] : 0;
+            $subtip_emp = false !== $key ? $emple[$key]['subtipo_empleado'] : 1; //cambio
             $grepresenta = false !== $key ? $emple[$key]['representacion'] : 0;
             $salario = 0;
             $empleado = $i;
@@ -1212,6 +1223,13 @@ if (isset($_POST['check'])) {
                 $saludempresa = (($salbase / 30) * $diaslab) * 0.125;
                 $pensionempresa = 0;
                 $salbase = $salbase * 0.75;
+            }
+            //cambio
+            if ($subtip_emp == 2) {
+                $pensionempleado = 0;
+                $solidpension = 0;
+                $porcenps = 0;
+                $pensionempresa = 0;
             }
             $semp = redondeo($saludempleado, 0);
             $pemp = redondeo($pensionempleado, 0);
