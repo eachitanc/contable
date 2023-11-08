@@ -282,6 +282,7 @@ if (count($empleado) > 0) {
     $date = new DateTime('now', new DateTimeZone('America/Bogota'));
     $descripcion = "LIQUIDACIÓN PRESTACIONES SOCIALES";
     $mesreg = date('m');
+    /*
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
@@ -302,7 +303,8 @@ if (count($empleado) > 0) {
         $cmd = null;
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-    }
+    }*/
+    $id_nomina = 12;
     foreach ($empleado as $e) {
         $id = $e['id_empleado'];
         $key = array_search($id, array_column($salario, 'id_empleado'));
@@ -356,7 +358,7 @@ if (count($empleado) > 0) {
             $fin_mes = false !== $key ? $meses[$key]['fin_mes'] : 28;
             $feci_bsp = date('Y-m-d', strtotime($datos['anio'] . '-' . $mes_bsp . '-' . $fin_mes . ' + 1 day'));
         }
-        $diasToBsp = calcularDias($feci_bsp, $fec_retiro);
+        $diasToBsp = calcularDias($feci_bsp, $fec_retiro, $id);
         $diasToBsp = $diasToBsp > 360 ? 360 : $diasToBsp;
         $bsp = $bsp_dia * $diasToBsp;
         $bsp_salarial = $bsp;
@@ -453,16 +455,16 @@ if (count($empleado) > 0) {
         $bspant  = $datos['val_bsp'] > 0 ? $datos['val_bsp'] : 0;
         $primavacant = $datos['val_prima_vac'] > 0 ? $datos['val_prima_vac'] : 0;
         $primanavant = $datos['val_liq_pv'] > 0 ? $datos['val_liq_pv'] : 0;
-        $diasToCes = calcularDias($feci_ces, $fec_retiro);
+        $diasToCes = calcularDias($feci_ces, $fec_retiro, $id);
         $diasToCes = $diasToCes > 360 ? 360 : $diasToCes;
         $promHorExt = PromedioHoras($feci_ces, $fec_retiro, $id);
-        $diasToPriServ = calcularDias($feci_priserv, $fec_retiro);
+        $diasToPriServ = calcularDias($feci_priserv, $fec_retiro, $id);
         $diasToPriServ = $diasToPriServ > 360 ? 360 : $diasToPriServ;
         $feci_pvac = $datos['corte_vac'] == '' ? $e['fech_inicio'] :  $datos['corte_vac'];
-        $diasToVac = calcularDias($feci_pvac, $fec_retiro);
-        $diasToVac = $diasToVac > 360 ? 360 : $diasToVac;
+        $diasToVac = calcularDias($feci_pvac, $fec_retiro, $id);
+        //$diasToVac = $diasToVac > 360 ? 360 : $diasToVac;
         $feci_primnav = $datos['corte_prim_nav'] != '' ? date('Y-m-d', strtotime($datos['corte_prim_nav'] . ' + 1 day')) : $e['fech_inicio'];
-        $diasToPriNav = calcularDias($feci_primnav, $fec_retiro);
+        $diasToPriNav = calcularDias($feci_primnav, $fec_retiro, $id);
         $diasToPriNav = $diasToPriNav > 360 ? 360 : $diasToPriNav;
         $prima_sv_dia = ($salbase  + $auxt + $auxali + $gasrep + $bspant / 12) / 720;
         //prima de servicios
@@ -849,10 +851,11 @@ if ($c > 0) {
 } else {
     echo 'No se liquidó ningún empleado';
 }
-function calcularDias($fechaInicial, $fechaFinal)
+function calcularDias($fI, $fF, $id)
 {
-    $fechaInicial = strtotime($fechaInicial);
-    $fechaFinal = strtotime($fechaFinal);
+    include '../../conexion.php';
+    $fechaInicial = strtotime($fI);
+    $fechaFinal = strtotime($fF);
     $dias360 = 0;
     if (!($fechaInicial > $fechaFinal)) {
         while ($fechaInicial < $fechaFinal) {
@@ -864,6 +867,22 @@ function calcularDias($fechaInicial, $fechaFinal)
         $dias360 += ($fechaFinal - $fechaInicial) / (60 * 60 * 24);
         $dias360 = $dias360 + 1;
     }
+    try {
+        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+        $sql = "SELECT
+                    SUM(`dias_inactivo`) AS `dias`
+                FROM
+                    `seg_licenciasnr`
+                WHERE ((`fec_inicio` BETWEEN '$fI' AND '$fF')OR (`fec_fin` BETWEEN '$fI' AND '$fF')) AND `id_empleado` = $id";
+        $rs = $cmd->query($sql);
+        $dias = $rs->fetch(PDO::FETCH_ASSOC);
+        $dlcnr = !empty($dias) ? $dias['dias'] : 0;
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+    $dias360 = $dias360 > $dlcnr ? $dias360 - $dlcnr : 0;
     return $dias360;
 }
 function redondeo($value, $places)

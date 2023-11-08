@@ -11,6 +11,7 @@ $tipo = $_POST['radTransfor'];
 $cantidad = $_POST['numArt4'];
 $entradas = $_POST['canTrasforma'];
 $id_entra = $_POST['id_entra'];
+$bodega_sale = 1;
 $ids = [];
 foreach ($entradas as $key => $value) {
     $ids[] = $key;
@@ -66,8 +67,8 @@ if ($entrada['id_devolucion'] == '') {
         $estado = 3;
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $sql = "INSERT INTO `seg_salida_dpdvo` (`id_tercero_api`, `id_tipo_salida`,  `acta_remision`, `fec_acta_remision`, `observacion`, `vigencia`, `id_user_reg`, `fec_reg`, `consecutivo`, `estado`)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO `seg_salida_dpdvo` (`id_tercero_api`, `id_tipo_salida`,  `acta_remision`, `fec_acta_remision`, `observacion`, `vigencia`, `id_user_reg`, `fec_reg`, `consecutivo`, `estado`, `id_bodega`)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $sql = $cmd->prepare($sql);
         $sql->bindParam(1, $id_ter, PDO::PARAM_INT);
         $sql->bindParam(2, $tipo_salida, PDO::PARAM_INT);
@@ -79,6 +80,7 @@ if ($entrada['id_devolucion'] == '') {
         $sql->bindValue(8, $date->format('Y-m-d H:i:s'));
         $sql->bindParam(9, $consec, PDO::PARAM_INT);
         $sql->bindParam(10, $estado, PDO::PARAM_INT);
+        $sql->bindParam(11, $bodega_sale, PDO::PARAM_INT);
         $sql->execute();
         $id_salida = $cmd->lastInsertId();
         if (!($id_salida > 0)) {
@@ -158,7 +160,7 @@ try {
                         VALUES (?, ?, ?, ?, ?, ?, ?)";
                 $query = $cmd->prepare($query);
                 $query->bindParam(1, $id_entrada, PDO::PARAM_INT);
-                $query->bindParam(2, $id_prod, PDO::PARAM_INT);
+                $query->bindParam(2, $id_prod1, PDO::PARAM_INT);
                 $query->bindParam(3, $id_salida, PDO::PARAM_INT);
                 $query->bindParam(4, $cant_p3, PDO::PARAM_INT);
                 $query->bindParam(5, $vigencia, PDO::PARAM_INT);

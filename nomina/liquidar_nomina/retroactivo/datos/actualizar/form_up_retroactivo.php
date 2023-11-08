@@ -10,12 +10,31 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-                `fec_inicio`, `fec_final`, `meses`, `porcentaje`, `observaciones`
+                `fec_inicio`, `fec_final`, `meses`, `id_incremento`, `observaciones`
             FROM
                 `seg_retroactivos`
             WHERE `id_retroactivo` = '$id_retroactivo'";
     $rs = $cmd->query($sql);
     $react = $rs->fetch();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+$vigencia = $_SESSION['vigencia'];
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `porcentaje`
+                , `id_inc`
+                , `porcentaje`
+                , `vigencia`
+                , `fec_reg`
+            FROM
+                `seg_incremento_salario`
+            WHERE (`vigencia` = '$vigencia')";
+    $rs = $cmd->query($sql);
+    $incrementos = $rs->fetchAll();
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -46,7 +65,14 @@ try {
                     </div>
                     <div class="form-group col-md-6">
                         <label for="numPorcentajeRetro" class="small">% incremento</label>
-                        <input type="number" id="numPorcentajeRetro" name="numPorcentajeRetro" class="form-control form-control-sm" min="0" max="100" placeholder="Formato decimal Ej: 9.8" value="<?php echo $react['porcentaje'] ?>">
+                        <select id="numPorcentajeRetro" name="numPorcentajeRetro" class="form-control form-control-sm">
+                            <?php
+                            foreach ($incrementos as $inc) {
+                                $slc = $inc['id_inc'] == $react['id_incremento'] ? 'selected' : '';
+                                echo '<option ' . $slc . ' value=' . $inc['id_inc'] . '>' . $inc['fec_reg'] . ' => ' . $inc['porcentaje'] . '%</option>';
+                            }
+                            ?>
+                        </select>
                     </div>
                 </div>
                 <div class="form-row text-center">

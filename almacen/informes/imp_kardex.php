@@ -103,9 +103,9 @@ if ($bodega == 1) {
                     , '5' AS `tipo` 
                 FROM
                     `seg_salidas_almacen`
-                    LEFT JOIN `seg_salida_dpdvo` 
+                    INNER JOIN `seg_salida_dpdvo` 
                         ON (`seg_salidas_almacen`.`id_devolucion` = `seg_salida_dpdvo`.`id_devolucion`)
-                        LEFT JOIN `seg_tipo_salidas` 
+                    LEFT JOIN `seg_tipo_salidas` 
                         ON (`seg_salida_dpdvo`.`id_tipo_salida` = `seg_tipo_salidas`.`id_salida`)
                     LEFT JOIN `seg_pedidos_almacen` 
                         ON (`seg_salida_dpdvo`.`id_pedido` = `seg_pedidos_almacen`.`id_pedido`)

@@ -99,7 +99,7 @@ if ($bodega == 1) {
                     , '5' AS `tipo` 
                 FROM
                     `seg_salidas_almacen`
-                    LEFT JOIN `seg_salida_dpdvo` 
+                    INNER JOIN `seg_salida_dpdvo` 
                         ON (`seg_salidas_almacen`.`id_devolucion` = `seg_salida_dpdvo`.`id_devolucion`)
                         LEFT JOIN `seg_tipo_salidas` 
                         ON (`seg_salida_dpdvo`.`id_tipo_salida` = `seg_tipo_salidas`.`id_salida`)
@@ -278,7 +278,7 @@ try {
                     INNER JOIN `seg_detalle_entrada_almacen` 
                         ON (`seg_detalles_traslado`.`id_entrada` = `seg_detalle_entrada_almacen`.`id_entrada`)
                 WHERE `seg_detalles_traslado`.`id_producto` = $articulo AND `seg_traslados_almacen`.`id_bodega_sale` = $bodega
-                $farmacia                
+                $farmacia
                 UNION ALL
                 SELECT
                     `seg_salida_dpdvo`.`consecutivo`
@@ -316,7 +316,7 @@ try {
                 WHERE `seg_salidas_almacen`.`id_producto` = $articulo AND `seg_pedidos_almacen`.`id_bodega` = $bodega
                 $nullos) AS `t1`
             WHERE `t1`.`fec_reg` <='$fecha2 23:59:59' $cond_marca
-            ORDER BY `t1`.`fec_reg` ASC ";
+            ORDER BY `t1`.`fec_reg` ASC";
     $rs = $cmd->query($sql);
     $movimientos = $rs->fetchAll();
 } catch (PDOException $e) {

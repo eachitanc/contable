@@ -20,7 +20,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "UPDATE `seg_retroactivos`  SET `fec_inicio` = ?, `fec_final` = ?, `meses` = ?, `porcentaje` = ?, `observaciones` = ? WHERE `id_retroactivo` = ?";
+    $sql = "UPDATE `seg_retroactivos`  SET `fec_inicio` = ?, `fec_final` = ?, `meses` = ?, `id_incremento` = ?, `observaciones` = ? WHERE `id_retroactivo` = ?";
     $sql = $cmd->prepare($sql);
     $sql->bindParam(1, $fecIni, PDO::PARAM_STR);
     $sql->bindParam(2, $fecFin, PDO::PARAM_STR);

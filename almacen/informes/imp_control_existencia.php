@@ -208,9 +208,9 @@ if (isset($_POST['bodega'])) {
                             ON (`seg_salidas_almacen`.`id_devolucion` = `seg_salida_dpdvo`.`id_devolucion`)
                         INNER JOIN `seg_tipo_salidas` 
                             ON (`seg_salida_dpdvo`.`id_tipo_salida` = `seg_tipo_salidas`.`id_salida`)
-                        INNER JOIN `seg_pedidos_almacen` 
+                        LEFT JOIN `seg_pedidos_almacen` 
                             ON (`seg_salida_dpdvo`.`id_pedido` = `seg_pedidos_almacen`.`id_pedido`)
-                    WHERE (`seg_salidas_almacen`.`estado` > 0 AND `seg_pedidos_almacen`.`id_bodega` = $ib AND `seg_salidas_almacen`.`fec_reg` <= '$fecha')
+                    WHERE (`seg_salidas_almacen`.`estado` > 0 AND `seg_salidas_almacen`.`fec_reg` <= '$fecha' AND (`seg_pedidos_almacen`.`id_bodega` = $ib OR `seg_salida_dpdvo`.`id_bodega` = $ib OR `seg_pedidos_almacen`.`id_bodega` IS NULL))
                     GROUP BY `seg_salidas_almacen`.`id_entrada`) AS `consumo` 
                         ON ($tabla.`id_entrada` = `consumo`.`id_entrada`)) AS `t1`
                 INNER JOIN `seg_detalle_entrada_almacen`
@@ -237,24 +237,27 @@ if (isset($_POST['bodega'])) {
     foreach ($datos as $key => $fila) {
         if (!empty($fila)) {
             foreach ($fila as $fl) {
-                $tps = $fl['tipo_bn_sv'];
-                $bs = $fl['bien_servicio'];
-                $lt = $fl['lote'] == '' ? 'EACII' . $consec : $fl['lote'];
-                $queda = $fl['queda'];
-                $sumalote = isset($datas[$key][$tps][$bs][$lt]['cantd']) ? $datas[$key][$tps][$bs][$lt]['cantd'] : 0;
-                $datas[$key][$tps][$bs][$lt]['cantd'] = $queda + $sumalote;
-                $costo = $fl['valu_ingresa'] + $fl['valu_ingresa'] * $fl['iva'] / 100;
-                $datas[$key][$tps][$bs][$lt]['datos']['costo'] =  $costo;
-                $datas[$key][$tps][$bs][$lt]['datos']['vence'] =  $fl['fecha_vence'];
-                $datas[$key][$tps][$bs][$lt]['datos']['id_bn'] =  $fl['id_prod'];
-                $datas[$key][$tps][$bs][$lt]['datos']['id_tb'] =  $fl['id_tipo_bn_sv'];
-                $datas[$key][$tps][$bs][$lt]['datos']['invima'] =  $fl['invima'];
-                $datas[$key][$tps][$bs][$lt]['datos']['marca'] =  $fl['marca'];
-                $idProd = $fl['id_prod'];
-                $productos[$idProd] = $idProd;
+                if (true) {
+                    $tps = $fl['tipo_bn_sv'];
+                    $bs = $fl['bien_servicio'];
+                    $lt = $fl['lote'] == '' ? 'EACII' . $consec : $fl['lote'];
+                    $queda = $fl['queda'];
+                    $sumalote = isset($datas[$key][$tps][$bs][$lt]['cantd']) ? $datas[$key][$tps][$bs][$lt]['cantd'] : 0;
+                    $datas[$key][$tps][$bs][$lt]['cantd'] = $queda + $sumalote;
+                    $costo = $fl['valu_ingresa'] + $fl['valu_ingresa'] * $fl['iva'] / 100;
+                    $datas[$key][$tps][$bs][$lt]['datos']['costo'] =  $costo;
+                    $datas[$key][$tps][$bs][$lt]['datos']['vence'] =  $fl['fecha_vence'];
+                    $datas[$key][$tps][$bs][$lt]['datos']['id_bn'] =  $fl['id_prod'];
+                    $datas[$key][$tps][$bs][$lt]['datos']['id_tb'] =  $fl['id_tipo_bn_sv'];
+                    $datas[$key][$tps][$bs][$lt]['datos']['invima'] =  $fl['invima'];
+                    $datas[$key][$tps][$bs][$lt]['datos']['marca'] =  $fl['marca'];
+                    $idProd = $fl['id_prod'];
+                    $productos[$idProd] = $idProd;
+                }
             }
         }
     }
+    //echo json_encode($datas);
     $productos = implode(',', $productos);
     try {
         $sql = "SELECT
@@ -294,7 +297,7 @@ if (isset($_POST['bodega'])) {
 }
 $farmacia = [];
 $inicial = [];
-if ($id_bodega == 40 && $_POST['optionCeros'] != 1) {
+if ($id_bodega == 40) {
     try {
         $sql = "SELECT
                      `id_prod`, `lote`,`id_lote`, SUM(`cantidad`) AS `cantidad`
@@ -306,6 +309,7 @@ if ($id_bodega == 40 && $_POST['optionCeros'] != 1) {
                 GROUP BY `lote`, `id_lote`,  `id_prod`";
         $res = $cmd->query($sql);
         $farmacia = $res->fetchAll(PDO::FETCH_ASSOC);
+        //echo '<br><br>FAEMACIA'.json_encode($farmacia);
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
@@ -330,11 +334,11 @@ if ($id_bodega == 40 && $_POST['optionCeros'] != 1) {
                             ON (`far_orden_ingreso_detalle`.`id_lote` = `far_medicamento_lote`.`id_lote`)
                         INNER JOIN $bd_base_f.`far_medicamentos` 
                             ON (`far_medicamento_lote`.`id_med` = `far_medicamentos`.`id_med`)
-                    WHERE `far_orden_ingreso`.`id_ingreso` IN (1,2,3,4,6)
-                        AND `far_orden_ingreso`.`fec_cierre` <= '$fecha 23:59:59') AS `t1`
+                    WHERE `far_orden_ingreso`.`id_tipo_ingreso` NOT IN (3,6) AND `far_orden_ingreso`.`fec_cierre` <= '$fecha 23:59:59') AS `t1`
                 GROUP BY `t1`.`lote`";
         $res = $cmd->query($sql);
         $inicial = $res->fetchAll(PDO::FETCH_ASSOC);
+        //echo '<br><br>INICIAL'.json_encode($inicial);
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
@@ -514,15 +518,13 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                                 $id_tipo = $lote['datos']['id_tb'];
                                                 $keylt = strncmp($keylt, 'EACII', strlen('EACII')) === 0 ? '' : $keylt;
                                                 $keyconsumo  = false;
-                                                foreach ($farmacia as $key => $item) {
+                                                $con_far = 0;
+                                                foreach ($farmacia as $keyconsumo => $item) {
                                                     if ($item['lote'] == $keylt && $item['id_prod'] == $id_bien) {
-                                                        $keyconsumo = $key;
-                                                        break;
+                                                        $con_far += $farmacia[$keyconsumo]['cantidad'];
                                                     }
                                                 }
-                                                $con_far = $keyconsumo !== false ? $farmacia[$keyconsumo]['cantidad'] : 0;
-                                                $id_lotex = $keyconsumo !== false ? $farmacia[$keyconsumo]['id_lote'] : 0;
-                                                $keyinicial = array_search($keylt, array_column($inicial, 'id_lote'));
+                                                $keyinicial = array_search($keylt, array_column($inicial, 'lote'));
                                                 $inv_ini =  $keyinicial !== false ? $inicial[$keyinicial]['cantidad'] : 0;
                                                 $disponible =  $lote['cantd'] - $con_far + $inv_ini;
                                                 if ($numLotes > 1) {

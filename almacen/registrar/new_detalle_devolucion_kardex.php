@@ -27,13 +27,15 @@ try {
     $sql->bindParam(6, $iduser, PDO::PARAM_INT);
     $sql->bindValue(7, $date->format('Y-m-d H:i:s'));
     foreach ($entradas as $key => $value) {
-        $id_entrada = $key;
-        $cantidad = $value;
-        $sql->execute();
-        if ($cmd->lastInsertId() > 0) {
-            $ctrl++;
-        } else {
-            echo $sql->errorInfo()[2];
+        if ($value > 0) {
+            $id_entrada = $key;
+            $cantidad = $value;
+            $sql->execute();
+            if ($cmd->lastInsertId() > 0) {
+                $ctrl++;
+            } else {
+                echo $sql->errorInfo()[2];
+            }
         }
     }
     if ($ctrl > 0) {
