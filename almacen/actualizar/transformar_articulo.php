@@ -150,28 +150,31 @@ try {
             $invima = $dl['invima'];
             $fecha_vence = $dl['fecha_vence'];
         }
-        $sql->execute();
-        if ($cmd->lastInsertId() > 0) {
-            $transformados++;
-            try {
-                $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-                $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-                $query = "INSERT INTO `seg_salidas_almacen` (`id_entrada`,`id_producto`,`id_devolucion`,`cantidad`,`vigencia`,`id_user_reg`,`fec_reg`) 
+        if ($cant_p3 > 0) {
+            $sql->execute();
+            if ($cmd->lastInsertId() > 0) {
+
+                $transformados++;
+                try {
+                    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+                    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+                    $query = "INSERT INTO `seg_salidas_almacen` (`id_entrada`,`id_producto`,`id_devolucion`,`cantidad`,`vigencia`,`id_user_reg`,`fec_reg`) 
                         VALUES (?, ?, ?, ?, ?, ?, ?)";
-                $query = $cmd->prepare($query);
-                $query->bindParam(1, $id_entrada, PDO::PARAM_INT);
-                $query->bindParam(2, $id_prod1, PDO::PARAM_INT);
-                $query->bindParam(3, $id_salida, PDO::PARAM_INT);
-                $query->bindParam(4, $cant_p3, PDO::PARAM_INT);
-                $query->bindParam(5, $vigencia, PDO::PARAM_INT);
-                $query->bindParam(6, $id_user, PDO::PARAM_INT);
-                $query->bindValue(7, $date->format('Y-m-d H:i:s'));
-                $query->execute();
-            } catch (PDOException $e) {
-                echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+                    $query = $cmd->prepare($query);
+                    $query->bindParam(1, $id_entrada, PDO::PARAM_INT);
+                    $query->bindParam(2, $id_prod1, PDO::PARAM_INT);
+                    $query->bindParam(3, $id_salida, PDO::PARAM_INT);
+                    $query->bindParam(4, $cant_p3, PDO::PARAM_INT);
+                    $query->bindParam(5, $vigencia, PDO::PARAM_INT);
+                    $query->bindParam(6, $id_user, PDO::PARAM_INT);
+                    $query->bindValue(7, $date->format('Y-m-d H:i:s'));
+                    $query->execute();
+                } catch (PDOException $e) {
+                    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+                }
+            } else {
+                echo 'Error:' . $sql->errorInfo()[2];
             }
-        } else {
-            echo 'Error:' . $sql->errorInfo()[2];
         }
     }
     $cmd = null;

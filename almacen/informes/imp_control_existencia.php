@@ -15,6 +15,20 @@ include '../../conexion.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 // consulto el nombre de la empresa de la tabla seg_empresas
+try {
+    $sql = "SELECT
+                `seg_bodega_almacen`.`id_bodega`
+                , `seg_ctas_gasto`.`id_tipo_bn_sv`
+                , `seg_ctas_gasto`.`cuenta`
+            FROM
+                `seg_ctas_gasto`
+                INNER JOIN `seg_bodega_almacen` 
+                    ON (`seg_ctas_gasto`.`id_bodega` = `seg_bodega_almacen`.`id_bodega`)";
+    $rs = $cmd->query($sql);
+    $cuentas = $rs->fetchAll();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 $id_user = $_SESSION['id_user'];
 try {
     $sql = "SELECT `nombre`, `nit`, `dig_ver` FROM `seg_empresas`";
@@ -144,6 +158,8 @@ if (isset($_POST['bodega'])) {
         $on = '';
         $tabla = '`entradas`';
         foreach ($id_bg as $key => $ib) {
+            $bcs = array_search($ib, array_column($allbodegas, 'id_bodega'));
+            $nom_bodega = $allbodegas[$bcs]['nombre'];
             if ($id_bodega == 1) {
                 $proveedor = "(SELECT
                                 `id_entrada`
@@ -171,6 +187,8 @@ if (isset($_POST['bodega'])) {
                     , `seg_bien_servicio`.`bien_servicio` 
                     , `seg_tipo_bien_servicio`.`id_tipo_cotrato`
                     , `seg_tipo_bien_servicio`.`tipo_bn_sv`
+                    , '$ib' AS `id_bodega`
+                    , '$nom_bodega' AS `bodega`
                 FROM 
                 (SELECT
                     $tabla.`id_entrada`
@@ -240,6 +258,13 @@ if (isset($_POST['bodega'])) {
                 if (true) {
                     $tps = $fl['tipo_bn_sv'];
                     $bs = $fl['bien_servicio'];
+                    $cta_contable = '';
+                    foreach ($cuentas as $cta) {
+                        if ($cta['id_bodega'] == $key && $cta['id_tipo_bn_sv'] == $fl['id_tipo_bn_sv']) {
+                            $cta_contable = $cta['cuenta'];
+                            break;
+                        }
+                    }
                     $lt = $fl['lote'] == '' ? 'EACII' . $consec : $fl['lote'];
                     $queda = $fl['queda'];
                     $sumalote = isset($datas[$key][$tps][$bs][$lt]['cantd']) ? $datas[$key][$tps][$bs][$lt]['cantd'] : 0;
@@ -251,6 +276,7 @@ if (isset($_POST['bodega'])) {
                     $datas[$key][$tps][$bs][$lt]['datos']['id_tb'] =  $fl['id_tipo_bn_sv'];
                     $datas[$key][$tps][$bs][$lt]['datos']['invima'] =  $fl['invima'];
                     $datas[$key][$tps][$bs][$lt]['datos']['marca'] =  $fl['marca'];
+                    $datas[$key][$tps][$bs][$lt]['datos']['cuenta'] =  $cta_contable;
                     $idProd = $fl['id_prod'];
                     $productos[$idProd] = $idProd;
                 }
@@ -297,7 +323,7 @@ if (isset($_POST['bodega'])) {
 }
 $farmacia = [];
 $inicial = [];
-if ($id_bodega == 40) {
+if ($id_bodega == 40 || $id_bodega == -1) {
     try {
         $sql = "SELECT
                      `id_prod`, `lote`,`id_lote`, SUM(`cantidad`) AS `cantidad`
@@ -309,7 +335,7 @@ if ($id_bodega == 40) {
                 GROUP BY `lote`, `id_lote`,  `id_prod`";
         $res = $cmd->query($sql);
         $farmacia = $res->fetchAll(PDO::FETCH_ASSOC);
-        //echo '<br><br>FAEMACIA'.json_encode($farmacia);
+        //echo '<br><br>FARMACIA' . json_encode($farmacia);
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
@@ -338,12 +364,13 @@ if ($id_bodega == 40) {
                 GROUP BY `t1`.`lote`";
         $res = $cmd->query($sql);
         $inicial = $res->fetchAll(PDO::FETCH_ASSOC);
-        //echo '<br><br>INICIAL'.json_encode($inicial);
+        //echo '<br><br>INICIAL' . json_encode($inicial);
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
 }
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
+$filaExcel = '';
 ?>
 <form id="formInfExiste">
     <div class="form-row">
@@ -394,7 +421,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
         <div class="form-group col-md-3 text-right">
             <label class="small">&nbsp;</label>
             <div>
-                <a type="" id="btnReporteGral" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
+                <a type="" id="excelPlano" class="btn btn-outline-success btn-sm" value="01" title="Exprotar a Excel">
                     <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
                 </a>
                 <a type="button" class="btn btn-primary btn-sm" title="Imprimir" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"><span class="fas fa-print fa-lg" aria-hidden="true"></span></a>
@@ -449,7 +476,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
         <table class="page_break_avoid" style="width:100% !important; border-collapse: collapse;">
             <thead style="background-color: white !important;font-size:80%">
                 <tr style="padding: bottom 3px; color:black">
-                    <td colspan="9">
+                    <td colspan="10">
                         <table id="lista" class="bg-light" style="width:100% !important;">
                             <tr>
                                 <td rowspan="2" class='text-center' style="width:18%"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
@@ -477,6 +504,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                 </tr>
                 <tr style="background-color: #CED3D3;">
                     <th>ID</th>
+                    <th>Cuenta</th>
                     <th>Producto</th>
                     <th>Invima</th>
                     <th>Vence</th>
@@ -495,6 +523,8 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                     $lote = 'EAC';
                     $valorXbien = 0;
                     $row_bg = '';
+                    $tr = '<tr  class="resaltar">';
+                    $ltr = ' </tr>';
                     foreach ($datas as $key => $filtro) {
                         if (!empty($filtro)) {
                             $bc = array_search($key, array_column($allbodegas, 'id_bodega'));
@@ -516,6 +546,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                             foreach ($bien as $keylt => $lote) {
                                                 $id_bien = $lote['datos']['id_bn'];
                                                 $id_tipo = $lote['datos']['id_tb'];
+                                                $cta_ctb = $lote['datos']['cuenta'];;
                                                 $keylt = strncmp($keylt, 'EACII', strlen('EACII')) === 0 ? '' : $keylt;
                                                 $keyconsumo  = false;
                                                 $con_far = 0;
@@ -527,39 +558,51 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                                 $keyinicial = array_search($keylt, array_column($inicial, 'lote'));
                                                 $inv_ini =  $keyinicial !== false ? $inicial[$keyinicial]['cantidad'] : 0;
                                                 $disponible =  $lote['cantd'] - $con_far + $inv_ini;
-                                                if ($numLotes > 1) {
-                                                    $sumaLote += $disponible;
-                                                    $row_lote .= '<tr class="resaltar" style="font-size: 90%;">
-                                                    <td></td>
-                                                    <td></td>
-                                                    <td>' . $lote['datos']['invima'] . '</td>
-                                                    <td>' . $lote['datos']['vence'] . '</td>
-                                                    <td>' . $keylt . '</td>
-                                                    <td>' . $lote['datos']['marca'] . '</td>
-                                                    <td>' . $disponible . '</td>
-                                                    <td style="text-align: right;">' . pesos($lote['datos']['costo']) . '</td>
-                                                    <td style="text-align: right;">' . pesos(($disponible) * $lote['datos']['costo']) . '</td>
-                                                    </tr>';
-                                                    if (($disponible) > 0) {
-                                                        $cant_prom++;
-                                                        $suma_val = $suma_val + $lote['datos']['costo'];
+                                                if (!($disponible == 0 && $cero == 3)) { //&& $disponible >= 0
+
+                                                    if ($numLotes > 1) {
+                                                        $sumaLote += $disponible;
+                                                        $celda = '<td>' . $lote['datos']['invima'] . '</td>
+                                                                <td>' . $lote['datos']['vence'] . '</td>
+                                                                <td>' . $keylt . '</td>
+                                                                <td>' . $lote['datos']['marca'] . '</td>
+                                                                <td>' . $disponible . '</td>
+                                                                <td style="text-align: right;">' . pesos($lote['datos']['costo']) . '</td>
+                                                                <td style="text-align: right;">' . pesos(($disponible) * $lote['datos']['costo']) . '</td>';
+                                                        $row_lote .= $tr . '<td></td><td></td><td></td>' . $celda . $ltr;
+                                                        $filaExcel .=  $tr . '<td>' . $key . '</td>';
+                                                        $filaExcel .= '<td>' . $allbodegas[$bc]['nombre'] . '</td>';
+                                                        $filaExcel .= '<td>' . $cta_ctb . '</td>';
+                                                        $filaExcel .= '<td>' . $id_tipo . '</td>';
+                                                        $filaExcel .= '<td>' . $keytb . '</td>';
+                                                        $filaExcel .= '<td>' . $id_bien . '</td>';
+                                                        $filaExcel .= '<td>' . $keybn . '</td>' . $celda . $ltr;
+                                                        if (($disponible) > 0) {
+                                                            $cant_prom++;
+                                                            $suma_val = $suma_val + $lote['datos']['costo'];
+                                                        }
+                                                    } else {
+                                                        $bandera = true;
+                                                        $sumaLote = $disponible;
+                                                        $campo = '<td colspan="2">' . $id_bien . '</td>';
+                                                        $campo_excel = '<td>' . $id_bien . '</td>';
+                                                        $celda = '<td style="text-align: left;">' . $keybn . '</td>
+                                                                <td>' . $lote['datos']['invima'] . '</td>
+                                                                <td>' . $lote['datos']['vence'] . '</td>
+                                                                <td>' . $keylt . '</td>
+                                                                <td>' . $lote['datos']['marca'] . '</td>
+                                                                <th>' . $disponible . '</th>
+                                                                <td style="text-align: right;">' . pesos($lote['datos']['costo']) . '</td>
+                                                                <td style="text-align: right;">' . pesos($sumaLote * $lote['datos']['costo']) . '</td>';
+                                                        $row_lote = $tr . $campo . $celda . $ltr;
+                                                        $filaExcel .= $tr . '<td>' . $key . '</td>';
+                                                        $filaExcel .= '<td>' . $allbodegas[$bc]['nombre'] . '</td>';
+                                                        $filaExcel .= '<td>' . $cta_ctb . '</td>';
+                                                        $filaExcel .= '<td>' . $id_tipo . '</td>';
+                                                        $filaExcel .= '<td>' . $keytb . '</td>' . $campo_excel . $celda . $ltr;
+                                                        $cant_prom = 1;
+                                                        $suma_val =  $lote['datos']['costo'];
                                                     }
-                                                } else {
-                                                    $bandera = true;
-                                                    $sumaLote = $disponible;
-                                                    $row_lote = '<tr  class="resaltar">
-                                                    <td>' . $id_bien . '</td>
-                                                    <td style="text-align: left;">' . $keybn . '</td>
-                                                    <td>' . $lote['datos']['invima'] . '</td>
-                                                    <td>' . $lote['datos']['vence'] . '</td>
-                                                    <td>' . $keylt . '</td>
-                                                    <td>' . $lote['datos']['marca'] . '</td>
-                                                    <th>' . $disponible . '</th>
-                                                    <td style="text-align: right;">' . pesos($lote['datos']['costo']) . '</td>
-                                                    <td style="text-align: right;">' . pesos($sumaLote * $lote['datos']['costo']) . '</td>
-                                                    </tr>';
-                                                    $cant_prom = 1;
-                                                    $suma_val =  $lote['datos']['costo'];
                                                 }
                                             }
                                             $keypm = array_search($id_bien, array_column($promedios, 'id_prod'));
@@ -571,17 +614,19 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                                     $cant_prom = 1;
                                                 }
                                                 $prom_valunid =  $val_prom == 0 ? $suma_val / $cant_prom : $val_prom;
-                                                $row_bien .= '<tr class="resaltar">
-                                                <td>' . $id_bien . '</td>
-                                                <td style="text-align: left;">' . $keybn . '</td>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <th>' . $sumaLote . '</th>
-                                                <td style="text-align: right;">' . pesos($prom_valunid) . '</td>
-                                                <td style="text-align: right;">' . pesos($sumaLote * $prom_valunid) . '</td>
-                                                </tr>' . $row_lote;
+                                                if (!($disponible == 0 && $cero == 3)) {
+                                                    $row_bien .= '<tr class="resaltar">
+                                                    <td colspan="2">' . $id_bien . '</td>
+                                                    <td style="text-align: left;">' . $keybn . '</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <th>' . $sumaLote . '</th>
+                                                    <td style="text-align: right;">' . pesos($prom_valunid) . '</td>
+                                                    <td style="text-align: right;">' . pesos($sumaLote * $prom_valunid) . '</td>
+                                                    </tr>' . $row_lote;
+                                                }
                                             }
                                             $prom_valunid =  $val_prom == 0 ? $suma_val / $cant_prom : $val_prom;
                                             $valorXbien = $sumaLote * $prom_valunid;
@@ -591,18 +636,20 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                     }
                                     $row_tipo .= '<tr style="font-size: 11px;"  class="resaltar">
                                     <th>' . $id_tipo . '</th>
+                                    <th>' . $cta_ctb . '</th>
                                     <th style="text-align: left;" colspan="7">' . $keytb . '</th>
                                     <th style="text-align: right;">' . pesos($totalBien) . '</th>
                                     </tr>' . $row_bien;
                                     $totalBodega += $totalBien;
                                 }
                             }
-                            $row_bodega = '<tr  class="resaltar"><th colspan="6" style="text-align:center; font-size:13px;">' . $allbodegas[$bc]['nombre'] . '</th><th colspan="3" style="text-align:right; font-size:13px;">' . pesos($totalBodega) . '</th></tr>';
+                            $row_bodega = '<tr  class="resaltar"><th colspan="7" style="text-align:center; font-size:13px;">' . $allbodegas[$bc]['nombre'] . '</th><th colspan="3" style="text-align:right; font-size:13px;">' . pesos($totalBodega) . '</th></tr>';
                             $row_bg .= $row_bodega . $row_tipo;
                         }
                     }
-                    $totalExistencia = '<tr style="font-size:14px"  class="resaltar">
-                                    <th style="text-align: left;" colspan="7">ELEMENTOS DE CONSUMO O CARGO DIFERIDO</th>
+                    $total = $cero == 1 ? 0 : $total;
+                    $totalExistencia = '<tr style="font-size:13px"  class="resaltar">
+                                    <th style="text-align: left;" colspan="8">ELEMENTOS DE CONSUMO O CARGO DIFERIDO</th>
                                     <th style="text-align: right;" colspan="2">' . pesos($total) . '</th>
                                 </tr>' . $row_bg;
                     echo $totalExistencia;
@@ -614,3 +661,24 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
         </table>
     </div>
 </div>
+<?php
+$excel = '<div id="tbPlano" style="display:none"><table><thead>';
+$excel .= '<tr>';
+$excel .= '<th>ID_BOD</th>';
+$excel .= '<th>BODEGA</th>';
+$excel .= '<th>CUENTA</th>';
+$excel .= '<th>ID_TIPO</th>';
+$excel .= '<th>TIPO</th>';
+$excel .= '<th>ID_BIEN</th>';
+$excel .= '<th>BIEN</th>';
+$excel .= '<th>INVIMA</th>';
+$excel .= '<th>VENCE</th>';
+$excel .= '<th>LOTE</th>';
+$excel .= '<th>MARCA</th>';
+$excel .= '<th>CANTIDAD</th>';
+$excel .= '<th>VALOR_UNITARIO</th>';
+$excel .= '<th>VALOR</th>';
+$excel .= '</tr></thead><tbody>' . $filaExcel;
+$excel .= '</tbody></table></div>';
+echo $excel;
+?>

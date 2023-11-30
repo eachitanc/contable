@@ -20,7 +20,7 @@ if ($key === false) {
     exit();
 }
 $vigencia = $_SESSION['vigencia'];
-$tipo = isset($_POST['tipo']) ? $_POST['tipo'] : '0';
+$tipo = isset($_POST['tipo']) ? $_POST['tipo'] : 0;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -90,7 +90,7 @@ try {
                                     </tbody>
                                 </table>
                             <?php
-                            } elseif ($tipo >= 2) {
+                            } else if ($tipo >= 2) {
                             ?>
                                 <table id="tableEntradasAlmacenPresDona" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
                                     <thead>

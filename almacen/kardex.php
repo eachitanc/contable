@@ -116,7 +116,7 @@ if ($bodega == 1) {
 if ($bodega == 40) {
     $farmacia = "UNION ALL
                     SELECT 
-                        '' AS `id_trasl_alm`
+                        `id_ingreso` AS `id_trasl_alm`
                         , '' AS `id_entrada`
                         , `seg_ids_farmacia`.`id_prod`
                         , '40' AS `id_bodega_sale`
@@ -132,28 +132,30 @@ if ($bodega == 40) {
                         , '' AS `invima`
                         , `t1`.`fec_vencimiento`
                         , `t1`.`fec_cierre`
-                        , 'INVENTARIO INICIAL' AS `tipo_entrada`
+                        , `nom_tipo_ingreso` AS `tipo_entrada`
                         , '1' AS `tipo` 
                     FROM 
                         (SELECT
-                            `far_orden_ingreso`.`id_ingreso`
-                            , `far_medicamentos`.`id_med`
-                            , `far_medicamento_lote`.`id_lote`
-                            , `far_medicamento_lote`.`lote`
-                            , `far_medicamento_lote`.`fec_vencimiento`
-                            , `far_orden_ingreso`.`fec_cierre`    
-                            , `far_orden_ingreso_detalle`.`cantidad`
-                            , `far_orden_ingreso_detalle`.`valor`       
-                        FROM   
-                            $bd_base_f.`far_orden_ingreso_detalle`
-                            INNER JOIN $bd_base_f.`far_orden_ingreso` 
-                                ON (`far_orden_ingreso_detalle`.`id_ingreso` = `far_orden_ingreso`.`id_ingreso`)
-                            INNER JOIN $bd_base_f.`far_medicamento_lote` 
-                                ON (`far_orden_ingreso_detalle`.`id_lote` = `far_medicamento_lote`.`id_lote`)
-                            INNER JOIN $bd_base_f.`far_medicamentos` 
-                                ON (`far_medicamento_lote`.`id_med` = `far_medicamentos`.`id_med`)
-                        WHERE `far_orden_ingreso`.`id_ingreso` IN (1,2,3,4,6)
-                            AND `far_orden_ingreso`.`fec_cierre` <= '$fecha2 23:59:59') AS `t1`
+                        `far_orden_ingreso`.`id_ingreso`
+                        , `far_medicamentos`.`id_med`
+                        , `far_medicamento_lote`.`id_lote`
+                        , `far_medicamento_lote`.`lote`
+                        , `far_medicamento_lote`.`fec_vencimiento`
+                        , `far_orden_ingreso`.`fec_cierre`    
+                        , `far_orden_ingreso_detalle`.`cantidad`
+                        , `far_orden_ingreso_detalle`.`valor`  
+                        , CONCAT(`far_orden_ingreso_tipo`.`nom_tipo_ingreso`, ' (ASISTENCIAL)') AS `nom_tipo_ingreso`
+                    FROM   
+                        $bd_base_f.`far_orden_ingreso_detalle`
+                        INNER JOIN $bd_base_f.`far_orden_ingreso` 
+                            ON (`far_orden_ingreso_detalle`.`id_ingreso` = `far_orden_ingreso`.`id_ingreso`)
+                        INNER JOIN $bd_base_f.`far_medicamento_lote` 
+                            ON (`far_orden_ingreso_detalle`.`id_lote` = `far_medicamento_lote`.`id_lote`)
+                        INNER JOIN $bd_base_f.`far_medicamentos` 
+                            ON (`far_medicamento_lote`.`id_med` = `far_medicamentos`.`id_med`)
+                        LEFT JOIN $bd_base_f.`far_orden_ingreso_tipo` 
+                            ON (`far_orden_ingreso_tipo`.`id_tipo_ingreso` = `far_orden_ingreso`.`id_tipo_ingreso`)
+                    WHERE `far_orden_ingreso`.`id_tipo_ingreso` NOT IN (3,6) AND `far_orden_ingreso`.`fec_cierre` <= '$fecha2 23:59:59') AS `t1`
                     LEFT JOIN `seg_ids_farmacia`
                         ON (`seg_ids_farmacia`.`id_med` = `t1`.`id_med`)
                     WHERE `seg_ids_farmacia`.`id_prod` = $articulo

@@ -200,11 +200,12 @@ try {
                                         `seg_pto_mvto`
                                         INNER JOIN `seg_pto_documento` 
                                             ON (`seg_pto_mvto`.`id_pto_doc` = `seg_pto_documento`.`id_pto_doc`)
-                                    WHERE `seg_pto_mvto`.`tipo_mov` ='COP' AND `seg_pto_mvto`.`id_pto_doc` ={$lp['id_pto_doc']}
+                                    WHERE `seg_pto_mvto`.`tipo_mov` ='COP' AND `seg_pto_mvto`.`id_auto_dep` ={$lp['id_pto_doc']} AND `seg_pto_mvto`.`estado` =0
                                     GROUP BY `seg_pto_mvto`.`id_pto_doc`;";
                             $res = $cmd->query($sql);
                             $causado = $res->fetch(PDO::FETCH_ASSOC);
                             $saldo_rp = $lp['valor'] - $causado['val_causado'];
+                            $sql2 = $sql;
                         } catch (PDOException $e) {
                             echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
                         }
@@ -239,9 +240,6 @@ try {
                         echo '</tr>';
                         $total_rp = $total_rp + $lp['valor'];
                     }
-
-
-
                     echo '<tr class="row-success">';
                     echo '<td colspan="3" class="text-left">&nbsp;Total</td>';
                     echo '<td class="text-right">' . number_format($total_rp, 2, '.', ',') . '</td>';

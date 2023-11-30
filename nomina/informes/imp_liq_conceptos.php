@@ -374,6 +374,83 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `seg_empleado`.`id_empleado`
+                , `seg_liq_cesantias`.`val_icesantias`
+                , `seg_liq_cesantias`.`val_cesantias`
+                , `seg_liq_cesantias`.`cant_dias`
+                , `seg_liq_cesantias`.`id_nomina`
+            FROM
+                `seg_liq_cesantias`
+                INNER JOIN `seg_empleado` 
+                    ON (`seg_liq_cesantias`.`id_empleado` = `seg_empleado`.`id_empleado`)
+            WHERE (`seg_liq_cesantias`.`id_nomina` = $id_nomina)";
+    $rs = $cmd->query($sql);
+    $cesantias = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `seg_empleado`.`id_empleado`
+                , `seg_liq_prima`.`val_liq_ps`
+                , `seg_liq_prima`.`id_nomina`
+                , `seg_liq_prima`.`cant_dias`
+            FROM
+                `seg_liq_prima`
+                LEFT JOIN `seg_empleado` 
+                    ON (`seg_liq_prima`.`id_empleado` = `seg_empleado`.`id_empleado`)
+            WHERE (`seg_liq_prima`.`id_nomina` = $id_nomina)";
+    $rs = $cmd->query($sql);
+    $prima_sv = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `seg_empleado`.`id_empleado`
+                , `seg_liq_prima_nav`.`val_liq_pv`
+                , `seg_liq_prima_nav`.`cant_dias`
+                , `seg_liq_prima_nav`.`id_nomina`
+            FROM
+                `seg_liq_prima_nav`
+                INNER JOIN `seg_empleado` 
+                    ON (`seg_liq_prima_nav`.`id_empleado` = `seg_empleado`.`id_empleado`)
+            WHERE (`seg_liq_prima_nav`.`id_nomina` = $id_nomina)";
+    $rs = $cmd->query($sql);
+    $prima_nav = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `seg_empleado`.`id_empleado`
+                , `seg_liq_compesatorio`.`val_compensa`
+                , `seg_liq_compesatorio`.`id_nomina`
+                , `seg_liq_compesatorio`.`dias`
+            FROM
+                `seg_liq_compesatorio`
+                INNER JOIN `seg_empleado` 
+                    ON (`seg_liq_compesatorio`.`id_empleado` = `seg_empleado`.`id_empleado`)
+            WHERE (`seg_liq_compesatorio`.`id_nomina` = $id_nomina)";
+    $rs = $cmd->query($sql);
+    $compensatorios = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 $concepto = isset($_POST['concepto']) ? $_POST['concepto'] : 'A';
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $meses = [
@@ -528,6 +605,15 @@ EOT;
             $key = array_search($id_empleado, array_column($retfte, 'id_empleado'));
             $val_rtefte = $key !== false ? $retfte[$key]['val_ret'] : 0;
             $representacion = $o['representacion'] == 1 ? $grepre['valor'] : 0;
+            $key = array_search($id_empleado, array_column($cesantias, 'id_empleado'));
+            $val_ces = $key !== false ? $cesantias[$key]['val_cesantias'] : 0;
+            $val_ices = $key !== false ? $cesantias[$key]['val_icesantias'] : 0;
+            $key = array_search($id_empleado, array_column($prima_sv, 'id_empleado'));
+            $val_prim_sv = $key !== false ? $prima_sv[$key]['val_liq_ps'] : 0;
+            $key = array_search($id_empleado, array_column($prima_nav, 'id_empleado'));
+            $val_prim_nav = $key !== false ? $prima_nav[$key]['val_liq_pv'] : 0;
+            $key = array_search($id_empleado, array_column($compensatorios, 'id_empleado'));
+            $val_compensa = $key !== false ? $compensatorios[$key]['val_compensa'] : 0;
             $filtro = [];
             $filtro = array_filter($hoex, function ($hoex) use ($id_empleado) {
                 return $hoex["id_empleado"] == $id_empleado;
@@ -579,7 +665,7 @@ EOT;
                     $val_sind += $f['val_aporte'];
                 }
             }
-            $devengado = $val_sueldo + $val_auxt + $val_auxal + $val_bsp + $val_vac + $val_pri_vac + $val_recrea + $val_lic + $val_indem + $representacion + $val_hoext + $val_incap;
+            $devengado = $val_sueldo + $val_auxt + $val_auxal + $val_bsp + $val_vac + $val_pri_vac + $val_recrea + $val_lic + $val_indem + $representacion + $val_hoext + $val_incap + $val_ces + $val_ices + $val_prim_sv + $val_prim_nav + $val_compensa;
             $deducido = $val_salud + $val_pension + $val_solidaria + $val_rtefte + $val_libr + $val_embar + $val_sind;
             $val_neto = $devengado - $deducido;
             $netos[$id_empleado] = $val_neto;
@@ -756,6 +842,80 @@ EOT;
                                 <td>' . $diasLab . '</td>
                             <td style="text-align: right;">' . pesos($grepre['valor']) . '</td>
                         </tr>';
+                    }
+                    //Prima servicios
+                    $key = array_search($id_empleado, array_column($prima_sv, 'id_empleado'));
+                    if ($key !== false) {
+                        $val_ps = $prima_sv[$key]['val_liq_ps'];
+                        $days = $prima_sv[$key]['cant_dias'] > 0 ? $prima_sv[$key]['cant_dias'] : 0;
+                        if ($val_ps > 0) {
+                            $devengos += $val_ps;
+                            $topdf .= '
+                                    <tr class="resaltar">
+                                        <td>PRIMA DE SERVICIOS</td>
+                                        <td>' . $o['no_documento'] . '</td>
+                                        <td>' . $days . '</td>
+                                        <td style="text-align: right;">' . pesos($val_ps) . '</td>
+                                    </tr>';
+                        }
+                    }
+                    //Prima Navidad
+                    $key = array_search($id_empleado, array_column($prima_nav, 'id_empleado'));
+                    if ($key !== false) {
+                        $val_nav = $prima_nav[$key]['val_liq_pv'];
+                        $dias_nav = $prima_nav[$key]['cant_dias'];
+                        if ($val_nav > 0) {
+                            $devengos += $val_nav;
+                            $topdf .= '
+                                <tr class="resaltar">
+                                    <td>PRIMA DE NAVIDAD</td>
+                                    <td>' . $o['no_documento'] . '</td>
+                                    <td>' . $dias_nav . '</td>
+                                    <td style="text-align: right;">' . pesos($val_nav) . '</td>
+                                </tr>';
+                        }
+                    }
+                    //Cesantias
+                    $key = array_search($id_empleado, array_column($cesantias, 'id_empleado'));
+                    if ($key !== false) {
+                        $val_ces = $cesantias[$key]['val_cesantias'];
+                        $val_ices = $cesantias[$key]['val_icesantias'];
+                        if ($val_ces > 0) {
+                            $devengos += $val_ces;
+                            $topdf .= '
+                        <tr class="resaltar">
+                            <td>CESANTÍAS</td>
+                            <td>' . $o['no_documento'] . '</td>
+                            <td>' . $cesantias[$key]['cant_dias'] . '</td>
+                            <td style="text-align: right;">' . pesos($val_ces) . '</td>
+                        </tr>';
+                        }
+                        if ($val_ices > 0) {
+                            $devengos += $val_ices;
+                            $topdf .= '
+                        <tr class="resaltar">
+                            <td>INTERESES A CESANTIAS</td>
+                            <td>' . $o['no_documento'] . '</td>
+                            <td>' . $cesantias[$key]['cant_dias'] . '</td>
+                            <td style="text-align: right;">' . pesos($val_ices) . '</td>
+                        </tr>';
+                        }
+                    }
+                    //Compensatorios 
+                    $key = array_search($id_empleado, array_column($compensatorios, 'id_empleado'));
+                    if ($key !== false) {
+                        $val_cp = $compensatorios[$key]['val_compensa'];
+                        $dias_comp = $compensatorios[$key]['dias'];
+                        if ($val_cp > 0) {
+                            $devengos += $val_cp;
+                            $topdf .= '
+                        <tr class="resaltar">
+                            <td>COMPENSATORIO</td>
+                            <td>' . $o['no_documento'] . '</td>
+                            <td>' . $dias_comp . '</td>
+                            <td style="text-align: right;">' . pesos($val_cp) . '</td>
+                        </tr>';
+                        }
                     }
                     //salud
                     $key = array_search($id_empleado, array_column($segsoc, 'id_empleado'));

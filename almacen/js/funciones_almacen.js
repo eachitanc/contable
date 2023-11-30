@@ -2728,6 +2728,11 @@
         var encoded = window.btoa(xls);
         $('<form action="' + window.urlin + '/almacen/informes/reporte_excel.php" method="post"><input type="hidden" name="xls" value="' + encoded + '" /></form>').appendTo('body').submit();
     });
+    $('#divModalForms').on('click', '#excelPlano', function () {
+        let xls = ($('#tbPlano').html());
+        var encoded = window.btoa(xls);
+        $('<form action="' + window.urlin + '/almacen/informes/reporte_excel.php" method="post"><input type="hidden" name="xls" value="' + encoded + '" /></form>').appendTo('body').submit();
+    });
     $('#divModalForms').on('click', '#btnExcelEntrada', function () {
         let xls = ($('#areaImprimir').html());
         var encoded = window.btoa(xls);
@@ -2961,6 +2966,16 @@
             $("#divForms").html(he);
         });
     });
+    $('#modificaBodega').on('click', '.gestionCuentas', function () {
+        let id = $(this).attr('value');
+        $.post('datos//registrar/form_gestiona_cuentas.php', { id: id }, function (he) {
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').addClass('modal-lg');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+    });
     $("#divModalForms").on('input', '#buscaUserResposable', function () {
         $(this).autocomplete({
             source: function (request, response) {
@@ -3005,6 +3020,44 @@
             });
             return false;
         }
+    });
+    $('#divModalForms').on('click', '#btnActCtasContables', function () {
+        var aprobar = 1;
+        $('.is-invalid').removeClass('is-invalid');
+        $('input[name^=numCuenta]').each(function () {
+            let val = $(this).val();
+            //console.log('Valor de la cuenta:', val);
+            if (val == '') {
+                aprobar = 0;
+                $(this).addClass('is-invalid');
+                $(this).focus();
+                $('#divModalError').modal('show');
+                $('#divMsgError').html('Cuenta no puede ser vacío');
+                return false;
+            }
+        });
+
+        if (aprobar == 1) {
+            let datos = $('#formGesCuentas').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'actualizar/cuentas_contables.php',
+                data: datos,
+                success: function (r) {
+                    if (r == 'ok') {
+                        let id = 'tableBodegas';
+                        reloadtable(id);
+                        $('#divModalForms').modal('hide');
+                        $('#divModalDone').modal('show');
+                        $('#divMsgDone').html("Cuentas modificadas correctamente");
+                    } else {
+                        $('#divModalError').modal('show');
+                        $('#divMsgError').html(r);
+                    }
+                }
+            });
+        }
+        return false;
     });
     $('#divModalForms').on('click', '#btnImprimir', function () {
         function imprSelec() {

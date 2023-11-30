@@ -1020,8 +1020,7 @@ compensatorios*/
                 <td colspan="2" style="text-align: right;"><b>NETO</b></td>
                 <td colspan="2" style="text-align: right;">
                     <b>';
-                $key = array_search($id_empleado, array_column($saln, 'id_empleado'));
-                $topdf .= pesos($saln[$key]['val_liq']);
+                $topdf .= pesos($devengos - $deducciones);
                 $topdf .= '
                     </b>
                 </td>

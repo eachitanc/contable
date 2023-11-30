@@ -50,13 +50,14 @@ if (!empty($bodegas)) {
         $id_bg = $bg['id_bodega'];
         $asigna = '<a value="' . $id_bg . '" class="btn btn-outline-info btn-sm btn-circle shadow-gb asignaResposable" title="Asignar Resposable"><span class="fas fa-user-cog fa-lg"></span></a>';
         $editar =  '<a value="' . $id_bg . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb editaBodega" title="Editar Bodega"><span class="fas fa-pencil-alt fa-lg"></span></a>';
+        $gCuentas = '<a value="' . $id_bg . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb gestionCuentas" title="Gestionar cuentas contables"><span class="fas fa-tasks fa-lg"></span></a>';
         $data[] = [
             "id" => $id_bg,
             "sede" => $bg['sede'],
             "bodega" => $bg['bodega'],
             "responsable" => mb_strtoupper($bg['usuario']),
             "fecha" => '<div class="text-center centro-vertical">' . $bg['fec_reg'] . '</div>',
-            "botones" => '<div class="text-center centro-vertical">' . $editar . $asigna . '</div>',
+            "botones" => '<div class="text-center centro-vertical">' . $editar . $asigna . $gCuentas.'</div>',
         ];
     }
 }

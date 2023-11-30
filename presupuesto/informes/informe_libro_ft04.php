@@ -45,17 +45,17 @@ try {
                 , `seg_pto_mvto`.`id_auto_dep`
                 , `seg_pto_mvto`.`tipo_mov`
                 , `seg_pto_mvto`.`rubro`
-                , `seg_pto_mvto`.`valor`
-                , `seg_pto_documento`.`id_tercero`
+                , sum(`seg_pto_mvto`.`valor`) as valor
+                , IF(`seg_pto_mvto`.`id_tercero_api`,`seg_pto_mvto`.`id_tercero_api`,`seg_pto_documento`.`id_tercero`) AS id_tercero
                 , `seg_pto_documento`.`id_manu`
-                , `seg_pto_mvto`.`id_tercero_api`
+                , `seg_pto_documento`.`objeto`
                 , `seg_pto_documento`.`fecha`
             FROM
                 `seg_pto_mvto`
                 INNER JOIN `seg_pto_documento` 
                     ON (`seg_pto_mvto`.`id_pto_doc` = `seg_pto_documento`.`id_pto_doc`)
-            WHERE (`seg_pto_mvto`.`tipo_mov` ='CRP'
-                AND `seg_pto_documento`.`fecha` <='$fecha_corte');
+            WHERE `seg_pto_documento`.`fecha` <='$fecha_corte' AND `seg_pto_mvto`.`tipo_mov` ='CRP' 
+            GROUP BY id_pto_doc,rubro;
 ";
     $res = $cmd->query($sql);
     $cdp = $res->fetchAll();
@@ -101,7 +101,7 @@ FROM
                 <td colspan="13" style="text-align:center"><?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?></td>
             </tr>
             <tr>
-                <td colspan="13" style="text-align:center"><?php echo 'ESTADO DE CUENTAS POR PAGAR'; ?></td>
+                <td colspan="13" style="text-align:center"><?php echo 'ESTADO DE CUENTAS POR PAGAR '; ?></td>
             </tr>
             <tr>
                 <td colspan="13" style="text-align:center"><?php echo 'Fecha de corte: ' . $fecha_corte; ?></td>
@@ -119,7 +119,6 @@ FROM
                 <td>Fecha</td>
                 <td>No CDP</td>
                 <td>No CRP</td>
-                <td>Fecha causacion</td>
                 <td>Tercero</td>
                 <td>cc/nit</td>
                 <td>detalle</td>
@@ -129,6 +128,7 @@ FROM
                 <td>Valor Pagado</td>
                 <td>Compromisos por pagar</td>
                 <td>Cuentas por pagar</td>
+                <td>auxiliar</td>
             </tr>
             <?php
 
@@ -152,6 +152,7 @@ FROM
             curl_close($ch);
             $terceros = json_decode($result, true);
             foreach ($cdp as $rp) {
+                $valor = 0;
                 $fecha = date('Y-m-d', strtotime($rp['fecha']));
 
                 // Consultar el valor registrado por rubro y cdp 
@@ -159,69 +160,66 @@ FROM
                 $key = array_search($rp['id_tercero'], array_column($terceros, 'id_tercero'));
                 $tercero = $terceros[$key]['nombre1'] . ' ' . $terceros[$key]['nombre2'] . ' ' . $terceros[$key]['apellido1'] . ' ' . $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['razon_social'];
                 $cc_nit = $terceros[$key]['cc_nit'];
-
-                // Consulto el valor causado
-                /*
-                $sql = "SELECT
-                            `tipo_mov`
-                            , `rubro`
-                            ,  SUM(`valor`) as valor
-                            , `id_auto_dep`
-                        FROM
-                            `seg_pto_mvto`
-                        WHERE (`tipo_mov` ='COP'
-                            AND `rubro` ='{$rp['rubro']}'
-                            AND `id_auto_dep` =$rp[id_pto_doc]);";
-                */
+                // consulto el valor liquidado
                 $sql = "SELECT
                     SUM(`seg_pto_mvto`.`valor`) AS valor
-                    , `seg_ctb_doc`.`fecha`
-                    , `seg_ctb_doc`.`id_tercero`
-                FROM
-                    `seg_pto_mvto`
-                    INNER JOIN `seg_ctb_doc` 
-                        ON (`seg_pto_mvto`.`id_ctb_doc` = `seg_ctb_doc`.`id_ctb_doc`)
-                WHERE (`seg_pto_mvto`.`tipo_mov` ='COP'
-                    AND `seg_pto_mvto`.`id_pto_doc` =$rp[id_pto_doc]
-                    AND `seg_pto_mvto`.`rubro` ='{$rp['rubro']}'
-                    AND `seg_ctb_doc`.`fecha` <='$fecha_corte')
-                    GROUP BY `seg_pto_mvto`.`valor`;";
+                    FROM
+                        `seg_pto_mvto`
+                        INNER JOIN `seg_pto_documento` ON (`seg_pto_mvto`.`id_pto_doc` = `seg_pto_documento`.`id_pto_doc`)
+                    WHERE `seg_pto_documento`.`fecha` <='$fecha_corte' 
+                    AND `seg_pto_mvto`.`tipo_mov` ='LRP' 
+                    AND `seg_pto_mvto`.`id_auto_crp` =$rp[id_pto_doc] 
+                    AND `seg_pto_mvto`.`rubro` ='{$rp['rubro']}' 
+                    AND `seg_pto_mvto`.`estado`=0
+                    GROUP BY `seg_pto_mvto`.id_pto_doc,rubro;";
+                $res = $cmd->query($sql);
+                $lrp = $res->fetch();
+
+                // Consulto el valor causado
+                $sql = "SELECT
+                            SUM(`seg_pto_mvto`.`valor`) AS valor
+                        FROM
+                            `seg_pto_mvto`
+                            INNER JOIN `seg_ctb_doc` ON (`seg_pto_mvto`.`id_ctb_doc` = `seg_ctb_doc`.`id_ctb_doc`)
+                        WHERE `seg_pto_mvto`.`tipo_mov` ='COP'
+                            AND `seg_pto_mvto`.`id_pto_doc` =$rp[id_pto_doc]
+                            AND `seg_pto_mvto`.`rubro` ='{$rp['rubro']}'
+                            AND `seg_pto_mvto`.`estado`=0
+                            AND `seg_ctb_doc`.`fecha` <='$fecha_corte'
+                        group by tipo_mov,id_pto_doc, rubro ;";
                 $res = $cmd->query($sql);
                 $cop = $res->fetch();
                 // Consulto el valor pagado
                 $sql = "SELECT
-                SUM(`seg_pto_mvto`.`valor`) AS valor
-            FROM
-                `seg_pto_mvto`
-                INNER JOIN `seg_ctb_doc` 
-                    ON (`seg_pto_mvto`.`id_ctb_doc` = `seg_ctb_doc`.`id_ctb_doc`)
-            WHERE (`seg_pto_mvto`.`tipo_mov` ='PAG'
-                AND `seg_pto_mvto`.`id_pto_doc` =$rp[id_pto_doc]
-                AND `seg_pto_mvto`.`rubro` ='{$rp['rubro']}'
-                AND `seg_ctb_doc`.`fecha` <='$fecha_corte')
-            GROUP BY `seg_pto_mvto`.`valor`;";
+                            SUM(`seg_pto_mvto`.`valor`) AS valor
+                        FROM
+                            `seg_pto_mvto`
+                            INNER JOIN `seg_ctb_doc` ON (`seg_pto_mvto`.`id_ctb_doc` = `seg_ctb_doc`.`id_ctb_doc`)
+                        WHERE (`seg_pto_mvto`.`tipo_mov` ='PAG'
+                            AND `seg_pto_mvto`.`id_pto_doc` =$rp[id_pto_doc]
+                            AND `seg_pto_mvto`.`rubro` ='{$rp['rubro']}'
+                            AND `seg_pto_mvto`.`estado`=0
+                            AND `seg_ctb_doc`.`fecha` <='$fecha_corte')
+                            group by tipo_mov,id_pto_doc, rubro ;";
                 $res = $cmd->query($sql);
                 $pag = $res->fetch();
-                if ($cop['fecha'] == null) {
-                    $fecha_causa = '';
-                } else {
-                    $fecha_causa = date('Y-m-d', strtotime($cop['fecha']));
+                $valor = $rp['valor'] + $lrp['valor'];
+                if ($valor > 0) {
+                    echo "<tr>
+                    <td class='text'>" . $fecha .  "</td>
+                    <td class='text-left'>" . $rp['id_manu'] . "</td>
+                    <td class='text-left'>" . $rp['id_manu'] . "</td>
+                    <td class='text-right'>" .     $tercero  . "</td>
+                    <td class='text-right'>" .   $cc_nit  . "</td>
+                    <td class='text-right'>" .  $rp['objeto'] . "</td>
+                    <td class='text'>" . $rp['rubro']   . "</td>
+                    <td class='text-right'>" . number_format($valor, 2, ".", ",")   . "</td>
+                    <td class='text-right'>" .  number_format($cop['valor'], 2, ".", ",")  . "</td>
+                    <td class='text-right'>" .  number_format($pag['valor'], 2, ".", ",")  . "</td>
+                    <td class='text-right'>" .  number_format(($rp['valor'] - $cop['valor']), 2, ".", ",")  . "</td>
+                    <td class='text-right'>" .  number_format(($cop['valor'] - $pag['valor']), 2, ".", ",")  . "</td>
+                    </tr>";
                 }
-                echo "<tr>
-                <td class='text'>" . $fecha .  "</td>
-                <td class='text-left'>" . $rp['id_manu'] . "</td>
-                <td class='text-left'>" . $rp['id_manu'] . "</td>
-                <td class='text-left'>" . $fecha_causa . "</td>
-                <td class='text-right'>" .     $tercero  . "</td>
-                <td class='text-right'>" .   $cc_nit  . "</td>
-                <td class='text-right'>" .  $rp['id_manu'] . "</td>
-                <td class='text'>" . $rp['rubro']   . "</td>
-                <td class='text-right'>" . number_format($rp['valor'], 2, ".", ",")   . "</td>
-                <td class='text-right'>" .  number_format($cop['valor'], 2, ".", ",")  . "</td>
-                <td class='text-right'>" .  number_format($pag['valor'], 2, ".", ",")  . "</td>
-                <td class='text-right'>" .  number_format(($rp['valor'] - $cop['valor']), 2, ".", ",")  . "</td>
-                <td class='text-right'>" .  number_format(($cop['valor'] - $pag['valor']), 2, ".", ",")  . "</td>
-                </tr>";
             }
             ?>
 

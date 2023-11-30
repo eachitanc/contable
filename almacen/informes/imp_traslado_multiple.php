@@ -233,72 +233,73 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
         }
     </style>
     <div class="p-4 text-left">
-        <table class="page_break_avoid" style="width:100% !important;">
-            <thead style="background-color: white !important;font-size:80%">
-                <tr style="padding: bottom 3px; color:black">
-                    <td colspan="10">
-                        <table style="width:100% !important;">
-                            <tr>
-                                <td rowspan="3" class='text-center' style="width:18%"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
-                                <td colspan="9" style="text-align:center">
-                                    <strong><?php echo $empresa['nombre']; ?> </strong>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="9" style="text-align:center">
-                                    NIT <?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="7">
-                                    <?php if ($tipoT == 1) { ?>
-                                        <b>TRASLADO MULTIPLES DEL No <?php echo str_pad($id_inicia, 5, "0", STR_PAD_LEFT) . ' AL No ' . str_pad($id_final, 5, "0", STR_PAD_LEFT) ?>
-                                        <?php } else { ?>
-                                            <b> CONTROL DE TRASLADO ENTRE EL <?php echo $fec_inicia . ' Y EL ' . $fec_final ?>
-                                            <?php } ?>
-                                </td>
-                                <td colspan="2" style="scale: 0.7; text-align: right;">
-                                    <table style="width:100% !important;">
-                                        <tr>
-                                            <td>Fecha Imp.</td>
-                                            <td><?php echo $date->format('Y/m/d') ?></td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <tr style="background-color: #CED3D3; text-align:center">
-                    <th rowspan="2">ID</th>
-                    <th rowspan="2">Producto</th>
-                    <th rowspan="2">Invima</th>
-                    <th rowspan="2">Vence</th>
-                    <th rowspan="2">Lote</th>
-                    <th rowspan="2">Marca</th>
-                    <th colspan="2">Cantidad</th>
-                    <th rowspan="2">Val.Und.</th>
-                    <th rowspan="2">Total</th>
-                </tr>
-                <tr style="background-color: #CED3D3; text-align:center">
-                    <th>Pedido</th>
-                    <th>Entregado</th>
-                </tr>
-            </thead>
-            <tbody style="font-size: 60%;">
-                <?php
-                if (!empty($datas)) {
-                    $row_traslado = '';
-                    $totalExistencia = '';
-                    $granTotal = 0;
-                    foreach ($datas as $ts => $trasl) {
-                        $total = 0;
-                        $row_tipo = '';
-                        $lote = 'EAC';
-                        $valorXbien = 0;
-                        $keyts = array_search($ts, array_column($encabezado, 'id_trasl_alm'));
-                        if ($keyts !== false) {
-                            $row_traslado = '<tr style="background-color: #CED3D3; color:#ffffff">
+        <div class="table-responsive">
+            <table class="page_break_avoid" style="width:100% !important;">
+                <thead style="background-color: white !important;font-size:80%">
+                    <tr style="padding: bottom 3px; color:black">
+                        <td colspan="10">
+                            <table style="width:100% !important;">
+                                <tr>
+                                    <td rowspan="3" class='text-center' style="width:18%"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
+                                    <td colspan="9" style="text-align:center">
+                                        <strong><?php echo $empresa['nombre']; ?> </strong>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="9" style="text-align:center">
+                                        NIT <?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="7">
+                                        <?php if ($tipoT == 1) { ?>
+                                            <b>TRASLADO MULTIPLES DEL No <?php echo str_pad($id_inicia, 5, "0", STR_PAD_LEFT) . ' AL No ' . str_pad($id_final, 5, "0", STR_PAD_LEFT) ?>
+                                            <?php } else { ?>
+                                                <b> CONTROL DE TRASLADO ENTRE EL <?php echo $fec_inicia . ' Y EL ' . $fec_final ?>
+                                                <?php } ?>
+                                    </td>
+                                    <td colspan="2" style="scale: 0.7; text-align: right;">
+                                        <table style="width:100% !important;">
+                                            <tr>
+                                                <td>Fecha Imp.</td>
+                                                <td><?php echo $date->format('Y/m/d') ?></td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr style="background-color: #F2F3F4; text-align:center">
+                        <th rowspan="2">ID</th>
+                        <th rowspan="2">Producto</th>
+                        <th rowspan="2">Invima</th>
+                        <th rowspan="2">Vence</th>
+                        <th rowspan="2">Lote</th>
+                        <th rowspan="2">Marca</th>
+                        <th colspan="2">Cantidad</th>
+                        <th rowspan="2">Val.Und.</th>
+                        <th rowspan="2">Total</th>
+                    </tr>
+                    <tr style="background-color: #F2F3F4; text-align:center">
+                        <th>Pedido</th>
+                        <th>Entregado</th>
+                    </tr>
+                </thead>
+                <tbody style="font-size: 60%;">
+                    <?php
+                    if (!empty($datas)) {
+                        $row_traslado = '';
+                        $totalExistencia = '';
+                        $granTotal = 0;
+                        foreach ($datas as $ts => $trasl) {
+                            $total = 0;
+                            $row_tipo = '';
+                            $lote = 'EAC';
+                            $valorXbien = 0;
+                            $keyts = array_search($ts, array_column($encabezado, 'id_trasl_alm'));
+                            if ($keyts !== false) {
+                                $row_traslado = '<tr style="background-color: #F2F3F4; color: black">
                                             <td colspan="3">
                                                 Genera: ' . $encabezado[$keyts]['bodega_sale'] . '
                                             </td>
@@ -306,7 +307,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                                 Solicita: ' . $encabezado[$keyts]['bodega_entra'] . '
                                             </td>
                                         </tr>
-                                        <tr style="background-color: #CED3D3;  color:#ffffff">
+                                        <tr style="background-color: #F2F3F4;  color:#black">
                                             <td colspan="3">
                                                 Traslado No.: ' . $ts . '
                                             </td>
@@ -314,35 +315,35 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                                 Pedido No.: ' . str_pad($encabezado[$keyts]["id_pedido"], 5, "0", STR_PAD_LEFT) . ' Fecha: ' . date('Y/m/d', strtotime($encabezado[$keyts]['fec_cierre'] == '' ? $encabezado[$keyts]['fec_reg'] : $encabezado[$keyts]['fec_cierre'])) . '
                                             </td>
                                         </tr>';
-                        } else {
-                            $row_traslado = '<tr style="background-color: #CED3D3;  color:#ffffff">
+                            } else {
+                                $row_traslado = '<tr style="background-color: #F2F3F4;  color:#black">
                                             <td colspan="10">
                                                 Genera: ' . $ts . '
                                             </td>
                                         </tr>';
-                        }
-                        foreach ($trasl as $keytb => $tipob) {
-                            $row_bien = '';
-                            if (!empty($tipob)) {
-                                $totalBien = 0;
-                                foreach ($tipob as $keybn => $bien) {
-                                    $numLotes = count($bien);
-                                    if (!empty($bien)) {
-                                        $row_lote = '';
-                                        $quedaXbien = 0;
-                                        $sumaLote = 0;
-                                        $cant_prom = 0;
-                                        $suma_val = 0;
-                                        $bandera = false;
-                                        foreach ($bien as $keylt => $lote) {
-                                            $keylt = strncmp($keylt, 'EACII', strlen('EACII')) === 0 ? '' : $keylt;
-                                            $id_bien = $lote['datos']['id_bn'];
-                                            $id_tipo = $lote['datos']['id_tb'];
-                                            $ketsol = array_search($id_bien, array_column($pedidos, 'id_producto'));
-                                            $solicitado = $ketsol !== false ? $pedidos[$ketsol]['cantidad'] : 0;
-                                            if ($numLotes > 1) {
-                                                $sumaLote += $lote['cantd'];
-                                                $row_lote .= '<tr class="resaltar">
+                            }
+                            foreach ($trasl as $keytb => $tipob) {
+                                $row_bien = '';
+                                if (!empty($tipob)) {
+                                    $totalBien = 0;
+                                    foreach ($tipob as $keybn => $bien) {
+                                        $numLotes = count($bien);
+                                        if (!empty($bien)) {
+                                            $row_lote = '';
+                                            $quedaXbien = 0;
+                                            $sumaLote = 0;
+                                            $cant_prom = 0;
+                                            $suma_val = 0;
+                                            $bandera = false;
+                                            foreach ($bien as $keylt => $lote) {
+                                                $keylt = strncmp($keylt, 'EACII', strlen('EACII')) === 0 ? '' : $keylt;
+                                                $id_bien = $lote['datos']['id_bn'];
+                                                $id_tipo = $lote['datos']['id_tb'];
+                                                $ketsol = array_search($id_bien, array_column($pedidos, 'id_producto'));
+                                                $solicitado = $ketsol !== false ? $pedidos[$ketsol]['cantidad'] : 0;
+                                                if ($numLotes > 1) {
+                                                    $sumaLote += $lote['cantd'];
+                                                    $row_lote .= '<tr class="resaltar">
                                                         <td></td>
                                                         <td></td>
                                                         <td>' . $lote['datos']['invima'] . '</td>
@@ -354,12 +355,12 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                                         <td style="text-align:right;">' . pesos($lote['datos']['valin']) . '</td>
                                                         <td style="text-align:right;">' . pesos($lote['cantd'] * $lote['datos']['costo']) . '</td>
                                                     </tr>';
-                                                $cant_prom++;
-                                                $suma_val = $suma_val + $lote['datos']['costo'];
-                                            } else {
-                                                $bandera = true;
-                                                $sumaLote = $lote['cantd'];
-                                                $row_lote = '<tr class="resaltar">
+                                                    $cant_prom++;
+                                                    $suma_val = $suma_val + $lote['datos']['costo'];
+                                                } else {
+                                                    $bandera = true;
+                                                    $sumaLote = $lote['cantd'];
+                                                    $row_lote = '<tr class="resaltar">
                                                                 <td>' . $id_bien . '</td>
                                                                 <td style="text-align:left;">' . $keybn . '</td>
                                                                 <td>' . $lote['datos']['invima'] . '</td>
@@ -371,15 +372,15 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                                                 <td style="text-align:right;">' . pesos($lote['datos']['valin']) . '</td>
                                                                 <td style="text-align:right;">' . pesos($sumaLote * $lote['datos']['costo']) . '</td>
                                                             </tr>';
-                                                $cant_prom = 1;
-                                                $suma_val =  $lote['datos']['costo'];
+                                                    $cant_prom = 1;
+                                                    $suma_val =  $lote['datos']['costo'];
+                                                }
                                             }
-                                        }
-                                        if ($bandera) {
-                                            $row_bien .= $row_lote;
-                                        } else {
-                                            $prom_valunid = $suma_val / $cant_prom;
-                                            $row_bien .= '<tr  class="resaltar">
+                                            if ($bandera) {
+                                                $row_bien .= $row_lote;
+                                            } else {
+                                                $prom_valunid = $suma_val / $cant_prom;
+                                                $row_bien .= '<tr  class="resaltar">
                                                             <td>' . $id_bien . '</td>
                                                             <td style="text-align:left;">' . $keybn . '</td>
                                                             <td></td>
@@ -391,60 +392,61 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                                             <td style="text-align:right;">' . pesos($prom_valunid) . '</td>
                                                             <td style="text-align:right;">' . pesos($sumaLote * $prom_valunid) . '</td>
                                                         </tr>' . $row_lote;
+                                            }
+                                            $valorXbien = $sumaLote * ($suma_val / $cant_prom);
+                                            $totalBien += $valorXbien;
+                                            $total += $valorXbien;
                                         }
-                                        $valorXbien = $sumaLote * ($suma_val / $cant_prom);
-                                        $totalBien += $valorXbien;
-                                        $total += $valorXbien;
                                     }
-                                }
-                                if ($tipoT == 2) {
-                                    $row_bien = NULL;
-                                }
-                                $row_tipo .= '<tr style="font-size: 11px; background-color" class="resaltar">
+                                    if ($tipoT == 2) {
+                                        $row_bien = NULL;
+                                    }
+                                    $row_tipo .= '<tr style="font-size: 11px; background-color" class="resaltar">
                         <th>' . $id_tipo . '</th>
                         <th style="text-align: left;" colspan="8">' . $keytb . '</th>
                         <th style="text-align: right;">' . pesos($totalBien) . '</th>
                         </tr>' . $row_bien;
+                                }
                             }
-                        }
-                        $granTotal += $total;
-                        $totalExistencia .= $row_traslado . '<tr style="font-size: 12px; background-color" class="resaltar">
+                            $granTotal += $total;
+                            $totalExistencia .= $row_traslado . '<tr style="font-size: 12px; background-color" class="resaltar">
                                         <th colspan=9">SUBTOTAL</th>
                                         <th>' . pesos($total) . '</th>
                                         </tr>' . $row_tipo;
-                    }
+                        }
 
-                    echo '<tr style="font-size: 12px; text-align:center" class="resaltar">
+                        echo '<tr style="font-size: 12px; text-align:center" class="resaltar">
                             <th colspan=9">TOTAL</th>
                             <th>' . pesos($granTotal) . '</th>
                         </tr>' . $totalExistencia;
-                } else {
-                    echo '<tr style="font-size: 12px; text-align:center" class="resaltar">
+                    } else {
+                        echo '<tr style="font-size: 12px; text-align:center" class="resaltar">
                             <th colspan=10">No hay datos para mostrar</th>
                         </tr>';
-                }
-                ?>
-                <tr colspan="10">
-                    <td style="height: 30px;"></td>
-                </tr>
-                <tr>
-                    <td colspan="5">
-                        Solicitó: _______________________________________________________
-                    </td>
-                    <td colspan="5">
-                        Recibe: _______________________________________________________
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="5">
-                        Elaboró: <?php echo mb_strtoupper(isset($usuario['nombre']) ? $usuario['nombre'] : ''); ?>
-                    </td>
-                    <td colspan="5">
-                        C.C:
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                    }
+                    ?>
+                    <tr colspan="10">
+                        <td style="height: 30px;"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="5">
+                            Solicitó: _______________________________________________________
+                        </td>
+                        <td colspan="5">
+                            Recibe: _______________________________________________________
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5">
+                            Elaboró: <?php echo mb_strtoupper(isset($usuario['nombre']) ? $usuario['nombre'] : ''); ?>
+                        </td>
+                        <td colspan="5">
+                            C.C:
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
 </div>

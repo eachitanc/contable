@@ -133,7 +133,6 @@ $usuario = $id_user == $pide['id_user_reg'] ? true : false;
                                     ?>
                                         <button class="btn btn-info btn-sm" id="btnImprimirPedido"><i class="fas fa-print"></i> Pedido</button>
                                         <button class="btn btn-success btn-sm" id="btnImprimirConsumo"><i class="fas fa-print"></i> Consumo</button>
-                                        <button class="btn btn-secondary btn-sm" id="btnCerrarConsumo"><i class="fas fa-door-closed"></i> Cerrar Consumo</button>
                                     <?php
                                     }
                                 }
@@ -141,6 +140,7 @@ $usuario = $id_user == $pide['id_user_reg'] ? true : false;
                                     //btnConsumirPedido
                                     ?>
                                     <button class="btn btn-info btn-sm" id="btnConsumirPedido"><i class="fas fa-arrow-alt-circle-down"></i> Consumir</button>
+                                    <button class="btn btn-secondary btn-sm" id="btnCerrarConsumo"><i class="fas fa-door-closed"></i> Cerrar Consumo</button>
                                 <?php
                                 }
                                 ?>

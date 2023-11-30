@@ -62,10 +62,9 @@ FROM
     INNER JOIN `seg_pto_documento` ON (`seg_pto_mvto`.`id_pto_doc` = `seg_pto_documento`.`id_pto_doc`)
     INNER JOIN seg_pto_anula ON (seg_pto_documento.id_pto_doc = seg_pto_anula.id_pto_doc)
     INNER JOIN seg_usuarios ON (seg_pto_anula.id_user_reg = seg_usuarios.id_usuario)
-WHERE `seg_pto_mvto`.`tipo_mov` ='CRP' AND `seg_pto_documento`.`estado` = 5 AND `seg_pto_documento`.`fecha` <= '$fecha_corte' 
+WHERE `seg_pto_mvto`.`tipo_mov` ='PAG' AND `seg_pto_documento`.`fecha` <= '$fecha_corte' AND `seg_pto_documento`.`estado` = 5
 ORDER BY `seg_pto_documento`.`fecha` ASC;
 ";
-    echo $sql;
     $res = $cmd->query($sql);
     $causaciones = $res->fetchAll();
 } catch (PDOException $e) {
@@ -101,7 +100,7 @@ FROM
                 <td colspan="9" style="text-align:center"><?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?></td>
             </tr>
             <tr>
-                <td colspan="9" style="text-align:center"><?php echo 'RELACION DE CERTIFICADOS DE REGISTRO PRESUPUESTAL'; ?></td>
+                <td colspan="9" style="text-align:center"><?php echo 'RELACION DE EGRESOS PRESUPUESTALES ANULADOS'; ?></td>
             </tr>
             <tr>
                 <td colspan="9" style="text-align:center"><?php echo 'Fecha de corte: ' . $fecha_corte; ?></td>

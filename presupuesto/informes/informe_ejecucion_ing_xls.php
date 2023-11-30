@@ -323,14 +323,19 @@ FROM
                 <td>Reconocimiento acumulado</td>
                 <td>Recaudo mes</td>
                 <td>Recaudo acumulado</td>
+                <td>Saldo por recaudar</td>
             </tr>
             <?php
             foreach ($acum as $key => $value) {
+                $definitivo = 0;
+                $saldo_recaudar = 0;
                 $keyrb = array_search($key, array_column($rubros, 'cod_pptal'));
                 if ($keyrb !== false)
                     $nomrb = $rubros[$keyrb]['nom_rubro'];
                 else
                     $nomrb = '';
+                $definitivo = $value['inicial'] + $value['adicion'] - $value['reduccion'];
+                $saldo_recaudar = $definitivo - $value['recaudo'];
                 echo '<tr>';
                 echo '<td class="text">' . $key . '</td>';
                 echo '<td class="text">' . $nomrb . '</td>';
@@ -344,6 +349,7 @@ FROM
                 echo '<td>' . $value['reconocimiento'] . '</td>';
                 echo '<td>' . $value['recaudo_mes'] . '</td>';
                 echo '<td>' . $value['recaudo'] . '</td>';
+                echo '<td>' .  $saldo_recaudar . '</td>';
                 echo '</tr>';
             }
             ?>

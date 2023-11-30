@@ -11,16 +11,6 @@ $iduser = $_SESSION['id_user'];
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 $vigencia = $_SESSION['vigencia'];
 $consumidos = 0;
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "SELECT `id_devolucion` FROM  `seg_salida_dpdvo` WHERE `id_pedido` = $id_pdo";
-    $rs = $cmd->query($sql);
-    $salida = $rs->fetch(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
 $tipo_salida = 7;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -33,31 +23,27 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 $consecutivo = $consec['consecutivo'] > 0 ? $consec['consecutivo'] + 1 : 1;
-if (!empty($salida)) {
-    $id_salida = $salida['id_devolucion'];
-} else {
-    $estado = 2;
-    $fecha = $date->format('Y-m-d');
-    try {
-        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $sql = "INSERT INTO `seg_salida_dpdvo` (`id_tipo_salida`, `fec_acta_remision`, `vigencia`, `id_user_reg`, `fec_reg`, `id_pedido`,`estado`, `consecutivo`)
+$estado = 2;
+$fecha = $date->format('Y-m-d');
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $sql = "INSERT INTO `seg_salida_dpdvo` (`id_tipo_salida`, `fec_acta_remision`, `vigencia`, `id_user_reg`, `fec_reg`, `id_pedido`,`estado`, `consecutivo`)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        $sql = $cmd->prepare($sql);
-        $sql->bindParam(1, $tipo_salida, PDO::PARAM_INT);
-        $sql->bindParam(2, $fecha, PDO::PARAM_STR);
-        $sql->bindParam(3, $vigencia, PDO::PARAM_STR);
-        $sql->bindParam(4, $iduser, PDO::PARAM_INT);
-        $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
-        $sql->bindParam(6, $id_pdo, PDO::PARAM_INT);
-        $sql->bindParam(7, $estado, PDO::PARAM_INT);
-        $sql->bindParam(8, $consecutivo, PDO::PARAM_INT);
-        $sql->execute();
-        $id_salida = $cmd->lastInsertId();
-        $cmd = null;
-    } catch (PDOException $e) {
-        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-    }
+    $sql = $cmd->prepare($sql);
+    $sql->bindParam(1, $tipo_salida, PDO::PARAM_INT);
+    $sql->bindParam(2, $fecha, PDO::PARAM_STR);
+    $sql->bindParam(3, $vigencia, PDO::PARAM_STR);
+    $sql->bindParam(4, $iduser, PDO::PARAM_INT);
+    $sql->bindValue(5, $date->format('Y-m-d H:i:s'));
+    $sql->bindParam(6, $id_pdo, PDO::PARAM_INT);
+    $sql->bindParam(7, $estado, PDO::PARAM_INT);
+    $sql->bindParam(8, $consecutivo, PDO::PARAM_INT);
+    $sql->execute();
+    $id_salida = $cmd->lastInsertId();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
 foreach ($data as $d => $v) {
     if ($v > 0) {

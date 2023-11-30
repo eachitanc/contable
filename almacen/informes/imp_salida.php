@@ -52,17 +52,6 @@ try {
 }
 try {
     $sql = "SELECT
-                CONCAT_WS(' ', `nombre1`, `nombre2`, `apellido1`, `apellido2`) AS `nombre`
-            FROM
-                `seg_usuarios`
-            WHERE (`id_usuario` = $_SESSION[id_user])";
-    $res = $cmd->query($sql);
-    $usuario = $res->fetch();
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-try {
-    $sql = "SELECT
                 `seg_usuarios`.`documento`
                 , CONCAT_WS(' ', `seg_usuarios`.`nombre1`
                 , `seg_usuarios`.`nombre2`
@@ -88,6 +77,7 @@ try {
                 , `seg_salida_dpdvo`.`consecutivo`
                 , `seg_salida_dpdvo`.`id_tercero_api`
                 , `seg_tipo_salidas`.`descripcion` AS `tipo_salida`
+                , `seg_salida_dpdvo`.`id_tipo_salida`
                 , `seg_salida_dpdvo`.`acta_remision`
                 , `seg_salida_dpdvo`.`fec_acta_remision`
                 , `seg_salida_dpdvo`.`observacion`
@@ -123,7 +113,29 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$user = $datos[0]['id_user_reg'];
+$tipo_salida = isset($datos[0]['id_tipo_salida']) ? $datos[0]['id_tipo_salida'] : 0;
+$user = isset($datos[0]['id_user_reg']) ? $datos[0]['id_user_reg'] : 0;
+try {
+    $sql = "SELECT
+                `seg_entrada_almacen`.`consecutivo`
+                , `seg_entrada_almacen`.`estado`
+                , `seg_entrada_almacen`.`id_devolucion`
+                , `seg_tipo_entrada`.`descripcion`
+            FROM
+                `seg_entrada_almacen`
+                INNER JOIN `seg_tipo_entrada` 
+                    ON (`seg_entrada_almacen`.`id_tipo_entrada` = `seg_tipo_entrada`.`id_entrada`)
+            WHERE (`seg_entrada_almacen`.`id_devolucion` = $id_salida)";
+    $res = $cmd->query($sql);
+    $relacion = $res->fetch();
+    if (!empty($datos)) {
+        $rel = !empty($relacion) ? ' -> ' . mb_strtoupper($relacion['descripcion']) . ' ' . str_pad($relacion['consecutivo'], 5, "0", STR_PAD_LEFT) : '';
+    } else {
+        $rel = '';
+    }
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
 try {
     $sql = "SELECT
                 CONCAT_WS(' ', `nombre1`, `nombre2`, `apellido1`, `apellido2`) AS `nombre`
@@ -135,7 +147,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-$id_tercero = $datos[0]['id_tercero_api'];
+$id_tercero = isset($datos[0]['id_tercero_api']) ? $datos[0]['id_tercero_api'] : 0;
 $url = $api . 'terceros/datos/res/datos/id/' . $id_tercero;
 $ch = curl_init($url);
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
@@ -227,12 +239,13 @@ $grantotal = $subtotal + $iva;
                             </tr>
                             <tr>
                                 <td colspan="3">
-                                    <b>SALIDA No: <?php echo str_pad($datos[0]['consecutivo'], 5, "0", STR_PAD_LEFT) ?>
+                                    <b>SALIDA No: <?php echo isset($datos[0]['consecutivo']) ? str_pad($datos[0]['consecutivo'], 5, "0", STR_PAD_LEFT) : '' ?>
                                 </td>
                                 <td colspan="3">
-                                    <b>TIPO: <?php echo $datos[0]['tipo_salida'] ?>
+                                    <b>TIPO: <?php echo isset($datos[0]['tipo_salida']) ? $datos[0]['tipo_salida'] : '';
+                                                echo ' ' . $rel ?>
                                 </td>
-                                <td colspan="4" style="text-align: right;">Fecha entrada: <?php echo date('Y/m/d', strtotime($datos[0]['fec_acta_remision'])) ?></td>
+                                <td colspan="4" style="text-align: right;">Fecha entrada: <?php echo isset($datos[0]['fec_acta_remision']) ? date('Y/m/d', strtotime($datos[0]['fec_acta_remision'])) : '' ?></td>
                             </tr>
                             <tr>
                                 <td colspan="10" style="text-align: right;">Fecha Imp: <?php echo $date->format('Y/m/d H:m:s') ?></td>
@@ -245,12 +258,12 @@ $grantotal = $subtotal + $iva;
                                     NIT: <?php echo $ccnit ?>
                                 </td>
                                 <td colspan="3" style="text-align:right">
-                                    
+
                                 </td>
                             </tr>
                             <tr style="font-size: 85%;">
                                 <td colspan="10" style="text-align:right">
-                                    <span>ESTADO: <b><?php echo $datos[0]['estado'] <= 2 ? 'BORRADOR' : 'DEFINITIVO' ?></b></span>
+                                    <span>ESTADO: <b><?php echo isset($datos[0]['estado']) ? $datos[0]['estado'] <= 2 ? 'BORRADOR' : 'DEFINITIVO' : '' ?></b></span>
                                 </td>
                             </tr>
                         </table>
@@ -271,30 +284,31 @@ $grantotal = $subtotal + $iva;
             </thead>
             <tbody style="font-size: 60%;">
                 <?php
-                $total = 0;
-                $row_tipo = '';
-                $lote = 'EAC';
-                $valorXbien = 0;
-                foreach ($datas as $keytb => $tipob) {
-                    $row_bien = '';
-                    if (!empty($tipob)) {
-                        $totalBien = 0;
-                        foreach ($tipob as $keybn => $bien) {
-                            $numLotes = count($bien);
-                            if (!empty($bien)) {
-                                $row_lote = '';
-                                $quedaXbien = 0;
-                                $sumaLote = 0;
-                                $cant_prom = 0;
-                                $suma_val = 0;
-                                $bandera = false;
-                                foreach ($bien as $keylt => $lote) {
-                                    $keylt = strncmp($keylt, 'EACII', strlen('EACII')) === 0 ? '' : $keylt;
-                                    $id_bien = $lote['datos']['id_bn'];
-                                    $id_tipo = $lote['datos']['id_tb'];
-                                    if ($numLotes > 1) {
-                                        $sumaLote += $lote['cantd'];
-                                        $row_lote .= '<tr class="resaltar">
+                if (!empty($datas)) {
+                    $total = 0;
+                    $row_tipo = '';
+                    $lote = 'EAC';
+                    $valorXbien = 0;
+                    foreach ($datas as $keytb => $tipob) {
+                        $row_bien = '';
+                        if (!empty($tipob)) {
+                            $totalBien = 0;
+                            foreach ($tipob as $keybn => $bien) {
+                                $numLotes = count($bien);
+                                if (!empty($bien)) {
+                                    $row_lote = '';
+                                    $quedaXbien = 0;
+                                    $sumaLote = 0;
+                                    $cant_prom = 0;
+                                    $suma_val = 0;
+                                    $bandera = false;
+                                    foreach ($bien as $keylt => $lote) {
+                                        $keylt = strncmp($keylt, 'EACII', strlen('EACII')) === 0 ? '' : $keylt;
+                                        $id_bien = $lote['datos']['id_bn'];
+                                        $id_tipo = $lote['datos']['id_tb'];
+                                        if ($numLotes > 1) {
+                                            $sumaLote += $lote['cantd'];
+                                            $row_lote .= '<tr class="resaltar">
                                                         <td></td>
                                                         <td></td>
                                                         <td>' . $lote['datos']['invima'] . '</td>
@@ -306,12 +320,12 @@ $grantotal = $subtotal + $iva;
                                                         <td style="text-align:right;">' . pesos($lote['datos']['valin']) . '</td>
                                                         <td style="text-align:right;">' . pesos($lote['cantd'] * $lote['datos']['costo']) . '</td>
                                                     </tr>';
-                                        $cant_prom++;
-                                        $suma_val = $suma_val + $lote['datos']['costo'];
-                                    } else {
-                                        $bandera = true;
-                                        $sumaLote = $lote['cantd'];
-                                        $row_lote = '<tr class="resaltar">
+                                            $cant_prom++;
+                                            $suma_val = $suma_val + $lote['datos']['costo'];
+                                        } else {
+                                            $bandera = true;
+                                            $sumaLote = $lote['cantd'];
+                                            $row_lote = '<tr class="resaltar">
                                         <td>' . $id_bien . '</td>
                                         <td style="text-align:left;">' . $keybn . '</td>
                                         <td>' . $lote['datos']['invima'] . '</td>
@@ -323,15 +337,15 @@ $grantotal = $subtotal + $iva;
                                         <td style="text-align: right;">' . pesos($lote['datos']['valin']) . '</td>
                                         <td style="text-align: right;">' . pesos($sumaLote * $lote['datos']['costo']) . '</td>
                                         </tr>';
-                                        $cant_prom = 1;
-                                        $suma_val =  $lote['datos']['costo'];
+                                            $cant_prom = 1;
+                                            $suma_val =  $lote['datos']['costo'];
+                                        }
                                     }
-                                }
-                                if ($bandera) {
-                                    $row_bien .= $row_lote;
-                                } else {
-                                    $prom_valunid = $suma_val / $cant_prom;
-                                    $row_bien .= '<tr  class="resaltar">
+                                    if ($bandera) {
+                                        $row_bien .= $row_lote;
+                                    } else {
+                                        $prom_valunid = $suma_val / $cant_prom;
+                                        $row_bien .= '<tr  class="resaltar">
                                         <td>' . $id_bien . '</td>
                                         <td style="text-align:left;">' . $keybn . '</td>
                                         <td></td>
@@ -343,20 +357,20 @@ $grantotal = $subtotal + $iva;
                                         <td style="text-align:right;">' . pesos($prom_valunid) . '</td>
                                         <td style="text-align: ight;">' . pesos($sumaLote * $prom_valunid) . '</td>
                                         </tr>' . $row_lote;
+                                    }
+                                    $valorXbien = $sumaLote * ($suma_val / $cant_prom);
+                                    $totalBien += $valorXbien;
+                                    $total += $valorXbien;
                                 }
-                                $valorXbien = $sumaLote * ($suma_val / $cant_prom);
-                                $totalBien += $valorXbien;
-                                $total += $valorXbien;
                             }
-                        }
-                        $row_tipo .= '<tr style="font-size: 11px; background-color" class="resaltar">
+                            $row_tipo .= '<tr style="font-size: 11px; background-color" class="resaltar">
                         <th>' . $id_tipo . '</th>
                         <th style="text-align: left;" colspan="8">' . $keytb . '</th>
                         <th style="text-align: right;">' . pesos($totalBien) . '</th>
                         </tr>' . $row_bien;
+                        }
                     }
-                }
-                $totalExistencia = '<tr style="font-size: 12px;" class="resaltar">
+                    $totalExistencia = '<tr style="font-size: 12px;" class="resaltar">
                                     <th style="text-align: left;" colspan="8">ELEMENTOS DE CONSUMO O CARGO DIFERIDO</th>
                                     <th style="text-align: right;" colspan="2">' . pesos(round($grantotal)) . '</th>
                                 </tr>
@@ -368,18 +382,23 @@ $grantotal = $subtotal + $iva;
                                     <th style="text-align: left;" colspan="8">IVA</th>
                                     <th style="text-align: right;" colspan="2">' . pesos($iva) . '</th>
                                 </tr>' . $row_tipo;
-                echo $totalExistencia;
+                    echo $totalExistencia;
+                } else {
+                    echo '<tr style="font-size: 12px;">
+                    <th style="text-align: center;" colspan="12">NO HAY REGISTROS DISPONIBLES</th>
+                </tr>';
+                }
                 ?>
                 <tr>
                     <td colspan="10" style="text-align: left; padding:5px;">
-                        <span>OBSERVACIÓN: <b><?php echo $datos[0]['observacion'] ?></b></span>
+                        <span>OBSERVACIÓN: <b><?php echo isset($datos[0]['observacion']) ? $datos[0]['observacion'] : '' ?></b></span>
                     </td>
                 <tr>
                     <td colspan="10" style="height: 30px;"></td>
                 </tr>
                 <tr>
                     <td colspan="10">
-                        <table style="width: 100%;">
+                        <table style="width: 100%; text-align:left">
                             <tr>
                                 <td colspan="2">
                                     Elaboró:
@@ -388,10 +407,8 @@ $grantotal = $subtotal + $iva;
                                     _________________________________________
                                 </td>
                                 <td colspan="2">
-                                    Recibido por:
                                 </td>
                                 <td colspan="3">
-                                    _________________________________________
                                 </td>
                             </tr>
                             <tr>
@@ -402,12 +419,18 @@ $grantotal = $subtotal + $iva;
                                     <?php echo mb_strtoupper($usuario['nombre']); ?>
                                 </td>
                                 <td colspan="2">
-                                    Nombre:
                                 </td>
                                 <td colspan="3">
-                                    <?php echo mb_strtoupper($responsable['responsable']); ?>
                                 </td>
                             </tr>
+                            <?php if ($tipo_salida == 9) { ?>
+                                <tr>
+                                    <td colspan="10" style="padding-top: 30px;">
+                                        SUJETO A APROBACIÓN: _________________________________________<br>
+                                        Jefe administrativa y financiera.
+                                    </td>
+                                </tr>
+                            <?php } ?>
                         </table>
                     </td>
                 </tr>

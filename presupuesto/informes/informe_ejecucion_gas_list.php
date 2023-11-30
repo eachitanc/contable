@@ -7,11 +7,7 @@ if (!isset($_SESSION['user'])) {
 include '../../conexion.php';
 include '../../permisos.php';
 include '../../financiero/consultas.php';
-?>
-<!DOCTYPE html>
-<html lang="es">
 
-<?php
 $vigencia = $_SESSION['vigencia'];
 // concateno la fecha con el año vigencia
 $fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
@@ -26,7 +22,7 @@ $fecha_actual = $fecha->format('Y-m-d');
 ?>
 
 <div class="row justify-content-center">
-    <div class="col-sm-8 ">
+    <div class="col-sm-12">
         <div class="card">
             <h5 class="card-header small">Ejecución presupuestal de gastos</h5>
             <div class="card-body">
@@ -48,14 +44,17 @@ $fecha_actual = $fecha->format('Y-m-d');
                         <div class="col-3"><input type="checkbox" id="mes" name="mes" value="0"></div>
                     </div>
                     <div class="px-50">&nbsp; </div>
-                    <div class="row">
-                        <div class="col-2"></div>
-                        <div class="col-3"></div>
-                        <div class="col-3"> <a href="#" class="btn btn-primary" onclick="generarInforme(1);">Consultar</a></div>
-                        <div class="col-3"> <a href="#" class="btn btn-primary" onclick="generarInformeConsulta(5);">Exportar</a></div>
-
+                    <div class="text-center">
+                        <button value="1" class="btn btn-primary" onclick="generarInforme(this);"><span></span>Consultar</button>
+                        <a type="" id="btnExcelEntrada" class="btn btn-outline-success" value="01" title="Exprotar a Excel">
+                            <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
+                        </a>
+                        <a type="button" class="btn btn-danger" title="Imprimir" onclick="imprSelecTes('areaImprimir',<?php echo 0; ?>);"><span class="fas fa-print fa-lg" aria-hidden="true"></span></a>
                     </div>
                 </form>
+            </div>
+            <br>
+            <div id="areaImprimir" class="table-responsive px-2">
             </div>
         </div>
     </div>

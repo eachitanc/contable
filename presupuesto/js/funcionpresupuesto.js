@@ -59,6 +59,11 @@
       },
     });
   };
+  $('#areaReporte').on('click', '#btnExcelEntrada', function () {
+    let xls = ($('#areaImprimir').html());
+    var encoded = window.btoa(xls);
+    $('<form action="' + window.urlin + '/almacen/informes/reporte_excel.php" method="post"><input type="hidden" name="xls" value="' + encoded + '" /></form>').appendTo('body').submit();
+  });
   // Valido que el numerico con separador de miles
   $("#divModalForms").on("keyup", "#valorAprob", function () {
     let id = "valorAprob";
@@ -602,10 +607,10 @@
     // Redireccionar a la pagina de presupuestos
     $(
       '<form action="lista_ejecucion_cdp.php" method="post"><input type="hidden" name="id_cdp" value="' +
-        id_cdp +
-        '" /><input type="hidden" name="id_ejec" value="' +
-        id_ppto +
-        '" /></form>'
+      id_cdp +
+      '" /><input type="hidden" name="id_ejec" value="' +
+      id_ppto +
+      '" /></form>'
     )
       .appendTo("body")
       .submit();
@@ -825,13 +830,13 @@ function redireccionar(ruta) {
   setTimeout(() => {
     $(
       '<form action="' +
-        ruta.url +
-        '" method="post">\n\
+      ruta.url +
+      '" method="post">\n\
     <input type="hidden" name="' +
-        ruta.name +
-        '" value="' +
-        ruta.valor +
-        '" />\n\
+      ruta.name +
+      '" value="' +
+      ruta.valor +
+      '" />\n\
     </form>'
     )
       .appendTo("body")
@@ -843,18 +848,18 @@ function redireccionar2(ruta) {
   setTimeout(() => {
     $(
       '<form action="' +
-        ruta.url +
-        '" method="post">\n\
+      ruta.url +
+      '" method="post">\n\
     <input type="hidden" name="' +
-        ruta.name1 +
-        '" value="' +
-        ruta.valor1 +
-        '" />\n\
+      ruta.name1 +
+      '" value="' +
+      ruta.valor1 +
+      '" />\n\
     <input type="hidden" name="' +
-        ruta.name2 +
-        '" value="' +
-        ruta.valor2 +
-        '" />\n\
+      ruta.name2 +
+      '" value="' +
+      ruta.valor2 +
+      '" />\n\
     </form>'
     )
       .appendTo("body")
@@ -982,11 +987,11 @@ document.addEventListener("submit", (e) => {
           $(
             '<form action="lista_ejecucion_crp_nuevo.php" method="post">\n\
             <input type="hidden" name="id_crp" value="' +
-              response[0].id +
-              '" />\n\
+            response[0].id +
+            '" />\n\
             <input type="hidden" name="id_cdp" value="' +
-              id_cdp +
-              '" />\n\
+            id_cdp +
+            '" />\n\
             </form>'
           )
             .appendTo("body")
@@ -1146,11 +1151,11 @@ function cambiaListadoModifica(dato) {
   $(
     '<form action="lista_modificacion_pto.php" method="post">\n\
     <input type="hidden" name="id_pto" value="' +
-      id_pto +
-      '" />\n\
+    id_pto +
+    '" />\n\
     <input type="hidden" name="tipo_mod" value="' +
-      dato +
-      '" /></form>'
+    dato +
+    '" /></form>'
   )
     .appendTo("body")
     .submit();
@@ -1414,7 +1419,7 @@ let abrirDocumentoMod = function (dato) {
     });
 };
 // Editar rubros de modificacion presupuestal
-let editarListaDetalleMod = (id) => {};
+let editarListaDetalleMod = (id) => { };
 
 // Eliminar rubros de modificaciones presupuestales adición
 let eliminarRubroDetalleMod = (id) => {
@@ -2271,9 +2276,11 @@ const cargarReportePresupuesto = (id) => {
 };
 
 // Funcion para generar formato de Modificaciones
-const generarInforme = (id) => {
+const generarInforme = (boton) => {
+  let id = boton.value;
   let fecha_corte = fecha.value;
-  let archivo = 0;
+  let archivo = '';
+  const areaImprimir = document.getElementById("areaImprimir");
   if (id == 1) {
     archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_gas_xls.php";
   }
@@ -2289,12 +2296,23 @@ const generarInforme = (id) => {
   if (id == 5) {
     archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_gas_xls_consulta.php";
   }
-  let ruta = {
-    url: archivo,
-    name: "fecha",
-    valor: fecha_corte,
-  };
-  redireccionar3(ruta);
+  boton.disabled = true;
+  var span = boton.querySelector("span")
+  span.classList.add("spinner-border", "spinner-border-sm");
+  fetch(archivo, {
+    method: "POST",
+    body: fecha_corte,
+  })
+    .then((response) => response.text())
+    .then((response) => {
+      boton.disabled = false;
+      span.classList.remove("spinner-border", "spinner-border-sm")
+      areaImprimir.innerHTML = response;
+    })
+    .catch((error) => {
+      console.log("Error:");
+    });
+  //redireccionar3(ruta);
 };
 // Funcion para generar libros presupuestales
 const generarInformeLibros = (id) => {
@@ -2334,6 +2352,9 @@ const generarInformeLibros = (id) => {
   if (tipo == 11) {
     archivo = window.urlin + "/presupuesto/informes/informe_libro_mod_anula_xls.php";
   }
+  if (tipo == 13) {
+    archivo = window.urlin + "/presupuesto/informes/informe_libro_pag_anula.php";
+  }
   if (id == 20) {
     archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_ing_xls.php ";
   }
@@ -2351,20 +2372,19 @@ function redireccionar3(ruta) {
   setTimeout(() => {
     $(
       '<form action="' +
-        ruta.url +
-        '" method="post">\n\
+      ruta.url +
+      '" method="post">\n\
     <input type="hidden" name="' +
-        ruta.name +
-        '" value="' +
-        ruta.valor +
-        '" />\n\
+      ruta.name +
+      '" value="' +
+      ruta.valor +
+      '" />\n\
     </form>'
     )
       .appendTo("body")
       .submit();
   }, 100);
 }
-
 const abrirLink = (link) => {
   if (link == 1) window.open("http://localhost:3080/2022/USUARIOS_REG/informes_sia/index.php");
   if (link == 2) window.open("http://localhost:3080/2022/USUARIOS_REG/informes_chip/cgr_ingresos.php");

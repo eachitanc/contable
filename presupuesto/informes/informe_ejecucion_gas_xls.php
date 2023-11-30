@@ -5,29 +5,8 @@ if (!isset($_SESSION['user'])) {
     echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
-?>
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>CONTAFACIL</title>
-    <style>
-        .text {
-            mso-number-format: "\@"
-        }
-    </style>
-    <?php
-
-    header("Content-type: application/vnd.ms-excel charset=utf-8");
-    header("Content-Disposition: attachment; filename=FORMATO_201101_F07_AGR.xls");
-    header("Pragma: no-cache");
-    header("Expires: 0");
-    ?>
-</head>
-<?php
 $vigencia = $_SESSION['vigencia'];
-$fecha_corte = $_POST['fecha'];
+$fecha_corte = file_get_contents("php://input");
 $fecha_ini = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-01-01'));
 $mes = date("m", strtotime($fecha_corte));
 $fecha_ini_mes = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-' . $mes . '-01'));
@@ -275,109 +254,97 @@ FROM
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 ?>
-<div class="contenedor bg-light" id="areaImprimir">
-    <div class="px-2 " style="width:90% !important;margin: 0 auto;">
+<style>
+    .resaltar:nth-child(even) {
+        background-color: #F8F9F9;
+    }
 
-        </br>
-        </br>
-        <table class="table-bordered bg-light" style="width:100% !important;">
-            <tr>
-                <td colspan="15" style="text-align:center"><?php echo ''; ?></td>
-            </tr>
-
-            <tr>
-                <td colspan="15" style="text-align:center"><?php echo $empresa['nombre']; ?></td>
-            </tr>
-            <tr>
-                <td colspan="15" style="text-align:center"><?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?></td>
-            </tr>
-            <tr>
-                <td colspan="15" style="text-align:center"><?php echo 'EJECUCION PRESUPUESTAL DE GASTOS'; ?></td>
-            </tr>
-            <tr>
-                <td colspan="15" style="text-align:center"><?php echo 'Fecha de corte: ' . $fecha_corte; ?></td>
-            </tr>
-            <tr>
-                <td colspan="15" style="text-align:center"><?php echo ''; ?></td>
-            </tr>
-        </table>
-
-
-
-        </br>
-        <table class="table-bordered bg-light" style="width:100% !important;" border=1>
-            <tr>
-                <td>Rubro</td>
-                <td>Descripcion</td>
-                <td>Tipo</td>
-                <td>Presupuesto inicial</td>
-                <td>Adiciones mes</td>
-                <td>Adiciones</td>
-                <td>Reducciones mes</td>
-                <td>Reducciones</td>
-                <td>Cr&eacute;ditos mes</td>
-                <td>Cr&eacute;ditos</td>
-                <td>Contracreditos mes</td>
-                <td>Contracreditos</td>
-                <td>Presupuesto definitivo</td>
-                <td>Disponibilidades mes</td>
-                <td>Disponibilidades</td>
-                <td>Compromisos mes</td>
-                <td>Compromisos</td>
-                <td>Obligaciones mes</td>
-                <td>Obligación</td>
-                <td>Pagos mes</td>
-                <td>Pagos</td>
-                <td>Saldo presupuestal</td>
-                <td>Cuentas por pagar</td>
-            </tr>
-            <?php
-            foreach ($acum as $key => $value) {
-                $keyrb = array_search($key, array_column($rubros, 'cod_pptal'));
-                if ($keyrb !== false) {
-                    $nomrb = $rubros[$keyrb]['nom_rubro'];
-                    $tipo = $rubros[$keyrb]['tipo_dato'];
-                } else {
-                    $nomrb = '';
-                }
-                if ($tipo == '0') {
-                    $tipo_dat = 'M';
-                } else {
-                    $tipo_dat = 'D';
-                }
-                echo '<tr>';
-                echo '<td class="text">' . $key . '</td>';
-                echo '<td class="text">' . $nomrb . '</td>';
-                echo '<td class="text">' . $tipo_dat . '</td>';
-                echo '<td>' . number_format($value['inicial'], 2, ".", ",") . '</td>';
-                echo '<td>' . number_format($value['adicion_mes'], 2, ".", ",") . '</td>';
-                echo '<td>' . number_format($value['adicion'], 2, ".", ",") . '</td>';
-                echo '<td>' . number_format($value['reduccion_mes'], 2, ".", ",") . '</td>';
-                echo '<td>' . number_format($value['reduccion'], 2, ".", ",") . '</td>';
-                echo '<td>' . number_format($value['credito_mes'], 2, ".", ",") . '</td>';
-                echo '<td>' . number_format($value['credito'], 2, ".", ",") . '</td>';
-                echo '<td>' . number_format($value['contracredito_mes'], 2, ".", ",") . '</td>';
-                echo '<td>' . number_format($value['contracredito'], 2, ".", ",") . '</td>';
-                echo '<td>' . number_format(($value['inicial'] + $value['adicion'] - $value['reduccion'] + $value['credito'] - $value['contracredito']), 2, ".", ",") . '</td>';
-                echo '<td>' . number_format($value['compromiso_cdp_mes'], 2, ".", ",") . '</td>';
-                echo '<td>' . number_format($value['compromiso_cdp'], 2, ".", ",") . '</td>';
-                echo '<td>' . number_format($value['compromiso_crp_mes'], 2, ".", ",") . '</td>';
-                echo '<td>' . number_format($value['compromiso_crp'], 2, ".", ",") . '</td>';
-                echo '<td>' . number_format($value['obligacion_mes'], 2, ".", ",") . '</td>';
-                echo '<td>' . number_format($value['obligacion'], 2, ".", ",") . '</td>';
-                echo '<td>' . number_format($value['pagos_mes'], 2, ".", ",") . '</td>';
-                echo '<td>' . number_format($value['pagos'], 2, ".", ",") . '</td>';
-                echo '<td>' . number_format((($value['inicial'] + $value['adicion'] - $value['reduccion'] + $value['credito'] - $value['contracredito']) - $value['compromiso_cdp']), 2, ".", ",") . '</td>';
-                echo '<td>' . number_format(($value['obligacion'] - $value['pagos']), 2, ".", ",") . '</td>';
-                echo '</tr>';
+    .resaltar:nth-child(odd) {
+        background-color: #ffffff;
+    }
+</style>
+<table style="width:100% !important; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <td rowspan="4" style="text-align:center"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
+            <td colspan="22" style="text-align:center"><?php echo $empresa['nombre']; ?></td>
+        </tr>
+        <tr>
+            <td colspan="22" style="text-align:center"><?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?></td>
+        </tr>
+        <tr>
+            <td colspan="22" style="text-align:center"><?php echo 'EJECUCION PRESUPUESTAL DE GASTOS'; ?></td>
+        </tr>
+        <tr>
+            <td colspan="22" style="text-align:center"><?php echo 'Fecha de corte: ' . $fecha_corte; ?></td>
+        </tr>
+        <tr style="background-color: #CED3D3; text-align:center;font-size:9px;">
+            <th>Descripcion</th>
+            <th>Rubro</th>
+            <th>Tipo</th>
+            <th>Presupuesto inicial</th>
+            <th>Adiciones mes</th>
+            <th>Adiciones</th>
+            <th>Reducciones mes</th>
+            <th>Reducciones</th>
+            <th>Cr&eacute;ditos mes</th>
+            <th>Cr&eacute;ditos</th>
+            <th>Contracreditos mes</th>
+            <th>Contracreditos</th>
+            <th>Presupuesto definitivo</th>
+            <th>Disponibilidades mes</th>
+            <th>Disponibilidades</th>
+            <th>Compromisos mes</th>
+            <th>Compromisos</th>
+            <th>Obligaciones mes</th>
+            <th>Obligación</th>
+            <th>Pagos mes</th>
+            <th>Pagos</th>
+            <th>Saldo presupuestal</th>
+            <th>Cuentas por pagar</th>
+        </tr>
+    </thead>
+    <tbody style="font-size:9px;">
+        <?php
+        foreach ($acum as $key => $value) {
+            $keyrb = array_search($key, array_column($rubros, 'cod_pptal'));
+            if ($keyrb !== false) {
+                $nomrb = $rubros[$keyrb]['nom_rubro'];
+                $tipo = $rubros[$keyrb]['tipo_dato'];
+            } else {
+                $nomrb = '';
             }
-            ?>
-
-        </table>
-        </br>
-        </br>
-        </br>
-
-    </div>
-
-</div>
+            if ($tipo == '0') {
+                $tipo_dat = 'M';
+            } else {
+                $tipo_dat = 'D';
+            }
+            echo '<tr class="resaltar">';
+            echo '<td class="text">' . $key . '</td>';
+            echo '<td class="text">' . $nomrb . '</td>';
+            echo '<td class="text">' . $tipo_dat . '</td>';
+            echo '<td style="text-align:right">' . number_format($value['inicial'], 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format($value['adicion_mes'], 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format($value['adicion'], 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format($value['reduccion_mes'], 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format($value['reduccion'], 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format($value['credito_mes'], 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format($value['credito'], 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format($value['contracredito_mes'], 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format($value['contracredito'], 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format(($value['inicial'] + $value['adicion'] - $value['reduccion'] + $value['credito'] - $value['contracredito']), 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format($value['compromiso_cdp_mes'], 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format($value['compromiso_cdp'], 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format($value['compromiso_crp_mes'], 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format($value['compromiso_crp'], 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format($value['obligacion_mes'], 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format($value['obligacion'], 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format($value['pagos_mes'], 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format($value['pagos'], 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format((($value['inicial'] + $value['adicion'] - $value['reduccion'] + $value['credito'] - $value['contracredito']) - $value['compromiso_cdp']), 2, ".", ",") . '</td>';
+            echo '<td style="text-align:right">' . number_format(($value['obligacion'] - $value['pagos']), 2, ".", ",") . '</td>';
+            echo '</tr>';
+        }
+        ?>
+    </tbody>
+</table>

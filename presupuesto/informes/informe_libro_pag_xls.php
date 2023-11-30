@@ -56,7 +56,7 @@ FROM
         ON (`seg_pto_mvto`.`id_ctb_doc` = `seg_ctb_doc`.`id_ctb_doc`)
     INNER JOIN `seg_pto_cargue` 
         ON (`seg_pto_mvto`.`rubro` = `seg_pto_cargue`.`cod_pptal`)
-WHERE `seg_ctb_doc`.`fecha` <='$fecha_corte' AND `seg_pto_mvto`.`tipo_mov` = 'PAG'
+WHERE `seg_ctb_doc`.`fecha` <='$fecha_corte' AND `seg_pto_mvto`.`tipo_mov` = 'PAG' AND `seg_pto_mvto`.`estado` <> 5
 ORDER BY `seg_ctb_doc`.`fecha` ASC;
 ";
     $res = $cmd->query($sql);

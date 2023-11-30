@@ -128,11 +128,7 @@ if (!empty($devoluciones)) {
                 $borrar = '<a value="' . $id_dev . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb borrar" title="Eliminar"><span class="fas fa-trash-alt fa-lg"></span></a>';
             }
         }
-        if ($d['estado'] >= 2 && $d['id_tipo_salida'] == 7) {
-            $imprimir = '<a value="' . $d['id_pedido'] . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btnImprimirConsumo" title="Imprimir"><span class="fas fa-print fa-lg"></span></a>';
-        } else {
-            $imprimir = '<a value="' . $id_dev . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btnImprimirConsumo" title="Imprimir"><span class="fas fa-print fa-lg"></span></a>';
-        }
+        $imprimir = '<a value="' . $id_dev . '" class="btn btn-outline-success btn-sm btn-circle shadow-gb btnImprimirConsumo" title="Imprimir"><span class="fas fa-print fa-lg"></span></a>';
         switch ($d['estado']) {
             case 1:
                 $estado = 'INICIALLIZADO';

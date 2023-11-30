@@ -52,17 +52,6 @@ try {
 }
 try {
     $sql = "SELECT
-                CONCAT_WS(' ', `nombre1`, `nombre2`, `apellido1`, `apellido2`) AS `nombre`
-            FROM
-                `seg_usuarios`
-            WHERE (`id_usuario` = $_SESSION[id_user])";
-    $res = $cmd->query($sql);
-    $usuario = $res->fetch();
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-try {
-    $sql = "SELECT
                 `seg_usuarios`.`documento`
                 , CONCAT_WS(' ', `seg_usuarios`.`nombre1`
                 , `seg_usuarios`.`nombre2`
@@ -110,6 +99,7 @@ try {
                 , `seg_detalle_entrada_almacen`.`fecha_vence`
                 , `seg_detalle_entrada_almacen`.`marca` as `marca2`
                 , `seg_tipo_entrada`.`descripcion` as `tipo_entrada`
+                , `seg_entrada_almacen`.`id_tipo_entrada`
             FROM
                 `seg_detalle_entrada_almacen`
                 INNER JOIN `seg_entrada_almacen` 
@@ -133,6 +123,7 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+$tipo_entrada = isset($datos[0]['id_tipo_entrada']) ? $datos[0]['id_tipo_entrada'] : 0;
 $user = $datos[0]['id_user_reg'];
 try {
     $sql = "SELECT
@@ -389,7 +380,7 @@ $grantotal = $subtotal + $iva;
                 </tr>
                 <tr>
                     <td colspan="10">
-                        <table style="width: 100%;">
+                        <table style="width: 100%; text-align:left">
                             <tr>
                                 <td colspan="2">
                                     Elaboró:
@@ -418,6 +409,14 @@ $grantotal = $subtotal + $iva;
                                     <?php echo mb_strtoupper($responsable['responsable']); ?>
                                 </td>
                             </tr>
+                            <?php if ($tipo_entrada == 10) { ?>
+                                <tr>
+                                    <td colspan="10" style="padding-top: 30px;">
+                                        SUJETO A APROBACIÓN: _________________________________________<br>
+                                        Jefe administrativa y financiera.
+                                    </td>
+                                </tr>
+                            <?php } ?>
                         </table>
                     </td>
                 </tr>

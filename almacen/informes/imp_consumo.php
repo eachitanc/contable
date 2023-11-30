@@ -39,7 +39,7 @@ function calcularDV($nit)
     }
 }
 include '../../conexion.php';
-$id_pedido = $_POST['id'];
+$id_consumo = $_POST['id'];
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 // consulto el nombre de la empresa de la tabla seg_empresas
@@ -52,38 +52,29 @@ try {
 }
 try {
     $sql = "SELECT
-                CONCAT_WS(' ', `nombre1`, `nombre2`, `apellido1`, `apellido2`) AS `nombre`
-            FROM
-                `seg_usuarios`
-            WHERE (`id_usuario` = $_SESSION[id_user])";
-    $res = $cmd->query($sql);
-    $usuario = $res->fetch();
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-try {
-    $sql = "SELECT
-                CONCAT_WS(' ', `nombre1`, `nombre2`, `apellido1`, `apellido2`) AS `nombre`
-            FROM
-                `seg_usuarios`
-            WHERE (`id_usuario` = $_SESSION[id_user])";
-    $res = $cmd->query($sql);
-    $usuario = $res->fetch();
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-}
-try {
-    $sql = "SELECT
-                `seg_salida_dpdvo`.`id_pedido`
+                `seg_salida_dpdvo`.`id_devolucion`
+                , `seg_salida_dpdvo`.`id_user_reg`
                 , `seg_salidas_almacen`.`fec_reg`
             FROM
                 `seg_salidas_almacen`
                 INNER JOIN `seg_salida_dpdvo` 
                     ON (`seg_salidas_almacen`.`id_devolucion` = `seg_salida_dpdvo`.`id_devolucion`)
-            WHERE (`seg_salida_dpdvo`.`id_pedido` = $id_pedido)
+            WHERE (`seg_salida_dpdvo`.`id_devolucion` = $id_consumo)
             ORDER BY `seg_salidas_almacen`.`fec_reg` ASC LIMIT 1";
     $res = $cmd->query($sql);
     $fec_inicia = $res->fetch();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+$id_user_reg = !empty($fec_inicia) ? $fec_inicia['id_user_reg'] : 0;
+try {
+    $sql = "SELECT
+                CONCAT_WS(' ', `nombre1`, `nombre2`, `apellido1`, `apellido2`) AS `nombre`
+            FROM
+                `seg_usuarios`
+            WHERE (`id_usuario` = $id_user_reg)";
+    $res = $cmd->query($sql);
+    $usuario = $res->fetch();
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
@@ -125,7 +116,7 @@ try {
                         ON (`seg_bien_servicio`.`id_tipo_bn_sv` = `seg_tipo_bien_servicio`.`id_tipo_b_s`)
                     INNER JOIN `seg_pedidos_almacen` 
                         ON (`seg_salida_dpdvo`.`id_pedido` = `seg_pedidos_almacen`.`id_pedido`)
-                WHERE (`seg_salida_dpdvo`.`id_pedido` = $id_pedido" . $condicicon . ")
+                WHERE (`seg_salida_dpdvo`.`id_devolucion` = $id_consumo" . $condicicon . ")
                 ORDER BY `seg_tipo_bien_servicio`.`tipo_bn_sv` ASC
                     , `seg_bien_servicio`.`bien_servicio` ASC
                     , `seg_detalle_entrada_almacen`.`lote` ASC
@@ -192,7 +183,7 @@ if (!empty($datos)) {
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 ?>
 <div class="form-row">
-    <input type="hidden" id="id_pdo" name="id_pdo" value="<?php echo $id_pedido ?>" />
+    <input type="hidden" id="id_pdo" name="id_pdo" value="<?php echo $id_consumo ?>" />
     <div class=" form-group col-md-4">
         <label for="fecha1" class="small">Fecha Inicial</label>
         <input type="date" class="form-control form-control-sm" id="fecha1" value="<?php echo $fecha1 ?>">

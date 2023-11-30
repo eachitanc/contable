@@ -74,11 +74,11 @@ try {
                             <?php } ?>
                             <input type="hidden" id="tipoSalida" value="<?php echo $tipo ?>">
                             <?php if ($tipo != 0) { ?>
-                                <table id="tableListDevoluciones" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
+                                <table id="tableListDevoluciones" class="table table-striped table-bordered table-sm table-hover nowrap shadow" style="width:100%">
                                     <thead>
                                         <tr class="text-center centro-vertical">
                                             <th>ID</th>
-                                            <th>CONSECUTIVO</th>
+                                            <th>Consec.</th>
                                             <th>Tercero</th>
                                             <th># Acta y/o Remisión</th>
                                             <th>Fecha</th>
