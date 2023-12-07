@@ -23,6 +23,20 @@ $fec_final = $fec_final == '' ? date('Y-m-d') : $fec_final;
 $tipoT = isset($_POST['tipo']) ? $_POST['tipo'] : 1;
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+try {
+    $sql = "SELECT
+                `seg_bodega_almacen`.`id_bodega`
+                , `seg_ctas_gasto`.`id_tipo_bn_sv`
+                , `seg_ctas_gasto`.`cuenta`
+            FROM
+                `seg_ctas_gasto`
+                INNER JOIN `seg_bodega_almacen` 
+                    ON (`seg_ctas_gasto`.`id_bodega` = `seg_bodega_almacen`.`id_bodega`)";
+    $rs = $cmd->query($sql);
+    $cuentas = $rs->fetchAll();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 if ($tipoT == 1) {
     $where = "WHERE (`seg_traslados_almacen`.`id_trasl_alm` BETWEEN $id_inicia AND $id_final)";
 } else {

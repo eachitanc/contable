@@ -99,6 +99,9 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
+if ($id_nom['tipo'] != 'N') {
+    $grepre['valor'] = 0;
+}
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -390,6 +393,7 @@ try {
                 `seg_empleado`.`id_empleado`
                 , `seg_liq_prima_nav`.`val_liq_pv`
                 , `seg_liq_prima_nav`.`id_nomina`
+                , `seg_liq_prima_nav`.`cant_dias`
             FROM
                 `seg_liq_prima_nav`
                 INNER JOIN `seg_empleado` 
@@ -613,6 +617,8 @@ try {
                                                         $keypfis = array_search($id, array_column($pfis, 'id_empleado'));
                                                         $keybsp = array_search($id, array_column($bsp, 'id_empleado'));
                                                         $keyIndem = array_search($id, array_column($indemnizaciones, 'id_empleado'));
+                                                        $keypn = array_search($id, array_column($prima_nav, 'id_empleado'));
+                                                        $dayPN = false !== $keypn ? $prima_nav[$keypn]['cant_dias'] : 0;
                                                         ?>
                                                         <td><?php echo $o['sede'] ?></td>
                                                         <td><?php echo $o['cargo'] ?></td>
@@ -653,6 +659,8 @@ try {
                                                             if ($id_nom['tipo'] == 'PV') {
                                                                 $dias_psv = false !== $keyps ? $prima_sv[$keyps]['cant_dias'] : 0;
                                                                 echo $dias_psv;
+                                                            } else if ($id_nom['tipo'] == 'PN') {
+                                                                echo $dayPN;
                                                             } else {
                                                                 if (false !== $keyIndem) {
                                                                     echo $indemnizaciones[$keyIndem]['cant_dias'];
@@ -783,7 +791,6 @@ try {
                                                                 $c5 = 0;
                                                             }
                                                             $ps = false !== $keyps ? $prima_sv[$keyps]['val_liq_ps'] : 0;
-                                                            $keypn = array_search($id, array_column($prima_nav, 'id_empleado'));
                                                             $pn = false !== $keypn ? $prima_nav[$keypn]['val_liq_pv'] : 0;
                                                             $keyces = array_search($id, array_column($cesantias, 'id_empleado'));
                                                             $ces = false !== $keyces ? $cesantias[$keyces]['val_cesantias'] : 0;

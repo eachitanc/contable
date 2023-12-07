@@ -4,7 +4,8 @@ if (!isset($_SESSION['user'])) {
     echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
-$id_entrada = isset($_POST['id_entrada']) ? $_POST['id_entrada'] : exit('Acción no permitida');
+$data = isset($_POST['id_entrada']) ? explode('|', $_POST['id_entrada']) : exit('Acción no permitida');
+$id_entrada  = $data[0];
 include '../../../conexion.php';
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
@@ -37,13 +38,64 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-if ($entrada['id_tipo_entrada'] == 3) {
-    $tipol = 'DONACIÓN';
-} else if ($entrada['id_tipo_entrada'] == 2) {
-    $tipol = 'PRÉSTAMO';
-} else {
-    $tipol = 'OTRA';
+$tipo = $entrada['id_tipo_entrada'];
+$maximo = '';
+if ($id_entrada == 0) {
+    $id_pdc = $data[1];
+    $max = $data[2];
+    //$maximo = 'max="' . $max . '"';
+    try {
+        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+        $sql = "SELECT `id_b_s`, `id_tipo_bn_sv`,`bien_servicio` FROM `seg_bien_servicio` WHERE `id_b_s` = $id_pdc";
+        $rs = $cmd->query($sql);
+        $articulo = $rs->fetch();
+        $cmd = null;
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
+    try {
+        $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+        $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+        $sql = "SELECT
+                    `id_prod`
+                    , AVG(`valu_ingresa` * (1+ `iva`/100)) AS `val_prom`
+                FROM
+                    `seg_detalle_entrada_almacen`
+                WHERE  `id_prod` = $id_pdc";
+        $res = $cmd->query($sql);
+        $promedio = $res->fetch();
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+    $entrada = [];
+    $entrada['id_entrada'] = 0;
+    $entrada['bien_servicio'] = $articulo['bien_servicio'];
+    $entrada['id_prod'] = $id_pdc;
+    $entrada['id_tipo_entrada'] = 2;
+    $entrada['cant_ingresa'] = $max;
+    $entrada['iva'] = 0;
+    $entrada['valu_ingresa'] = $promedio['val_prom'];
+    $entrada['val_prom'] = $promedio['val_prom'];
+    $entrada['lote'] = '';
+    $entrada['fecha_vence'] = '';
+    $entrada['id_marca'] = '';
+    $entrada['marca'] = '';
+    $entrada['invima'] = '';
+    $entrada['existencia'] = '';
+    $tipo = 2;
 }
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT `descripcion` FROM  `seg_tipo_entrada` WHERE `id_entrada` = $tipo";
+    $rs = $cmd->query($sql);
+    $tentradas = $rs->fetch();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+$tipol = $tentradas['descripcion'];
 ?>
 <div class="px-0">
     <div class="shadow">
@@ -56,7 +108,7 @@ if ($entrada['id_tipo_entrada'] == 3) {
                 <div class="form-row text-center">
                     <div class="form-group col-md-12">
                         <label for="buscProd" class="small">Bien y/o producto</label>
-                        <input id="buscProd" type="text" class="form-control form-control-sm" placeholder="Buscar" value="<?php echo $entrada['bien_servicio'] ?>">
+                        <input id="buscProd" type="text" class="form-control form-control-sm" placeholder="Buscar" value="<?php echo $entrada['bien_servicio'] ?>" <?php echo $id_entrada == 0 || $tipo == 2 ? 'disabled' : '' ?>>
                         <input type="hidden" id="id_bnsvc" name="id_bnsvc" value="<?php echo $entrada['id_prod'] ?>">
                         <input type="hidden" name="id_bnsvc_ant" value="<?php echo $entrada['id_prod'] ?>">
                     </div>
@@ -64,13 +116,14 @@ if ($entrada['id_tipo_entrada'] == 3) {
                 <div class="form-row text-center">
                     <div class="form-group col-md-3">
                         <label for="numCantRecb" class="small">cantidad</label>
-                        <input type="number" id="numCantRecb" name="numCantRecb" class="form-control form-control-sm" value="<?php echo $entrada['cant_ingresa'] ?>">
+                        <input type="number" id="numCantRecb" name="numCantRecb" class="form-control form-control-sm" value="<?php echo $entrada['cant_ingresa'] ?>" <?php echo $maximo ?>>
                         <input type="hidden" name="numCantRecb_ant" value="<?php echo $entrada['cant_ingresa'] ?>">
                         <input type="hidden" name="numCantExistencia" value="<?php echo $entrada['existencia'] ?>">
                     </div>
                     <div class="form-group col-md-2">
                         <label for="numValUnita" class="small">Val. Und</label>
-                        <input type="number" id="numValUnita" name="numValUnita" class="form-control form-control-sm" placeholder="Valor sin IVA" value="<?php echo $entrada['valu_ingresa'] ?>">
+                        <input type="number" id="numValUnita" name="numValUnita" class="form-control form-control-sm" placeholder="Valor sin IVA" value="<?php echo $entrada['valu_ingresa'] ?>" <?php echo $id_entrada == 0 || $tipo == 2 ? 'disabled' : '' ?>>
+                        <?php echo $id_entrada == 0 || $tipo == 2 ? '<input type="hidden" name="numValUnita" value="' . $entrada['valu_ingresa'] . '">' : '' ?>
                     </div>
                     <div class="form-group col-md-2">
                         <label for="numIvaProd" class="small">% IVA</label>

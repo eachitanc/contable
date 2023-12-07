@@ -86,6 +86,20 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+try {
+    $sql = "SELECT
+                `seg_bodega_almacen`.`id_bodega`
+                , `seg_ctas_gasto`.`id_tipo_bn_sv`
+                , `seg_ctas_gasto`.`cuenta`
+            FROM
+                `seg_ctas_gasto`
+                INNER JOIN `seg_bodega_almacen` 
+                    ON (`seg_ctas_gasto`.`id_bodega` = `seg_bodega_almacen`.`id_bodega`)";
+    $rs = $cmd->query($sql);
+    $cuentas = $rs->fetchAll();
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
 $consec = 0;
 $subtotal = 0;
 $iva = 0;
@@ -94,23 +108,43 @@ if ($check ==  0) {
     foreach ($datos as $fila) {
         $consumo = $fila['id_devolucion'];
         $bdg = $fila['bodega'];
+        $id_bdg = $fila['id_bodega'];
         $tipo = $fila['tipo_bn_sv'];
+        $id_tipo = $fila['id_tipo_bn_sv'];
+        $cta_contable = '-';
+        foreach ($cuentas as $cta) {
+            if ($cta['id_bodega'] == $id_bdg && $cta['id_tipo_bn_sv'] == $id_tipo) {
+                $cta_contable = $cta['cuenta'];
+                break;
+            }
+        }
         $datas[$consumo]['fecha'] = $fila['fec_reg'];
         $datas[$consumo]['sede'] = $fila['sede'];
         $valor = isset($datas[$consumo]['bodega'][$bdg][$tipo]['valor']) ? $datas[$consumo]['bodega'][$bdg][$tipo]['valor'] : 0;
         $datas[$consumo]['bodega'][$bdg][$tipo]['valor'] = $valor + ($fila['valu_ingresa'] * $fila['cantidad'] * (1 + ($fila['iva'] / 100)));
         $datas[$consumo]['bodega'][$bdg][$tipo]['id_tipo'] = $fila['id_tipo_bn_sv'];
+        $datas[$consumo]['bodega'][$bdg][$tipo]['cuenta'] = $cta_contable;
     }
 } else if ($check == 1) {
     foreach ($datos as $fila) {
         $consumo = 0;
         $bdg = $fila['bodega'];
+        $id_bdg = $fila['id_bodega'];
         $tipo = $fila['tipo_bn_sv'];
+        $id_tipo = $fila['id_tipo_bn_sv'];
+        $cta_contable = '-';
+        foreach ($cuentas as $cta) {
+            if ($cta['id_bodega'] == $id_bdg && $cta['id_tipo_bn_sv'] == $id_tipo) {
+                $cta_contable = $cta['cuenta'];
+                break;
+            }
+        }
         $datas[$consumo]['fecha'] = '';
         $datas[$consumo]['sede'] = $fila['sede'];
         $valor = isset($datas[$consumo]['bodega'][$bdg][$tipo]['valor']) ? $datas[$consumo]['bodega'][$bdg][$tipo]['valor'] : 0;
         $datas[$consumo]['bodega'][$bdg][$tipo]['valor'] = $valor + ($fila['valu_ingresa'] * $fila['cantidad'] * (1 + ($fila['iva'] / 100)));
         $datas[$consumo]['bodega'][$bdg][$tipo]['id_tipo'] = $fila['id_tipo_bn_sv'];
+        $datas[$consumo]['bodega'][$bdg][$tipo]['cuenta'] = $cta_contable;
     }
 } else if ($check == 2) {
     foreach ($datos as $fila) {
@@ -189,7 +223,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
         <table class="page_break_avoid" style="width:100% !important; border-collapse: collapse;">
             <thead style="background-color: white !important;font-size:80%">
                 <tr style="padding: bottom 3px; color:black">
-                    <td colspan="9">
+                    <td colspan="10">
                         <table id="lista" class="bg-light" style="width:100% !important;">
                             <tr>
                                 <td rowspan="2" class='text-center' style="width:18%"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
@@ -224,6 +258,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                 </tr>
                 <tr style="background-color: #CED3D3; width:100%">
                     <th>ID</th>
+                    <th>Cuenta</th>
                     <th><?php echo  $check == 0 ? 'Fecha' : ''; ?></th>
                     <th colspan="5">Almacén</th>
                     <th>Vr. Total</th>
@@ -248,8 +283,9 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                             $rowbg = '';
                             foreach ($tipo as $tp => $dt) {
                                 $row_tipo .=  '<tr class="resaltar">';
-                                $row_tipo .= '<td colspan="2" style="text-align:right">' . $dt['id_tipo'] . '</td>';
-                                $row_tipo .= '<td colspan="5" style="text-align:left">' . $tp . '</td>';
+                                $row_tipo .= '<td colspan="1" style="text-align:left">' . $dt['id_tipo'] . '</td>';
+                                $row_tipo .= '<td colspan="1" style="text-align:left">' . $dt['cuenta'] . '</td>';
+                                $row_tipo .= '<td colspan="6" style="text-align:left">' . $tp . '</td>';
                                 $row_tipo .= '<td style="text-align:right">' . number_format($dt['valor'], 2, ',', '.') . '</td>';
                                 $row_tipo .= '<td></td>';
                                 $row_tipo .= '</tr>';
@@ -258,7 +294,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                             $estado = $check == 0 ? 'REALIZADO' : '';
                             $row_tipo = $check == 2 ? '' : $row_tipo;
                             $rowbg .= '<tr class="resaltar">';
-                            $rowbg .= '<th>' . $key . '</th>';
+                            $rowbg .= '<th colspan="2">' . $key . '</th>';
                             $rowbg .= '<th>' . $fecha . '</th>';
                             $rowbg .= '<th colspan="5" style="text-align:left">' . $bdg . '</th>';
                             $rowbg .= '<th style="text-align:right">' . number_format($subtotal, 2, ',', '.') . '</th>';
@@ -275,7 +311,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                     echo '<tr style="font-size: 10px;" class="resaltar">';
                     echo '<th style="text-align:left">' . $datos[0]['id_tipo'] . '</th>';
                     echo '<th></th>';
-                    echo '<th colspan="5" style="text-align:left">' . $datos[0]['tipo_contrato'] . '</th>';
+                    echo '<th colspan="6" style="text-align:left">' . $datos[0]['tipo_contrato'] . '</th>';
                     echo '<th style="text-align:right">' . $t . '</th>';
                     echo '<th style="text-align:right">' . $t2 . '</th>';
                     echo $tabla;

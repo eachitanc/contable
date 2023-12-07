@@ -9,6 +9,7 @@ include '../../conexion.php';
 $vigencia = $_SESSION['vigencia'];
 $ids = isset($_POST['empleado']) ? $_POST['empleado'] : exit('Acción no permitida');
 $ids = implode(',', $ids);
+$id_user = $_SESSION['id_user'];
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -137,6 +138,25 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT   
+                `id_empleado`
+                , `corte`
+                , `val_liq_pv`
+            FROM `seg_liq_prima_nav` WHERE `id_liq_privac` IN 
+            (SELECT
+                MAX(`id_liq_privac`) AS `id_lp`
+            FROM
+                `seg_liq_prima_nav`
+            GROUP BY `id_empleado`)";
+    $rs = $cmd->query($sql);
+    $cortePriNavAnt = $rs->fetchAll(PDO::FETCH_ASSOC);
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
                 `seg_vacaciones`.`id_empleado`
                 , `seg_liq_vac`.`val_prima_vac`
@@ -148,24 +168,6 @@ try {
             WHERE (`seg_liq_vac`.`id_vac` IN (SELECT MAX(`id_vac`) FROM  `seg_vacaciones` WHERE `id_empleado` IN ($ids)GROUP BY `id_empleado`))";
     $rs = $cmd->query($sql);
     $vaciones = $rs->fetchAll(PDO::FETCH_ASSOC);
-    $cmd = null;
-} catch (PDOException $e) {
-    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-}
-try {
-    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT   
-                `id_empleado`
-                , `corte`
-            FROM `seg_liq_prima_nav` WHERE `id_liq_privac` IN 
-            (SELECT
-                MAX(`id_liq_privac`) AS `id_lp`
-            FROM
-                `seg_liq_prima_nav`
-            GROUP BY `id_empleado`)";
-    $rs = $cmd->query($sql);
-    $corteprimant = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
@@ -209,13 +211,14 @@ if (isset($empleados)) {
         try {
             $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
             $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-            $sql = "INSERT INTO `seg_nominas` (`tipo`, `vigencia`, `descripcion`,`fec_reg`, `mes`) VALUES (?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO `seg_nominas` (`tipo`, `vigencia`, `descripcion`,`fec_reg`, `mes`, `id_user_reg`) VALUES (?, ?, ?, ?, ?, ?)";
             $sql = $cmd->prepare($sql);
             $sql->bindParam(1, $tipo, PDO::PARAM_STR);
             $sql->bindParam(2, $vigencia, PDO::PARAM_STR);
             $sql->bindParam(3, $descripcion, PDO::PARAM_STR);
             $sql->bindValue(4, $date->format('Y-m-d H:i:s'));
             $sql->bindParam(5, $mesreg, PDO::PARAM_STR);
+            $sql->bindParam(6, $id_user, PDO::PARAM_STR);
             $sql->execute();
             $id_nomina = $cmd->lastInsertId();
             if (!($id_nomina > 0)) {
@@ -238,13 +241,14 @@ if (isset($empleados)) {
         if ($sal_integ == 0) {
             $key = array_search($id, array_column($primliq, 'id_empleado'));
             if (false === $key) {
-                $basetransporte = ($salbase * 0.06) + $salbase;
+                $basetransporte = $salbase;
                 $auxt_base = $basetransporte > $smmlv * 2 ? 0 : $auxt;
                 $auxali_base = $salbase > $basalim ? 0 : $auxali;
                 $gasrep = $emp['representacion'] == 1 ? $repre : 0;
                 $key = array_search($id, array_column($corteprimant, 'id_empleado'));
                 $prima_ant = false !== $key ? $corteprimant[$key]['val_liq_ps'] : 0;
-                $corteant = false !== $key ? $corteprimant[$key]['corte'] : $emp['fech_inicio'];
+                $key = array_search($id, array_column($cortePriNavAnt, 'id_empleado'));
+                $corteant = false !== $key ? $cortePriNavAnt[$key]['corte'] : $emp['fech_inicio'];
                 $diastoprima = calcularDias($corteant, $corte);
                 $diastoprima = $diastoprima > 360 ? 360 : $diastoprima;
                 $key = array_search($id, array_column($lic_noremun, 'id_empleado'));

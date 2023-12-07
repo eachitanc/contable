@@ -45,7 +45,7 @@ $fecha_actual = $fecha->format('Y-m-d');
                     </div>
                     <div class="px-50">&nbsp; </div>
                     <div class="text-center">
-                        <button value="1" class="btn btn-primary" onclick="generarInforme(this);"><span></span>Consultar</button>
+                        <button value="1" class="btn btn-primary" onclick="generarInforme(this);"><span></span> Consultar</button>
                         <a type="" id="btnExcelEntrada" class="btn btn-outline-success" value="01" title="Exprotar a Excel">
                             <span class="fas fa-file-excel fa-lg" aria-hidden="true"></span>
                         </a>

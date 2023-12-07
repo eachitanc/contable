@@ -67,8 +67,8 @@ $terceros = $terceros != '0' ? $terceros : [];
                         <?php
                         } else {
                         ?>
-                            <label for="slcFianza" class="small">FIANZA</label>
-                            <select id="slcFianza" name="slcFianza" class="form-control form-control-sm">
+                            <label for="id_tercero_pd" class="small">FIANZA</label>
+                            <select id="id_tercero_pd" name="id_tercero_pd" class="form-control form-control-sm">
                                 <option value="0">--Seleccione--</option>
                                 <?php
                                 foreach ($fianzas as $f) {
@@ -77,7 +77,7 @@ $terceros = $terceros != '0' ? $terceros : [];
                                     $terc = trim($terc);
                                     $terc = $terc == '' ? $terc : ' -> ' . $terc;
                                 ?>
-                                    <option value="<?php echo $f['id_entrada'] ?>"><?php echo 'FIANZA ENTRADA ' . str_pad($f['consecutivo'], 5, "0", STR_PAD_LEFT) . $terc ?></option>
+                                    <option value="<?php echo $f['id_entrada'] . '|' . $f['id_tercero_api'] ?>"><?php echo 'FIANZA ENTRADA ' . str_pad($f['consecutivo'], 5, "0", STR_PAD_LEFT) . $terc ?></option>
                                 <?php
                                 }
                                 ?>

@@ -100,7 +100,7 @@ switch ($estado) {
                                 <?php
                                 $estado_dev = $devolucion['estado'];
                                 if ($estado_dev < 3) {
-                                    if ($tipo_salida == 3 || $tipo_salida == 4 || $tipo_salida == 5 || $tipo_salida == 9) {
+                                    if ($tipo_salida == 2 || $tipo_salida == 3 || $tipo_salida == 4 || $tipo_salida == 5 || $tipo_salida == 9) {
                                         echo '<input type="hidden" id="peReg" value="1">';
                                     }
                                     if ($tipo_salida == 8) {

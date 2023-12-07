@@ -30,12 +30,11 @@ if (isset($listentradas)) {
         $idst = [];
         $idin = '0';
         foreach ($listentradas as $l) {
-            if ($l['id_tercero_api'] > 0) {
+            if ($l['id_tercero_api'] != '') {
                 $idst[] = $l['id_tercero_api'];
             }
             $idin .= ',' . $l['id_entrada'];
         }
-        //API URL
         $payload = json_encode($idst);
         //API URL
         $url = $api . 'terceros/datos/res/lista/terceros';
@@ -48,7 +47,7 @@ if (isset($listentradas)) {
         $result = curl_exec($ch);
         curl_close($ch);
         $dat_ter = json_decode($result, true);
-        if (empty($dat_ter) || $dat_ter == null) {
+        if (empty($dat_ter) || $dat_ter == 0) {
             $dat_ter = [];
         }
         try {

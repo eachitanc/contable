@@ -5,31 +5,8 @@ if (!isset($_SESSION['user'])) {
     echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
-?>
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>CONTAFACIL</title>
-    <style>
-        .text {
-            mso-number-format: "\@"
-        }
-    </style>
-
-    <?php
-
-    header("Content-type: application/vnd.ms-excel charset=utf-8");
-    header("Content-Disposition: attachment; filename=FORMATO_LIBRO_RECONOCIMIENTOS.xls");
-    header("Pragma: no-cache");
-    header("Expires: 0");
-
-    ?>
-</head>
-<?php
 $vigencia = $_SESSION['vigencia'];
-$fecha_corte = $_POST['fecha'];
+$fecha_corte = file_get_contents("php://input");
 function pesos($valor)
 {
     return '$' . number_format($valor, 2);
@@ -91,90 +68,67 @@ FROM
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-?> <div class="contenedor bg-light" id="areaImprimir">
-    <div class="px-2 " style="width:90% !important;margin: 0 auto;">
+?>
 
-        </br>
-        </br>
-        <table class="table-bordered bg-light" style="width:100% !important;">
-            <tr>
-                <td colspan="7" style="text-align:center"><?php echo ''; ?></td>
-            </tr>
-
-            <tr>
-                <td colspan="7" style="text-align:center"><?php echo $empresa['nombre']; ?></td>
-            </tr>
-            <tr>
-                <td colspan="7" style="text-align:center"><?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?></td>
-            </tr>
-            <tr>
-                <td colspan="7" style="text-align:center"><?php echo 'RELACION DE RECONOCIMIENTOS PRESUPUESTALES'; ?></td>
-            </tr>
-            <tr>
-                <td colspan="7" style="text-align:center"><?php echo 'Fecha de corte: ' . $fecha_corte; ?></td>
-            </tr>
-            <tr>
-                <td colspan="7" style="text-align:center"><?php echo ''; ?></td>
-            </tr>
-        </table>
-
-
-
-        </br>
-        <table class="table-bordered bg-light" style="width:100% !important;" border=1>
-            <tr>
-                <td>Tipo</td>
-                <td>No reconocimiento</td>
-                <td>Fecha</td>
-                <td>Tercero</td>
-                <td>Objeto</td>
-                <td>Rubro</td>
-                <td>Valor</td>
-
-            </tr>
-            <?php
-
-            foreach ($causaciones as $rp) {
-                // consulto el valor registrado de cada cdp y rubro
-                /*$sql = "SELECT
-                            SUM(`seg_pto_mvto`.`valor`) AS `valor_rp`
-                        FROM
-                            `seg_pto_mvto`
-                            INNER JOIN `seg_pto_documento` 
-                                ON (`seg_pto_mvto`.`id_pto_doc` = `seg_pto_documento`.`id_pto_doc`)
-                        WHERE `seg_pto_mvto`.`rubro` ='{$rp['rubro']}'
-                            AND `seg_pto_documento`.`fecha` <='$fecha_corte'
-                            AND `seg_pto_mvto`.`id_auto_dep` ={$rp['id_pto_doc']}
-                            AND `seg_pto_mvto`.`tipo_mov`='CRP' 
-                        GROUP BY `seg_pto_mvto`.`rubro`;";
-                $res = $cmd->query($sql);
-                $reg2 = $res->fetch();
+<table style="width:100% !important; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <td rowspan="4" style="text-align:center"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
+            <td colspan="6" style="text-align:center"><?php echo $empresa['nombre']; ?></td>
+        </tr>
+        <tr>
+            <td colspan="6" style="text-align:center"><?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?></td>
+        </tr>
+        <tr>
+            <td colspan="6" style="text-align:center"><?php echo 'RELACION DE RECONOCIMIENTOS PRESUPUESTALES'; ?></td>
+        </tr>
+        <tr>
+            <td colspan="6" style="text-align:center"><?php echo 'Fecha de corte: ' . $fecha_corte; ?></td>
+        </tr>
+        <tr style="background-color: #CED3D3; text-align:center;font-size:9px;">
+            <th>Tipo</th>
+            <th>No reconocimiento</th>
+            <th>Fecha</th>
+            <th>Tercero</th>
+            <th>Objeto</th>
+            <th>Rubro</th>
+            <th>Valor</th>
+        </tr>
+    </thead>
+    <tbody style="font-size:9px;">
+        <?php
+        foreach ($causaciones as $rp) {
+            // consulto el valor registrado de cada cdp y rubro
+            /*$sql = "SELECT
+                        SUM(`seg_pto_mvto`.`valor`) AS `valor_rp`
+                    FROM
+                        `seg_pto_mvto`
+                        INNER JOIN `seg_pto_documento` 
+                            ON (`seg_pto_mvto`.`id_pto_doc` = `seg_pto_documento`.`id_pto_doc`)
+                    WHERE `seg_pto_mvto`.`rubro` ='{$rp['rubro']}'
+                        AND `seg_pto_documento`.`fecha` <='$fecha_corte'
+                        AND `seg_pto_mvto`.`id_auto_dep` ={$rp['id_pto_doc']}
+                        AND `seg_pto_mvto`.`tipo_mov`='CRP' 
+                    GROUP BY `seg_pto_mvto`.`rubro`;";
+            $res = $cmd->query($sql);
+            $reg2 = $res->fetch();
 */
-                if ($rp['objeto'] == '') {
-                    $rp['objeto'] = 'RECONOCIMIENTO POR VENTA DE SERVICIOS ';
-                }
-                $fecha = date('Y-m-d', strtotime($rp['fecha']));
-                if ($saldo >= 0) {
-                    echo "<tr>
-                <td class='text'>" . 'RAD' .  "</td>
-                <td class='text-left'>" . $rp['factura'] . "</td>
-                <td class='text-right'>" .   $fecha   . "</td>
-                <td class='text-right'>" . $rp['nit'] . "</td>
-                <td class='text-right'>" . $rp['objeto'] . "</td>
-                <td class='text-right'>" .  $rp['cuenta'] . "</td>
-                <td class='text-right'>" . number_format($rp['valor'], 2, ".", ",")  . "</td>
-                </tr>";
-                }
+            if ($rp['objeto'] == '') {
+                $rp['objeto'] = 'RECONOCIMIENTO POR VENTA DE SERVICIOS ';
             }
-            ?>
-
-        </table>
-        </br>
-        </br>
-        </br>
-
-    </div>
-
-</div>
-
-</html>
+            $fecha = date('Y-m-d', strtotime($rp['fecha']));
+            if ($saldo >= 0) {
+                echo "<tr>
+            <td style='text-aling:left'>" . 'RAD' .  "</td>
+            <td style='text-aling:left'>" . $rp['factura'] . "</td>
+            <td style='text-aling:left'>" .   $fecha   . "</td>
+            <td style='text-aling:left'>" . $rp['nit'] . "</td>
+            <td style='text-aling:left'>" . $rp['objeto'] . "</td>
+            <td style='text-aling:left'>" .  $rp['cuenta'] . "</td>
+            <td style='text-aling:right'>" . number_format($rp['valor'], 2, ".", ",")  . "</td>
+            </tr>";
+            }
+        }
+        ?>
+    </tbody>
+</table>

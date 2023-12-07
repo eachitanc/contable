@@ -367,6 +367,7 @@ try {
                 `seg_empleado`.`id_empleado`
                 , `seg_liq_prima_nav`.`val_liq_pv`
                 , `seg_liq_prima_nav`.`id_nomina`
+                , `seg_liq_prima_nav`.`cant_dias`
             FROM
                 `seg_liq_prima_nav`
                 INNER JOIN `seg_empleado` 
@@ -650,6 +651,9 @@ $logo = $_SERVER['HTTP_HOST'] . $_SESSION['urlin'] . '/images/logos/logo.png';
                                     if ($nomina['tipo'] == 'PV') {
                                         $dias_psv = false !== $keyps ? $prima_sv[$keyps]['cant_dias'] : 0;
                                         echo $dias_psv;
+                                    } else if ($nomina['tipo'] == 'PN') {
+                                        $diasPN = false !== $keypn ? $prima_nav[$keypn]['cant_dias'] : 0;
+                                        echo $diasPN;
                                     } else {
                                         if (false !== $keyIndem) {
                                             echo $indemnizaciones[$keyIndem]['cant_dias'];
@@ -888,6 +892,7 @@ $logo = $_SERVER['HTTP_HOST'] . $_SESSION['urlin'] . '/images/logos/logo.png';
                                 </td>
                                 <td style="border: 1px solid black;" class="text-right">
                                     <?php
+                                    $n = 0;
                                     $keyretfte = array_search($id, array_column($retfte, 'id_empleado'));
                                     if (false !== $keyretfte) {
                                         echo pesos($retfte[$keyretfte]['val_ret']);

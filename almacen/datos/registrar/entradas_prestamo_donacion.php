@@ -44,8 +44,13 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $res_api = curl_exec($ch);
 curl_close($ch);
 $dat_ter = json_decode($res_api, true);
-$ccnit = $dat_ter[0]['cc_nit'];
-$tercer = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['razon_social'];
+if ($dat_ter != 0) {
+    $ccnit = $dat_ter[0]['cc_nit'];
+    $tercer = $dat_ter[0]['apellido1'] . ' ' . $dat_ter[0]['apellido2'] . ' ' . $dat_ter[0]['nombre2'] . ' ' . $dat_ter[0]['nombre1'] . ' ' . $dat_ter[0]['razon_social'];
+} else {
+    $ccnit = '';
+    $tercer = '';
+}
 $estado = $entraxpresta['estado'];
 switch ($estado) {
     case '1':

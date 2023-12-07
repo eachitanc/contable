@@ -60,9 +60,9 @@
     });
   };
   $('#areaReporte').on('click', '#btnExcelEntrada', function () {
-    let xls = ($('#areaImprimir').html());
-    var encoded = window.btoa(xls);
-    $('<form action="' + window.urlin + '/almacen/informes/reporte_excel.php" method="post"><input type="hidden" name="xls" value="' + encoded + '" /></form>').appendTo('body').submit();
+    let tableHtml = $('#areaImprimir').html();
+    let encodedTable = btoa(unescape(encodeURIComponent(tableHtml)));
+    $('<form action="' + window.urlin + '/almacen/informes/reporte_excel.php" method="post"><input type="hidden" name="xls" value="' + encodedTable + '" /></form>').appendTo('body').submit();
   });
   // Valido que el numerico con separador de miles
   $("#divModalForms").on("keyup", "#valorAprob", function () {
@@ -2315,7 +2315,8 @@ const generarInforme = (boton) => {
   //redireccionar3(ruta);
 };
 // Funcion para generar libros presupuestales
-const generarInformeLibros = (id) => {
+const generarInformeLibros = (boton) => {
+  let id = boton.value;
   let tipo = tipo_libro.value;
   let fecha_corte = fecha.value;
   let archivo = 0;
@@ -2358,12 +2359,23 @@ const generarInformeLibros = (id) => {
   if (id == 20) {
     archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_ing_xls.php ";
   }
-  let ruta = {
-    url: archivo,
-    name: "fecha",
-    valor: fecha_corte,
-  };
-  redireccionar3(ruta);
+  boton.disabled = true;
+  var span = boton.querySelector("span")
+  span.classList.add("spinner-border", "spinner-border-sm");
+  areaImprimir.innerHTML = "";
+  fetch(archivo, {
+    method: "POST",
+    body: fecha_corte,
+  })
+    .then((response) => response.text())
+    .then((response) => {
+      boton.disabled = false;
+      span.classList.remove("spinner-border", "spinner-border-sm")
+      areaImprimir.innerHTML = response;
+    })
+    .catch((error) => {
+      console.log("Error:");
+    });
 };
 
 // Funcion para redireccionar la recarga de la pagina
@@ -2385,6 +2397,7 @@ function redireccionar3(ruta) {
       .submit();
   }, 100);
 }
+
 const abrirLink = (link) => {
   if (link == 1) window.open("http://localhost:3080/2022/USUARIOS_REG/informes_sia/index.php");
   if (link == 2) window.open("http://localhost:3080/2022/USUARIOS_REG/informes_chip/cgr_ingresos.php");

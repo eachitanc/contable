@@ -221,6 +221,20 @@ if (isset($_POST['bodega'])) {
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
     }
+    try {
+        $sql = "SELECT
+                    `seg_bodega_almacen`.`id_bodega`
+                    , `seg_ctas_gasto`.`id_tipo_bn_sv`
+                    , `seg_ctas_gasto`.`cuenta`
+                FROM
+                    `seg_ctas_gasto`
+                    INNER JOIN `seg_bodega_almacen` 
+                        ON (`seg_ctas_gasto`.`id_bodega` = `seg_bodega_almacen`.`id_bodega`)";
+        $rs = $cmd->query($sql);
+        $cuentas = $rs->fetchAll();
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+    }
     $productos = [];
     $productos[0] = 0;
     $consec = 0;
@@ -231,6 +245,13 @@ if (isset($_POST['bodega'])) {
             foreach ($fila as $fl) {
                 $tps = $fl['tipo_bn_sv'];
                 $bs = $fl['bien_servicio'];
+                $cta_contable = '';
+                foreach ($cuentas as $cta) {
+                    if ($cta['id_bodega'] == $key && $cta['id_tipo_bn_sv'] == $fl['id_tipo_bn_sv']) {
+                        $cta_contable = $cta['cuenta'];
+                        break;
+                    }
+                }
                 $lt = $fl['lote'] == '' ? 'EACII' . $consec : $fl['lote'];
                 $queda = $fl['queda'];
                 $sumalote = isset($datas[$key][$tps][$bs][$lt]['cantd']) ? $datas[$key][$tps][$bs][$lt]['cantd'] : 0;
@@ -242,6 +263,7 @@ if (isset($_POST['bodega'])) {
                 $datas[$key][$tps][$bs][$lt]['datos']['id_tb'] =  $fl['id_tipo_bn_sv'];
                 $datas[$key][$tps][$bs][$lt]['datos']['invima'] =  $fl['invima'];
                 $datas[$key][$tps][$bs][$lt]['datos']['marca'] =  $fl['marca'];
+                $datas[$key][$tps][$bs][$lt]['datos']['cuenta'] =  $cta_contable;
                 $idProd = $fl['id_prod'];
                 $productos[$idProd] = $idProd;
             }
@@ -416,7 +438,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
         <table class="page_break_avoid" style="width:100% !important; border-collapse: collapse;">
             <thead style="background-color: white !important;font-size:80%">
                 <tr style="padding: bottom 3px; color:black">
-                    <td colspan="9">
+                    <td colspan="8">
                         <table id="lista" class="bg-light" style="width:100% !important;">
                             <tr>
                                 <td rowspan="2" class='text-center' style="width:18%"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
@@ -444,6 +466,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                 </tr>
                 <tr style="background-color: #CED3D3;">
                     <th>ID</th>
+                    <th>Cuenta</th>
                     <th>Producto</th>
                     <th>Vence</th>
                     <th>Lote</th>
@@ -481,6 +504,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                             foreach ($bien as $keylt => $lote) {
                                                 $id_bien = $lote['datos']['id_bn'];
                                                 $id_tipo = $lote['datos']['id_tb'];
+                                                $cta_ctb = $lote['datos']['cuenta'];
                                                 $keylt = strncmp($keylt, 'EACII', strlen('EACII')) === 0 ? '' : $keylt;
                                                 $keyconsumo = array_search($keylt, array_column($farmacia, 'lote'));
                                                 $con_far = $keyconsumo !== false ? $farmacia[$keyconsumo]['cantidad'] : 0;
@@ -490,6 +514,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                                 if ($numLotes > 1) {
                                                     $sumaLote += $disponible;
                                                     $row_lote .= '<tr class="resaltar" style="height: 30px;">
+                                                    <td></td>
                                                     <td></td>
                                                     <td></td>
                                                     <td>' . $lote['datos']['vence'] . '</td>
@@ -507,7 +532,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                                     $sumaLote = $disponible;
                                                     $row_lote = '<tr  class="resaltar" style="height: 30px;">
                                                     <td>' . $id_bien . '</td>
-                                                    <td style="text-align: left;">' . $keybn . '</td>
+                                                    <td colspan="2" style="text-align: left;">' . $keybn . '</td>
                                                     <td>' . $lote['datos']['vence'] . '</td>
                                                     <td>' . $keylt . '</td>
                                                     <th>' . $disponible . '</th>
@@ -532,6 +557,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                                 <td style="text-align: left;">' . $keybn . '</td>
                                                 <td></td>
                                                 <td></td>
+                                                <td></td>
                                                 <th>' . $sumaLote . '</th>
                                                 <td style="text-align: center;"> _____  _____ </td>
                                                 <td style="text-align: center;"> _____  _____ </td>
@@ -545,6 +571,7 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                     }
                                     $row_tipo .= '<tr class="resaltar">
                                     <th>' . $id_tipo . '</th>
+                                    <th>' . $cta_ctb . '</th>
                                     <th style="text-align: left;" colspan="5">' . $keytb . '</th>
                                     <th style="text-align: right;"></th>
                                     </tr>' . $row_bien;

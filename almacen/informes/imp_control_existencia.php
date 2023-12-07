@@ -546,7 +546,7 @@ $filaExcel = '';
                                             foreach ($bien as $keylt => $lote) {
                                                 $id_bien = $lote['datos']['id_bn'];
                                                 $id_tipo = $lote['datos']['id_tb'];
-                                                $cta_ctb = $lote['datos']['cuenta'];;
+                                                $cta_ctb = $lote['datos']['cuenta'];
                                                 $keylt = strncmp($keylt, 'EACII', strlen('EACII')) === 0 ? '' : $keylt;
                                                 $keyconsumo  = false;
                                                 $con_far = 0;

@@ -1531,6 +1531,8 @@
             $('#divMsgError').html('Valor unitario debe ser mayor o igual a cero');
         } else {
             let datos = $('#formUpEntraPrestDona').serialize();
+            let id_entrada = $('#id_prestdonac').val();
+            datos = datos + '&id_prestdonac=' + id_entrada;
             $.ajax({
                 type: 'POST',
                 url: '../../actualizar/mod_prest_dona_kardex.php',

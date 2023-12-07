@@ -4,29 +4,8 @@ if (!isset($_SESSION['user'])) {
     echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
-?>
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>CONTAFACIL</title>
-    <style>
-        .text {
-            mso-number-format: "\@"
-        }
-    </style>
-    <?php
-    header("Content-type: application/vnd.ms-excel charset=utf-8");
-    header("Content-Disposition: attachment; filename=FORMATO_201101_F07_AGR.xls");
-    header("Pragma: no-cache");
-    header("Expires: 0");
-    ?>
-</head>
-
-<?php
 $vigencia = $_SESSION['vigencia'];
-$fecha_corte = isset($_POST['fecha']) ? $_POST['fecha'] : date('Y-m-d');
+$fecha_corte = file_get_contents("php://input");
 // extraer el mes de $fecha_corte
 $fecha_ini = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-01-01'));
 $mes = date("m", strtotime($fecha_corte));
@@ -282,83 +261,76 @@ FROM
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
+
 ?>
-<div class="contenedor bg-light" id="areaImprimir">
-    <div class="px-2 " style="width:90% !important;margin: 0 auto;">
+<style>
+    .resaltar:nth-child(even) {
+        background-color: #F8F9F9;
+    }
 
-        </br>
-        </br>
-        <table class="table-bordered bg-light" style="width:100% !important;">
-            <tr>
-                <td colspan="15" style="text-align:center"><?php echo ''; ?></td>
-            </tr>
-
-            <tr>
-                <td colspan="15" style="text-align:center"><?php echo $empresa['nombre']; ?></td>
-            </tr>
-            <tr>
-                <td colspan="15" style="text-align:center"><?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?></td>
-            </tr>
-            <tr>
-                <td colspan="15" style="text-align:center"><?php echo 'EJECUCION PRESUPUESTAL DE INGRESOS'; ?></td>
-            </tr>
-            <tr>
-                <td colspan="15" style="text-align:center"><?php echo 'Fecha de corte: ' . $fecha_corte; ?></td>
-            </tr>
-            <tr>
-                <td colspan="15" style="text-align:center"><?php echo ''; ?></td>
-            </tr>
-        </table>
-        <table class="table-bordered bg-light" style="width:100% !important;" border=1>
-            <tr>
-                <td>C&oacute;digo</td>
-                <td>Nombre</td>
-                <td>Inicial</td>
-                <td>Adiciones mes</td>
-                <td>adicion acumulada</td>
-                <td>Reducción mes</td>
-                <td>Reducción acumulada</td>
-                <td>Definitivo</td>
-                <td>Reconocimiento mes</td>
-                <td>Reconocimiento acumulado</td>
-                <td>Recaudo mes</td>
-                <td>Recaudo acumulado</td>
-                <td>Saldo por recaudar</td>
-            </tr>
-            <?php
-            foreach ($acum as $key => $value) {
-                $definitivo = 0;
-                $saldo_recaudar = 0;
-                $keyrb = array_search($key, array_column($rubros, 'cod_pptal'));
-                if ($keyrb !== false)
-                    $nomrb = $rubros[$keyrb]['nom_rubro'];
-                else
-                    $nomrb = '';
-                $definitivo = $value['inicial'] + $value['adicion'] - $value['reduccion'];
-                $saldo_recaudar = $definitivo - $value['recaudo'];
-                echo '<tr>';
-                echo '<td class="text">' . $key . '</td>';
-                echo '<td class="text">' . $nomrb . '</td>';
-                echo '<td>' . $value['inicial'] . '</td>';
-                echo '<td>' . $value['adicion_mes'] . '</td>';
-                echo '<td>' . $value['adicion'] . '</td>';
-                echo '<td>' . $value['reduccion_mes'] . '</td>';
-                echo '<td>' . $value['reduccion'] . '</td>';
-                echo '<td>' . ($value['inicial'] + $value['adicion'] - $value['reduccion']) . '</td>';
-                echo '<td>' . $value['reconocimiento_mes'] . '</td>';
-                echo '<td>' . $value['reconocimiento'] . '</td>';
-                echo '<td>' . $value['recaudo_mes'] . '</td>';
-                echo '<td>' . $value['recaudo'] . '</td>';
-                echo '<td>' .  $saldo_recaudar . '</td>';
-                echo '</tr>';
-            }
-            ?>
-
-        </table>
-        </br>
-        </br>
-        </br>
-
-    </div>
-
-</div>
+    .resaltar:nth-child(odd) {
+        background-color: #ffffff;
+    }
+</style>
+<table style="width:100% !important; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <td rowspan="2" style="text-align:center"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
+            <td colspan="12" style="text-align:center"><?php echo $empresa['nombre']; ?></td>
+        </tr>
+        <tr>
+            <td colspan="12" style="text-align:center"><?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?></td>
+        </tr>
+        <tr>
+            <td colspan="12" style="text-align:center"><?php echo 'EJECUCION PRESUPUESTAL DE INGRESOS'; ?></td>
+        </tr>
+        <tr>
+            <td colspan="12" style="text-align:center"><?php echo 'Fecha de corte: ' . $fecha_corte; ?></td>
+        </tr>
+        <tr style="background-color: #CED3D3; text-align:center;font-size:9px;">
+            <td>C&oacute;digo</td>
+            <td>Nombre</td>
+            <td>Inicial</td>
+            <td>Adiciones mes</td>
+            <td>adicion acumulada</td>
+            <td>Reducción mes</td>
+            <td>Reducción acumulada</td>
+            <td>Definitivo</td>
+            <td>Reconocimiento mes</td>
+            <td>Reconocimiento acumulado</td>
+            <td>Recaudo mes</td>
+            <td>Recaudo acumulado</td>
+            <td>Saldo por recaudar</td>
+        </tr>
+    </thead>
+    <tbody style="font-size:9px;">
+        <?php
+        foreach ($acum as $key => $value) {
+            $definitivo = 0;
+            $saldo_recaudar = 0;
+            $keyrb = array_search($key, array_column($rubros, 'cod_pptal'));
+            if ($keyrb !== false)
+                $nomrb = $rubros[$keyrb]['nom_rubro'];
+            else
+                $nomrb = '';
+            $definitivo = $value['inicial'] + $value['adicion'] - $value['reduccion'];
+            $saldo_recaudar = $definitivo - $value['recaudo'];
+            echo '<tr>';
+            echo '<td class="text">' . $key . '</td>';
+            echo '<td class="text">' . $nomrb . '</td>';
+            echo '<td>' . $value['inicial'] . '</td>';
+            echo '<td>' . $value['adicion_mes'] . '</td>';
+            echo '<td>' . $value['adicion'] . '</td>';
+            echo '<td>' . $value['reduccion_mes'] . '</td>';
+            echo '<td>' . $value['reduccion'] . '</td>';
+            echo '<td>' . ($value['inicial'] + $value['adicion'] - $value['reduccion']) . '</td>';
+            echo '<td>' . $value['reconocimiento_mes'] . '</td>';
+            echo '<td>' . $value['reconocimiento'] . '</td>';
+            echo '<td>' . $value['recaudo_mes'] . '</td>';
+            echo '<td>' . $value['recaudo'] . '</td>';
+            echo '<td>' .  $saldo_recaudar . '</td>';
+            echo '</tr>';
+        }
+        ?>
+    </tbody>
+</table>

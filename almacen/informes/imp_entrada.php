@@ -124,6 +124,29 @@ try {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
 $tipo_entrada = isset($datos[0]['id_tipo_entrada']) ? $datos[0]['id_tipo_entrada'] : 0;
+$tipo_salida = '';
+if ($tipo_entrada == 7 || $tipo_entrada == 2) {
+    try {
+        $sql = "SELECT
+                    `seg_salida_dpdvo`.`id_devolucion`
+                    , `seg_salida_dpdvo`.`consecutivo`
+                    , `seg_tipo_salidas`.`descripcion`
+                    , `seg_entrada_almacen`.`id_entrada`
+                FROM
+                    `seg_salida_dpdvo`
+                    INNER JOIN `seg_tipo_salidas` 
+                        ON (`seg_salida_dpdvo`.`id_tipo_salida` = `seg_tipo_salidas`.`id_salida`)
+                    INNER JOIN `seg_entrada_almacen` 
+                        ON (`seg_entrada_almacen`.`id_devolucion` = `seg_salida_dpdvo`.`id_devolucion`)
+                WHERE (`seg_entrada_almacen`.`id_entrada` = $id_entrada)";
+        $res = $cmd->query($sql);
+        $salida = $res->fetch();
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
+    $tipo_salida = 'TIPO: ' . $salida['descripcion'];
+    $num_salida = 'SALIDA: ' . str_pad($salida['consecutivo'], 5, "0", STR_PAD_LEFT);
+}
 $user = $datos[0]['id_user_reg'];
 try {
     $sql = "SELECT
@@ -229,9 +252,13 @@ $grantotal = $subtotal + $iva;
                             <tr>
                                 <td colspan="3">
                                     <b>ENTRADA No: <?php echo str_pad($datos[0]['consecutivo'], 5, "0", STR_PAD_LEFT) ?>
+                                        <br>
+                                        <?php echo $num_salida ?>
                                 </td>
                                 <td colspan="3">
                                     <b>TIPO: <?php echo $datos[0]['tipo_entrada'] ?>
+                                        <br>
+                                        <?php echo $tipo_salida ?>
                                 </td>
                                 <td colspan="4" style="text-align: right;">Fecha entrada: <?php echo date('Y/m/d', strtotime($datos[0]['fec_entrada'])) ?></td>
                             </tr>

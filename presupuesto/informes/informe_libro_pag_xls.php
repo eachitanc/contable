@@ -5,31 +5,8 @@ if (!isset($_SESSION['user'])) {
     echo '<script>window.location.replace("../../../index.php");</script>';
     exit();
 }
-?>
-<!DOCTYPE html>
-<html lang="es">
-
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>CONTAFACIL</title>
-    <style>
-        .text {
-            mso-number-format: "\@"
-        }
-    </style>
-
-    <?php
-
-    header("Content-type: application/vnd.ms-excel charset=utf-8");
-    header("Content-Disposition: attachment; filename=FORMATO_201101_F07_AGR.xls");
-    header("Pragma: no-cache");
-    header("Expires: 0");
-
-    ?>
-</head>
-<?php
 $vigencia = $_SESSION['vigencia'];
-$fecha_corte = $_POST['fecha'];
+$fecha_corte = file_get_contents("php://input");
 function pesos($valor)
 {
     return '$' . number_format($valor, 2);
@@ -78,124 +55,102 @@ FROM
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-?> <div class="contenedor bg-light" id="areaImprimir">
-    <div class="px-2 " style="width:90% !important;margin: 0 auto;">
-
-        </br>
-        </br>
-        <table class="table-bordered bg-light" style="width:100% !important;">
-            <tr>
-                <td colspan="11" style="text-align:center"><?php echo ''; ?></td>
-            </tr>
-
-            <tr>
-                <td colspan="11" style="text-align:center"><?php echo $empresa['nombre']; ?></td>
-            </tr>
-            <tr>
-                <td colspan="11" style="text-align:center"><?php echo $empresa['nit'] . '-' . $empresa['dig_ver'] . $sql2; ?></td>
-            </tr>
-            <tr>
-                <td colspan="11" style="text-align:center"><?php echo 'RELACION DE EGRESOS PRESUPUESTALES'; ?></td>
-            </tr>
-            <tr>
-                <td colspan="11" style="text-align:center"><?php echo 'Fecha de corte: ' . $fecha_corte; ?></td>
-            </tr>
-            <tr>
-                <td colspan="11" style="text-align:center"><?php echo ''; ?></td>
-            </tr>
-        </table>
-
-
-
-        </br>
-        <table class="table-bordered bg-light" style="width:100% !important;" border=1>
-            <tr>
-                <td>Tipo</td>
-                <td>No Registro</td>
-                <td>No Egreso</td>
-                <td>Fecha</td>
-                <td>Tercero</td>
-                <td>Cc/Nit</td>
-                <td>Objeto</td>
-                <td>Rubro</td>
-                <td>Nombre rubro</td>
-                <td>Valor</td>
-            </tr>
-            <?php
-            // Consulto los id de terceros creado en la tabla seg_ctb_doc
+?>
+<table style="width:100% !important; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <td rowspan="4" style="text-align:center"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
+            <td colspan="9" style="text-align:center"><?php echo $empresa['nombre']; ?></td>
+        </tr>
+        <tr>
+            <td colspan="9" style="text-align:center"><?php echo $empresa['nit'] . '-' . $empresa['dig_ver']; ?></td>
+        </tr>
+        <tr>
+            <td colspan="9" style="text-align:center"><?php echo 'RELACION DE OBLIGACIONES PRESUPUESTALES'; ?></td>
+        </tr>
+        <tr>
+            <td colspan="9" style="text-align:center"><?php echo 'Fecha de corte: ' . $fecha_corte; ?></td>
+        </tr>
+        <tr style="background-color: #CED3D3; text-align:center;font-size:9px;">
+            <th>Tipo</th>
+            <th>No Registro</th>
+            <th>No Egreso</th>
+            <th>Fecha</th>
+            <th>Tercero</th>
+            <th>Cc/Nit</th>
+            <th>Objeto</th>
+            <th>Rubro</th>
+            <th>Nombre rubro</th>
+            <th>Valor</th>
+        </tr>
+    </thead>
+    <tbody style="font-size:9px;">
+        <?php
+        try {
+            $sql = "SELECT DISTINCT
+            `id_tercero_api`
+        FROM
+            `seg_terceros`;";
+            $res = $cmd->query($sql);
+            $id_terceros = $res->fetchAll();
+        } catch (PDOException $e) {
+            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+        }
+        $id_t = [];
+        foreach ($id_terceros as $ter) {
+            $id_t[] = $ter['id_tercero_api'];
+        }
+        $payload = json_encode($id_t);
+        //API URL
+        $url = $api . 'terceros/datos/res/lista/terceros';
+        $ch = curl_init($url);
+        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
+        curl_close($ch);
+        $terceros = json_decode($result, true);
+        foreach ($causaciones as $rp) {
+            $key = array_search($rp['id_terceroapi'], array_column($terceros, 'id_tercero'));
+            $tercero = $terceros[$key]['apellido1'] . ' ' .  $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['nombre2'] . ' ' .  $terceros[$key]['nombre1'] . ' ' .  $terceros[$key]['razon_social'];
+            $ccnit = $terceros[$key]['cc_nit'];
+            if ($tercero == null) {
+                $recero = 'NOMINA DE EMPLEADOS';
+            }
+            //Consultar el numero del registro
             try {
-                $sql = "SELECT DISTINCT
-                `id_tercero_api`
+                $sql = "SELECT
+                `seg_pto_documento`.`id_manu`
+                , `seg_pto_mvto`.`id_ctb_cop`
             FROM
-                `seg_terceros`;";
+                `seg_ctb_libaux`
+                INNER JOIN `seg_pto_documento` 
+                    ON (`seg_ctb_libaux`.`id_crp` = `seg_pto_documento`.`id_pto_doc`)
+                INNER JOIN `seg_pto_mvto` 
+                    ON (`seg_pto_mvto`.`id_ctb_cop` = `seg_ctb_libaux`.`id_ctb_doc`)
+            WHERE `seg_pto_mvto`.`id_ctb_cop` =$rp[id_ctb_cop] LIMIT 1;";
                 $res = $cmd->query($sql);
-                $id_terceros = $res->fetchAll();
+                $registro = $res->fetch();
             } catch (PDOException $e) {
                 echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
             }
-            $id_t = [];
-            foreach ($id_terceros as $ter) {
-                $id_t[] = $ter['id_tercero_api'];
-            }
-            $payload = json_encode($id_t);
-            //API URL
-            $url = $api . 'terceros/datos/res/lista/terceros';
-            $ch = curl_init($url);
-            //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            $result = curl_exec($ch);
-            curl_close($ch);
-            $terceros = json_decode($result, true);
-            foreach ($causaciones as $rp) {
-                $key = array_search($rp['id_terceroapi'], array_column($terceros, 'id_tercero'));
-                $tercero = $terceros[$key]['apellido1'] . ' ' .  $terceros[$key]['apellido2'] . ' ' . $terceros[$key]['nombre2'] . ' ' .  $terceros[$key]['nombre1'] . ' ' .  $terceros[$key]['razon_social'];
-                $ccnit = $terceros[$key]['cc_nit'];
-                if ($tercero == null) {
-                    $recero = 'NOMINA DE EMPLEADOS';
-                }
-                //Consultar el numero del registro
-                try {
-                    $sql = "SELECT
-                    `seg_pto_documento`.`id_manu`
-                    , `seg_pto_mvto`.`id_ctb_cop`
-                FROM
-                    `seg_ctb_libaux`
-                    INNER JOIN `seg_pto_documento` 
-                        ON (`seg_ctb_libaux`.`id_crp` = `seg_pto_documento`.`id_pto_doc`)
-                    INNER JOIN `seg_pto_mvto` 
-                        ON (`seg_pto_mvto`.`id_ctb_cop` = `seg_ctb_libaux`.`id_ctb_doc`)
-                WHERE `seg_pto_mvto`.`id_ctb_cop` =$rp[id_ctb_cop] LIMIT 1;";
-                    $res = $cmd->query($sql);
-                    $registro = $res->fetch();
-                } catch (PDOException $e) {
-                    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
-                }
 
-                $fecha = date('Y-m-d', strtotime($rp['fecha']));
-                echo "<tr>
-                    <td class='text'>" . $rp['tipo_mov'] .  "</td>
-                    <td class='text-left'>" . $registro['id_manu'] . "</td>
-                    <td class='text-left'>" . $rp['id_manu'] . "</td>
-                    <td class='text-right'>" .   $fecha   . "</td>
-                    <td class='text-right'>" .   $tercero . "</td>
-                    <td class='text-right'>" . $ccnit . "</td>
-                    <td class='text-right'>" . $rp['detalle'] . "</td>
-                    <td class='text'>" . $rp['rubro'] . "</td>
-                    <td class='text-right'>" .  $rp['nom_rubro'] . "</td>
-                    <td class='text-right'>" . number_format($rp['valor'], 2, ".", ",")  . "</td>
-                    </tr>";
-            }
-            ?>
-        </table>
-        </br>
-        </br>
-        </br>
-
-    </div>
-
-</div>
-
-</html>
+            $fecha = date('Y-m-d', strtotime($rp['fecha']));
+            echo "<tr>
+                <td style='text-aling:left'>" . $rp['tipo_mov'] .  "</td>
+                <td style='text-aling:left'>" . $registro['id_manu'] . "</td>
+                <td style='text-aling:left'>" . $rp['id_manu'] . "</td>
+                <td style='text-aling:left'>" .   $fecha   . "</td>
+                <td style='text-aling:left'>" .   $tercero . "</td>
+                <td style='text-aling:left'>" . $ccnit . "</td>
+                <td style='text-aling:left'>" . $rp['detalle'] . "</td>
+                <td style='text-aling:left'>" . $rp['rubro'] . "</td>
+                <td style='text-aling:left'>" .  $rp['nom_rubro'] . "</td>
+                <td style='text-aling:right'>" . number_format($rp['valor'], 2, ".", ",")  . "</td>
+                </tr>";
+        }
+        ?>
+    </tbody>
+</table>
