@@ -8,7 +8,7 @@
     <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/js/dataTables.fixedColumns.min.js"></script>
     <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/js/Chart.min.js"></script>
     <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/js/jquery-ui.js"></script>
-    <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/js/funciones.js"></script>
+    <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/js/funciones.js?v=<?php echo date('YmdHis') ?>"></script>
     <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/nomina/empleados/js/funcionesempleado.js?v=<?php echo date('YmdHis') ?>"></script>
     <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/usuarios/js/funcionesusuario.js?v=<?php echo date('YmdHis') ?>"></script>
     <script type="text/javascript" src="<?php echo $_SESSION['urlin'] ?>/nomina/extras/js/funcionesextras.js?v=<?php echo date('YmdHis') ?>"></script>

@@ -134,6 +134,7 @@ if (!empty($ladquis)) {
         $editar = null;
         $detalles = null;
         $anular = null;
+        $duplicar = null;
         if ($la['estado'] <= '5' && $_SESSION['id_user'] == 1) {
             $anular = '<a value="' . $id_adq . '" class="btn btn-outline-danger btn-sm btn-circle shadow-gb anular" title="Anular"><span class="fas fa-ban fa-lg"></span></a>';
         }
@@ -142,6 +143,9 @@ if (!empty($ladquis)) {
             if ($la['estado'] <= 2) {
                 $editar = '<a value="' . $id_adq . '" class="btn btn-outline-primary btn-sm btn-circle shadow-gb editar" title="Editar"><span class="fas fa-pencil-alt fa-lg"></span></a>';
             }
+        }
+        if ($la['estado'] >= '6') {
+            $duplicar = '<a value="' . $id_adq . '" class="btn btn-outline-info btn-sm btn-circle shadow-gb duplicar" title="Duplicar"><span class="fas fa-clone fa-lg"></span></a>';
         }
         $accion = null;
         switch ($la['estado']) {
@@ -193,7 +197,7 @@ if (!empty($ladquis)) {
             'objeto' => $la['objeto'],
             'tercero' => $tercer,
             'estado' => $estado_adq[$key]['descripcion'],
-            'botones' => '<div class="text-center">' . $editar . $borrar . $detalles . $accion . $anular . '</div>',
+            'botones' => '<div class="text-center">' . $editar . $borrar . $detalles . $accion . $anular . $duplicar . '</div>',
         ];
     }
 } else {

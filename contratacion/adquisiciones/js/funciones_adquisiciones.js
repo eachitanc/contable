@@ -107,7 +107,12 @@
             columnDefs: [{
                 class: 'text-wrap',
                 targets: [1, 4, 5]
-            }]
+            }],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableAdquisiciones').wrap('<div class="overflow" />');
         $('#tableLisTerCot').wrap('<div class="overflow" />');
@@ -170,17 +175,32 @@
         });
         $('#tableAdqBnSv').wrap('<div class="overflow" />');
         $('#tableUpAdqBnSv').DataTable({
-            language: setIdioma
+            language: setIdioma,
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableUpAdqBnSv').wrap('<div class="overflow" />');
 
         $('.tableCotRecibidas').DataTable({
-            language: setIdioma
+            language: setIdioma,
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('.tableCotRecibidas').wrap('<div class="overflow" />');
         //tabla lista de compra recibida
         $('#tableListProdRecibidos').DataTable({
             language: setIdioma,
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableListProdRecibidos').wrap('<div class="overflow" />');
         //tabla documentos soporte de contratos
@@ -201,7 +221,12 @@
             ],
             "order": [
                 [0, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableDocSopContrato').wrap('<div class="overflow" />');
         $('#tableNovedadesContrato').DataTable({
@@ -228,7 +253,12 @@
             ],
             "order": [
                 [0, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableNovedadesContrato').wrap('<div class="overflow" />');
         $('#divForms').on('change', '#slcTipoBnSv', function () {
@@ -908,6 +938,118 @@
             }
         });
     });
+    $("#divModalForms").on('click', '#btnDuplicaAdq', function () {
+        $('.is-invalid').removeClass('is-invalid');
+        if ($('#datFecAdq').val() == '') {
+            $('#datFecAdq').focus();
+            $('#datFecAdq').addClass('is-invalid');
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Fecha de aquisición no puede ser vacía');
+        } else if (Number($('#numTotalContrato').val()) <= 0) {
+            $('#numTotalContrato').focus();
+            $('#numTotalContrato').addClass('is-invalid');
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Valor estimado del contrato debe ser mayor a cero');
+        } else if (Number($('#txtObjeto').val()) <= 0) {
+            $('#txtObjeto').focus();
+            $('#txtObjeto').addClass('is-invalid');
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Objeto del contrato no puede ser vacío');
+        } else if ($('#id_tercero').val() == '0') {
+            $('#SeaTercer').focus();
+            $('#SeaTercer').addClass('is-invalid');
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Debe seleccionar un tercero');
+        } else if ($('#datFecIniEjec').val() == '') {
+            $('#datFecIniEjec').focus();
+            $('#datFecIniEjec').addClass('is-invalid');
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Fecha Inicial no puede ser vacía');
+        } else if ($('#datFecFinEjec').val() == '') {
+            $('#datFecFinEjec').focus();
+            $('#datFecFinEjec').addClass('is-invalid');
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Fecha Final no puede ser vacía');
+        } else if (Number($('#numValContrata').val()) <= 0) {
+            $('#numValContrata').focus();
+            $('#numValContrata').addClass('is-invalid');
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Valor total del contrato debe ser mayor a cero');
+        } else if ($('#numDS').val() == '') {
+            $('#numDS').focus();
+            $('#numDS').addClass('is-invalid');
+            $('#divModalError').modal('show');
+            $('#divMsgError').html('Número DC no puede ser vacío');
+        } else {
+            let validar = false;
+            $('.slcCentroCosto').each(function () {
+                if ($(this).val() == '0') {
+                    $(this).focus();
+                    $(this).addClass('is-invalid');
+                    $('#divModalError').modal('show');
+                    $('#divMsgError').html('Selecccionar centro de costo');
+                    validar = true;
+                    return false;
+                }
+
+            });
+            if (validar) {
+                return false;
+            }
+            validar = false;
+            $('input[name="numHorasMes[]"]').each(function () {
+                if ($(this).val() == '' || Number($(this).val()) <= 0) {
+                    $(this).focus();
+                    $(this).addClass('is-invalid');
+                    $('#divModalError').modal('show');
+                    $('#divMsgError').html('Cantidad debe ser mayor a cero');
+                    validar = true;
+                    return false;
+                }
+            });
+            if (validar) {
+                return false;
+            }
+            var datos = $('#formDuplicaAdq').serialize();
+            $.ajax({
+                type: 'POST',
+                url: 'registrar/new_duplica_adq.php',
+                data: datos,
+                success: function (r) {
+                    if (r == 'ok') {
+                        let id = "tableAdquisiciones";
+                        reloadtable(id);
+                        $('#divModalForms').modal('hide');
+                        $('#divModalDone').modal('show');
+                        $('#divMsgDone').html("Adquisición duplicada correctamente");
+                    } else {
+                        $('#divModalError').modal('show');
+                        $('#divMsgError').html(r);
+                    }
+                }
+            });
+        }
+    });
+    $("#divModalForms").on('input', '#SeaTercer', function () {
+        $(this).autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: window.urlin + "/almacen/datos/listar/datos_terceros.php",
+                    dataType: "json",
+                    data: {
+                        term: request.term
+                    },
+                    success: function (data) {
+                        response(data);
+                    }
+                });
+            },
+            minLength: 2,
+            select: function (event, ui) {
+                $('#id_tercero').val(ui.item.id);
+            }
+        });
+    });
     $('#btnAddEstudioPrevio').on('click', function () {
         let id = $('#id_compra').val();
         $.post("datos/registrar/formadd_estudio_previo.php", { id: id }, function (he) {
@@ -1468,6 +1610,17 @@
         });
         return false;
     });
+    $('#modificarAdquisiciones').on('click', '.duplicar', function () {
+        let id = $(this).attr('value');
+        $.post("datos/registrar/form_duplica_est_prev.php", { id: id }, function (he) {
+            $('#divTamModalForms').removeClass('modal-sm');
+            $('#divTamModalForms').removeClass('modal-xl');
+            $('#divTamModalForms').addClass('modal-lg');
+            $('#divModalForms').modal('show');
+            $("#divForms").html(he);
+        });
+        return false;
+    });
     $('#divModalForms').on('click', '#btnNovContrato', function () {
         let op = $(this).attr('value');
         let correcto = 0;
@@ -1886,13 +2039,35 @@
         }
         return false;
     });
+    $('#divModalForms').on('input', '.slcSedeAC', function () {
+        let id_sede = $(this).val();
+        let fila = $(this).parent().parent();
+        if (id_sede == '0') {
+            fila.find('.slcCentroCosto').html('<option value="0">--Seleccionar Sede--</option>');
+        } else {
+            $.post("datos/listar/datos_centros_costo.php", { id_sede: id_sede }, function (he) {
+                fila.find('.slcCentroCosto').html(he);
+            });
+        }
+        return false;
+    });
     $('#addRowSedes').on('click', function () {
         $.post("datos/listar/new_fila.php", function (he) {
             $('#contenedor').append(he);
         });
         return false;
     });
+    $('#divModalForms').on('click', '#addRowSedes', function () {
+        $.post("datos/listar/new_fila.php", function (he) {
+            $('#contenedor').append(he);
+        });
+        return false;
+    });
     $('#contenedor').on('click', '.delRowSedes', function () {
+        let fila = $(this).parent().parent().parent().parent();
+        fila.remove();
+    });
+    $('#divModalForms').on('click', '.delRowSedes', function () {
         let fila = $(this).parent().parent().parent().parent();
         fila.remove();
     });

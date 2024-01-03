@@ -90,6 +90,40 @@
         }
         return false;
     });
+    $("#btnLiqCesantias").click(function () {
+        var valida = 0;
+        $('input[type="checkbox"]').each(function () {
+            if ($(this).is(":checked")) {
+                valida++;
+            }
+        });
+        if (valida == 0) {
+            $('#divModalError').modal('show');
+            $('#divMsgError').html("Debe elegir al menos un empleado");
+        } else {
+            let datas = $("#formLiqCesantias").serialize();
+            var url = window.urlin + '/nomina/liquidar_nomina/liq_cesantias_public.php';
+            $('#divModalEspera').modal('show');
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: datas,
+                success: function (r) {
+                    $('.modal-backdrop').remove();
+                    $('#divModalEspera').fadeOut(0);
+                    if (r == 'ok') {
+                        $('#divModalExito').modal('show');
+                        $('#divMsgExito').html("Proceso realizado con éxito");
+                        setTimeout(function () { }, 1000);
+                    } else {
+                        $('#divModalError').modal('show');
+                        $('#divMsgError').html(r);
+                    }
+                }
+            });
+        }
+        return false;
+    });
     $("#btnLiqCesant").click(function () {
         let dliqnom = $("#formLiqNomina").serialize();
         $.ajax({

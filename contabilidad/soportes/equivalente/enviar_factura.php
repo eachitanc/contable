@@ -525,7 +525,7 @@ $procesado = 0;
 
 
 $err = '';
-if ($resnom['rerror'] == 0) {
+if ($resnom['rerror'] == 0 && $resnom['jret']['scufe'] != '') {
     $shash = $resnom['jret']['scufe'];
     $sreference = $resnom['jret']['sdocumentreference'];
     $iduser = $_SESSION['id_user'];

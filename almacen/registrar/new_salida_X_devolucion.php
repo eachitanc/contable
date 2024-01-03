@@ -5,9 +5,10 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 include '../../conexion.php';
-$id_ter = isset($_POST['id_tercero_pd']) ? $_POST['id_tercero_pd'] : 0;
-if ($id_ter == 0) {
-    $id_fianza = isset($_POST['slcFianza']) ? $_POST['slcFianza'] : 0;
+$data = isset($_POST['id_tercero_pd']) ? explode('|', $_POST['id_tercero_pd']) : 0;
+$id_ter = isset($data[1]) ? $data[1] :  $data[0];
+$id_fianza = isset($data[1]) ? $data[0] : 0;
+if ($id_fianza != 0) {
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -20,7 +21,6 @@ if ($id_ter == 0) {
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
     }
-    $id_ter = $fianza['id_tercero_api'];
 }
 $acta_remision = $_POST['numActaRemDev'];
 $fec_ac_re = $_POST['fecActRem'];

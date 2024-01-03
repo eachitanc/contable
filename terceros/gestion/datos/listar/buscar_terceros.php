@@ -15,6 +15,7 @@ try {
                 , `seg_terceros`.`no_doc`
                 , `seg_terceros`.`estado`
                 , `seg_tipo_tercero`.`descripcion`
+                , `rel_tipo_tercero`.`id_tercero_api`
             FROM
                 `rel_tipo_tercero`
                 INNER JOIN `seg_terceros` 
@@ -27,14 +28,17 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
 }
-$ced = '0';
-foreach ($terEmpr as $tE) {
-    $ced .= ',' . $tE['no_doc'];
+$id_t = [];
+foreach ($terEmpr as $l) {
+    $id_t[] = $l['id_tercero_api'];
 }
+$payload = json_encode($id_t);
 //API URL
-$url = $api . 'terceros/datos/res/lista/' . $ced;
+$url = $api . 'terceros/datos/res/lista/terceros';
 $ch = curl_init($url);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 $result = curl_exec($ch);

@@ -409,6 +409,7 @@ $grantotal = $subtotal + $iva;
                                 <td colspan="2">
                                 </td>
                                 <td colspan="3">
+                                    Recibido por: _________________________________________
                                 </td>
                             </tr>
                             <tr>
@@ -421,6 +422,7 @@ $grantotal = $subtotal + $iva;
                                 <td colspan="2">
                                 </td>
                                 <td colspan="3">
+                                    C.C:
                                 </td>
                             </tr>
                             <?php if ($tipo_salida == 9) { ?>

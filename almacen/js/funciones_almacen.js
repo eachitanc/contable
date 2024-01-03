@@ -439,6 +439,10 @@
                 { 'data': 'estado' },
                 { 'data': 'accion' },
             ],
+            columnDefs: [{
+                class: 'text-wrap',
+                targets: [5]
+            }],
             "order": [
                 [0, "desc"]
             ],
@@ -2796,7 +2800,7 @@
         if ($('#slctipoSalida').val() == 7) {
             url = 'informes/imp_consumo.php';
         } else {
-            url = 'informes/imp_salida';
+            url = 'informes/imp_salida.php';
         }
         $.post(url, { id: id }, function (he) {
             $('#divTamModalForms').removeClass('modal-xl');

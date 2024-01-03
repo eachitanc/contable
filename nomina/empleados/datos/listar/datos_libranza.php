@@ -12,7 +12,23 @@ function pesos($valor)
 }
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
-    $sql = "SELECT *
+    $sql = "SELECT 
+                `seg_libranzas`.`id_libranza`
+                , `seg_libranzas`.`id_banco`
+                , `seg_libranzas`.`id_empleado`
+                , `seg_libranzas`.`estado`
+                , `seg_libranzas`.`descripcion_lib`
+                , `seg_libranzas`.`valor_total`
+                , `seg_libranzas`.`cuotas`
+                , `seg_libranzas`.`val_mes`
+                , `seg_libranzas`.`porcentaje`
+                , `seg_libranzas`.`fecha_inicio`
+                , `seg_libranzas`.`fecha_fin`
+                , `seg_bancos`.`id_tercero_api`
+                , `seg_bancos`.`nit_banco`
+                , `seg_bancos`.`dig_ver`
+                , `seg_bancos`.`cod_banco`
+                , `seg_bancos`.`nom_banco`
             FROM
                 seg_libranzas
             INNER JOIN seg_bancos 
@@ -58,6 +74,7 @@ if (!empty($libranzas)) {
             $pago = '0';
             $cuotas = '0';
         }
+        //echo $li['estado'] . '<br>';
         $estado = $li['estado'] == 1 ? '<span class="badge badge-success">Activo</span><button value="' . $li['id_libranza'] . '" class="btn btn-outline-success btn-sm btn-circle estado" title="Cambiar Estado" estado="' . $li['estado'] . '"><span class="fas fa-exchange-alt"></span></button>' : '<span class="badge badge-secondary">Inactivo</span><button value="' . $li['id_libranza'] . '" class="btn btn-outline-secondary btn-sm btn-circle estado" title="Cambiar Estado"  estado="' . $li['estado'] . '"><span class="fas fa-exchange-alt"></span></button>';
         $data[] = [
             'id_libranza' => $li['id_libranza'],

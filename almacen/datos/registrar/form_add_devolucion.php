@@ -21,7 +21,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT `id_entrada`, `consecutivo`, `id_tercero_api`, `acta_remision` 
             FROM `seg_entrada_almacen`
-            WHERE `id_cronhis` > 0 AND `estado` > 0 AND `id_tipo_entrada` = 8";
+            WHERE `estado` > 0 AND `id_tipo_entrada` = 8";
     $rs = $cmd->query($sql);
     $fianzas = $rs->fetchAll();
     $cmd = null;

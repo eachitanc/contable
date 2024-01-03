@@ -6,7 +6,7 @@ if (!isset($_SESSION['user'])) {
 }
 include '../../../conexion.php';
 $id = isset($_POST['id']) ? $_POST['id'] : exit('Acción no permitida');
-$estado = $_POST['est']  == 1 ? 0 : 1;
+$estado = $_POST['est']  == '1' ? 0 : 1;
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);

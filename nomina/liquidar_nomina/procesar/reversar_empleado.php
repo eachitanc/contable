@@ -454,6 +454,12 @@ try {
     if ($sql->rowCount() > 0) {
         $dels++;
     }
+    $sql = "DELETE FROM `seg_liq_cesantias` WHERE `id_nomina` = $id_nomina AND `id_empleado`= $id_empleado";
+    $sql = $cmd->prepare($sql);
+    $sql->execute();
+    if ($sql->rowCount() > 0) {
+        $dels++;
+    }
     if ($dels > 0) {
         echo 'ok';
     } else {

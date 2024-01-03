@@ -74,7 +74,12 @@
             ],
             "order": [
                 [0, "desc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableCertfForm220').wrap('<div class="overflow" />');
         $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');

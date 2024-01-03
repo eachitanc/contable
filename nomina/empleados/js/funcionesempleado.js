@@ -2786,6 +2786,11 @@
             "order": [
                 [0, "asc"]
             ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableListEmpleados').wrap('<div class="overflow" />');
         //dataTable lista de empleados
@@ -2794,7 +2799,12 @@
             language: setIdioma,
             "order": [
                 [0, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('.dataTableMes').wrap('<div class="overflow" />');
         //dataTable Contratos de empleados
@@ -2828,7 +2838,12 @@
             ],
             "order": [
                 [0, "desc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableListContratosEmp').wrap('<div class="overflow" />');
         //dataTable EPS
@@ -2861,7 +2876,12 @@
             ],
             "order": [
                 [2, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableEps').wrap('<div class="overflow" />');
         //dataTable ARL
@@ -2895,7 +2915,12 @@
             ],
             "order": [
                 [3, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableArl').wrap('<div class="overflow" />');
         //dataTable AFP
@@ -2928,7 +2953,12 @@
             ],
             "order": [
                 [2, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableAfp').wrap('<div class="overflow" />');
         $('#tableFCesan').DataTable({
@@ -2960,7 +2990,12 @@
             ],
             "order": [
                 [2, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableFCesan').wrap('<div class="overflow" />');
         //dataTable Libranza
@@ -2998,7 +3033,12 @@
             ],
             "order": [
                 [7, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableLibranza').wrap('<div class="overflow" />');
         //dataTable Embargo
@@ -3034,7 +3074,12 @@
             ],
             "order": [
                 [5, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableEmbargo').wrap('<div class="overflow" />');
         //dataTable Sindicato
@@ -3070,7 +3115,12 @@
             ],
             "order": [
                 [5, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableSindicato').wrap('<div class="overflow" />');
         //dataTable Incapacidad
@@ -3103,7 +3153,12 @@
             ],
             "order": [
                 [1, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableIncapacidad').wrap('<div class="overflow" />');
         //dataTable Vacaciones
@@ -3138,7 +3193,12 @@
             ],
             "order": [
                 [1, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableVacaciones').wrap('<div class="overflow" />');
         //dataTable Licencia
@@ -3170,7 +3230,12 @@
             ],
             "order": [
                 [0, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableLicencia').wrap('<div class="overflow" />');
         //dataTable Licencia no remunerada
@@ -3202,7 +3267,12 @@
             ],
             "order": [
                 [0, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableLuto').wrap('<div class="overflow" />');
         $('#tableLicenciaNR').DataTable({
@@ -3233,7 +3303,12 @@
             ],
             "order": [
                 [0, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableLicenciaNR').wrap('<div class="overflow" />');
         $('#tableIndemnizaVac').DataTable({
@@ -3264,7 +3339,12 @@
             ],
             "order": [
                 [0, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableIndemnizaVac').wrap('<div class="overflow" />');
         $('#tableOtroDcto').DataTable({
@@ -3296,7 +3376,12 @@
             ],
             "order": [
                 [0, "desc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableOtroDcto').wrap('<div class="overflow" />');
     });

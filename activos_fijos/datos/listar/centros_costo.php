@@ -15,15 +15,15 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-    `seg_centro_costo_x_sede`.`id_x_sede`
-    , `seg_centros_costo`.`descripcion`
-FROM
-    `seg_centro_costo_x_sede`
-    INNER JOIN `seg_sedes_empresa` 
-        ON (`seg_centro_costo_x_sede`.`id_sede` = `seg_sedes_empresa`.`id_sede`)
-    INNER JOIN `seg_centros_costo` 
-        ON (`seg_centro_costo_x_sede`.`id_centro_c` = `seg_centros_costo`.`id_centro`)
-WHERE `seg_centro_costo_x_sede`.`id_sede` = '$id_sede'";
+                `seg_centro_costo_x_sede`.`id_x_sede`
+                , `seg_centros_costo`.`descripcion`
+            FROM
+                `seg_centro_costo_x_sede`
+                INNER JOIN `seg_sedes_empresa` 
+                    ON (`seg_centro_costo_x_sede`.`id_sede` = `seg_sedes_empresa`.`id_sede`)
+                INNER JOIN `seg_centros_costo` 
+                    ON (`seg_centro_costo_x_sede`.`id_centro_c` = `seg_centros_costo`.`id_centro`)
+            WHERE `seg_centro_costo_x_sede`.`id_sede` = '$id_sede'";
     $rs = $cmd->query($sql);
     $centros = $rs->fetchAll();
     $cmd = null;

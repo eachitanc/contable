@@ -78,10 +78,26 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT 
-                `id_empleado`,`val_bsp`
+                `id_empleado`
+                ,SUM(`val_bsp`) AS `val_bsp`
             FROM `seg_liq_bsp`
             WHERE `id_bonificaciones` IN 
-            (SELECT MAX(`id_bonificaciones`) FROM `seg_liq_bsp` WHERE `id_empleado`IN ($ids) GROUP BY `id_empleado`)";
+            (SELECT 
+                MAX(`id_bonificaciones`)
+            FROM `seg_liq_bsp`
+            INNER JOIN `seg_nominas`
+                ON (`seg_liq_bsp`.`id_nomina` = `seg_nominas`.`id_nomina`)
+            WHERE `seg_nominas`.`tipo` = 'N' OR `seg_nominas`.`tipo` = 'PS'
+            GROUP BY `id_empleado`
+            UNION ALL 
+            SELECT 
+                MAX(`id_bonificaciones`)
+            FROM `seg_liq_bsp`
+            INNER JOIN `seg_nominas`
+                ON (`seg_liq_bsp`.`id_nomina` = `seg_nominas`.`id_nomina`)
+            WHERE `seg_nominas`.`tipo` = 'RA' AND `seg_nominas`.`vigencia` = '$vigencia'
+            GROUP BY `id_empleado`)
+            GROUP BY `id_empleado`";
     $rs = $cmd->query($sql);
     $bon_servicios = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -122,13 +138,26 @@ try {
     $sql = "SELECT   
                 `id_empleado`
                 , `corte`
-                , `val_liq_ps`
+                , SUM(`val_liq_ps`) AS `val_liq_ps`
             FROM `seg_liq_prima` WHERE `id_liq_prima` IN 
             (SELECT
                 MAX(`id_liq_prima`) AS `id_lp`
             FROM
                 `seg_liq_prima`
-            GROUP BY `id_empleado`)";
+            INNER JOIN `seg_nominas`
+                ON (`seg_liq_prima`.`id_nomina` = `seg_nominas`.`id_nomina`)
+            WHERE `seg_nominas`.`tipo` = 'PV'
+            GROUP BY `id_empleado`
+            UNION ALL 
+            SELECT
+                MAX(`id_liq_prima`) AS `id_lp`
+            FROM
+                `seg_liq_prima`
+            INNER JOIN `seg_nominas`
+                ON (`seg_liq_prima`.`id_nomina` = `seg_nominas`.`id_nomina`)
+            WHERE `seg_nominas`.`tipo` = 'RA' AND `seg_nominas`.`vigencia` = '$vigencia'
+            GROUP BY `id_empleado`)
+            GROUP BY `id_empleado` ";
     $rs = $cmd->query($sql);
     $corteprimant = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -159,13 +188,33 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
                 `seg_vacaciones`.`id_empleado`
-                , `seg_liq_vac`.`val_prima_vac`
+                , SUM(`seg_liq_vac`.`val_prima_vac`) AS val_prima_vac
                 , `seg_liq_vac`.`id_vac`
             FROM
                 `seg_liq_vac`
                 INNER JOIN `seg_vacaciones` 
                     ON (`seg_liq_vac`.`id_vac` = `seg_vacaciones`.`id_vac`)
-            WHERE (`seg_liq_vac`.`id_vac` IN (SELECT MAX(`id_vac`) FROM  `seg_vacaciones` WHERE `id_empleado` IN ($ids)GROUP BY `id_empleado`))";
+            WHERE (`seg_liq_vac`.`id_vac` IN 
+            (SELECT 
+            MAX(`seg_vacaciones`.`id_vac`) 
+            FROM  `seg_vacaciones`
+            INNER JOIN  seg_liq_vac
+            ON (`seg_liq_vac`.`id_vac` = `seg_vacaciones`.`id_vac`)
+            INNER JOIN `seg_nominas`
+                ON (`seg_liq_vac`.`id_nomina` = `seg_nominas`.`id_nomina`)
+            WHERE `seg_nominas`.`tipo` = 'N' OR `seg_nominas`.`tipo` = 'VC'
+            GROUP BY `id_empleado`
+            UNION ALL 
+            SELECT 
+            MAX(`seg_vacaciones`.`id_vac`) 
+            FROM  `seg_vacaciones`
+            INNER JOIN  seg_liq_vac
+            ON (`seg_liq_vac`.`id_vac` = `seg_vacaciones`.`id_vac`)
+            INNER JOIN `seg_nominas`
+                ON (`seg_liq_vac`.`id_nomina` = `seg_nominas`.`id_nomina`)
+            WHERE `seg_nominas`.`tipo` = 'RA' AND `seg_nominas`.`vigencia` = '$vigencia'
+            GROUP BY `id_empleado`))
+            GROUP BY `id_empleado`";
     $rs = $cmd->query($sql);
     $vaciones = $rs->fetchAll(PDO::FETCH_ASSOC);
     $cmd = null;
@@ -248,8 +297,9 @@ if (isset($empleados)) {
                 $key = array_search($id, array_column($corteprimant, 'id_empleado'));
                 $prima_ant = false !== $key ? $corteprimant[$key]['val_liq_ps'] : 0;
                 $key = array_search($id, array_column($cortePriNavAnt, 'id_empleado'));
-                $corteant = false !== $key ? $cortePriNavAnt[$key]['corte'] : $emp['fech_inicio'];
+                $corteant = false !== $key ? date('Y-m-d', strtotime($cortePriNavAnt[$key]['corte'] . ' + 1 day')) : $emp['fech_inicio'];
                 $diastoprima = calcularDias($corteant, $corte);
+                //echo 'Fechas: ' . $corteant . ' <=> ' . $corte;
                 $diastoprima = $diastoprima > 360 ? 360 : $diastoprima;
                 $key = array_search($id, array_column($lic_noremun, 'id_empleado'));
                 $tot_dlic = false !== $key ? $lic_noremun[$key]['tot_dias'] : 0;
@@ -262,6 +312,16 @@ if (isset($empleados)) {
                 //prima de servicios
                 $prima_nav_dia = ($salbase + $auxt_base + $auxali_base + $gasrep + ($bspant / 12) + ($prima_ant / 12) + ($vac_ant / 12)) / 360;
                 $prima_nav = $prima_nav_dia * $diastoprima;
+                /*
+                echo '<br>salbase: ' . $salbase . '<br>';
+                echo 'auxt_base: ' . $auxt_base . '<br>';
+                echo 'auxali_base: ' . $auxali_base . '<br>';
+                echo 'gasrep: ' . $gasrep . '<br>';
+                echo 'bspant: ' . $bspant . '<br>';
+                echo 'prima_ant: ' . $prima_ant . '<br>';
+                echo 'vac_ant: ' . $vac_ant . '<br>';
+                echo 'prima_nav: ' . $prima_nav . '<br>';
+                echo 'diastoprima: ' . $diastoprima . '<br>';*/
                 try {
                     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
                     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -337,17 +397,20 @@ if ($liquidados > 0) {
     echo 'No se liquidó ningún empleado';
 }
 
-function calcularDias($fechaInicial, $fechaFinal)
+function calcularDias($fI, $fF)
 {
-    $dateInicial = new DateTime($fechaInicial);
-    $dateFinal = new DateTime($fechaFinal);
+    $fechaInicial = strtotime($fI);
+    $fechaFinal = strtotime($fF);
+    $dias360 = 0;
+    if (!($fechaInicial > $fechaFinal)) {
+        while ($fechaInicial < $fechaFinal) {
+            $dias360 += 30; // Agregar 30 días por cada mes
+            $fechaInicial = strtotime('+1 month', $fechaInicial);
+        }
 
-    if ($dateInicial > $dateFinal) {
-        $dias  = 0;
-    } else {
-        $diferencia = $dateInicial->diff($dateFinal);
-        $dias = $diferencia->days;
+        // Agregar los días restantes después del último mes completo
+        $dias360 += ($fechaFinal - $fechaInicial) / (60 * 60 * 24);
+        $dias360 = $dias360 + 1;
     }
-
-    return $dias;
+    return $dias360;
 }

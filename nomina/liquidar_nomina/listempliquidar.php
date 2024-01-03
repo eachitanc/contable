@@ -459,20 +459,6 @@ $carcater_empresa = $_SESSION['caracter'] == 2 ? $_SESSION['caracter'] : 1;
                             </div>
                             <div class="center-block py-2">
                                 <div class="form-group">
-                                    <?php
-                                        if (($_GET['mes'] == '06' || $_GET['mes'] == '12') && $carcater_empresa == 1) {
-                                            echo '<button class="btn btn-info" id="btnLiqPrima">Liquidar Prima</button>';
-                                        } else if ($_GET['mes'] == '07' && $carcater_empresa == 2) {
-                                            echo '<button class="btn btn-info" id="btnLiqPrima">Liq. Prima Servicios</button>';
-                                        } else if ($_GET['mes'] == '12' && $carcater_empresa == 2) {
-                                            echo '<button class="btn btn-info" id="btnLiqPrima">Liq. Prima Navidad</button>';
-                                        }
-                                        if ($_GET['mes'] == '12' && $carcater_empresa == 2) {
-                                    ?>
-                                        <button class="btn btn-warning" id="btnLiqCesant">Liq. Cesantías</button>
-                                    <?php
-                                        }
-                                    ?>
                                     <button class="btn btn-success" id="btnLiqNom">Liquidar nómina</button>
                                     <a type="button" class="btn btn-secondary " href="../../inicio.php"> Cancelar</a>
                                 </div>

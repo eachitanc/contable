@@ -100,7 +100,12 @@
             ],
             "order": [
                 [0, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableModalidad').wrap('<div class="overflow" />');
         //dataTable Tipo Contrato
@@ -134,7 +139,12 @@
             "order": [
                 [0, "asc"],
                 [1, "asc"],
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableTipoContrato').wrap('<div class="overflow" />');
         //dataTable Tipo de bien o servicio
@@ -168,7 +178,12 @@
                 [0, "asc"],
                 [1, "asc"],
                 [2, "asc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableTipoBnSv').wrap('<div class="overflow" />');
         //dataTable Tipo de bien o servicio
@@ -205,6 +220,11 @@
                 [2, "asc"],
                 [3, "asc"]
             ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableBnSv').wrap('<div class="overflow" />');
         $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');

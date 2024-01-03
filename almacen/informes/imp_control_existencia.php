@@ -241,6 +241,7 @@ if (isset($_POST['bodega'])) {
                     ON (`seg_bien_servicio`.`id_tipo_bn_sv` = `seg_tipo_bien_servicio`.`id_tipo_b_s`)
                 $cond_ceros
                 ORDER BY `seg_tipo_bien_servicio`.`tipo_bn_sv`,`seg_bien_servicio`.`bien_servicio`,`seg_detalle_entrada_almacen`.`lote` DESC";
+                //echo $sql;
             $res = $cmd->query($sql);
             $datos[$ib] = $res->fetchAll(PDO::FETCH_ASSOC);
         }

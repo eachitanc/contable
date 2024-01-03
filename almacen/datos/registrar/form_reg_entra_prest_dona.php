@@ -50,6 +50,7 @@ foreach ($salida as $vc) {
     }
 }
 $idsd = implode(',', $id_salida);
+$idsd = $idsd == '' ? 0 : $idsd;
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
@@ -76,6 +77,7 @@ try {
                     ON (`seg_detalle_entrada_almacen`.`id_entra` = `seg_entrada_almacen`.`id_entrada`)
             WHERE (`seg_entrada_almacen`.`id_devolucion` IN ($idsd))) AS `t2`
             ON (`t1`.`id_devolucion` = `t2`.`id_devolucion`)";
+    //echo $sql;
     $rs = $cmd->query($sql);
     $pendientes = $rs->fetchAll();
     $cmd = null;

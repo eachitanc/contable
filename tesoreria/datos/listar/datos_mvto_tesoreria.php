@@ -157,6 +157,10 @@ if (!empty($listappto)) {
             $enviar = null;
             $dato = '<span class="badge badge-pill badge-danger">Anulado</span>';
         }
+        if ($id_ctb == 3684) {
+            $enviar = '<button id ="enviar_' . $id_ctb . '" value="12" onclick="EnviarNomina(this)" class="btn btn-outline-primary btn-sm bt-sm btn-circle shadow-gb"  title="Procesar nómina (Soporte Electrónico)"><span class="fas fa-paper-plane fa-lg"></span></button>';
+        }
+
         $data[] = [
 
             'numero' =>  $lp['id_manu'],

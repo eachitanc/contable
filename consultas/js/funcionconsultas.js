@@ -62,7 +62,12 @@
             columnDefs: [{
                 class: 'text-wrap',
                 targets: [1]
-            }]
+            }],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableConsultas').wrap('<div class="overflow" />');
         $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus fa-lg"></span>');

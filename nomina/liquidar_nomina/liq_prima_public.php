@@ -295,17 +295,20 @@ if ($liquidados > 0) {
     echo 'No se liquidó ningún empleado';
 }
 
-function calcularDias($fechaInicial, $fechaFinal)
+function calcularDias($fI, $fF)
 {
-    $dateInicial = new DateTime($fechaInicial);
-    $dateFinal = new DateTime($fechaFinal);
+    $fechaInicial = strtotime($fI);
+    $fechaFinal = strtotime($fF);
+    $dias360 = 0;
+    if (!($fechaInicial > $fechaFinal)) {
+        while ($fechaInicial < $fechaFinal) {
+            $dias360 += 30; // Agregar 30 días por cada mes
+            $fechaInicial = strtotime('+1 month', $fechaInicial);
+        }
 
-    if ($dateInicial > $dateFinal) {
-        $dias  = 0;
-    } else {
-        $diferencia = $dateInicial->diff($dateFinal);
-        $dias = $diferencia->days;
+        // Agregar los días restantes después del último mes completo
+        $dias360 += ($fechaFinal - $fechaInicial) / (60 * 60 * 24);
+        $dias360 = $dias360 + 1;
     }
-
-    return $dias;
+    return $dias360;
 }

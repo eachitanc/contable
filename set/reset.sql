@@ -1,10 +1,7 @@
-
-update seg_liq_licnr set dias_licnr = 28 where id_liqlicnr = 14;
-update seg_liq_licnr set dias_licnr = 30 where id_liqlicnr = 19;
-update seg_liq_licnr set dias_licnr = 27 where id_liqlicnr = 20;
-update seg_liq_licnr set dias_licnr = 30 where id_liqlicnr = 24;
-update seg_liq_licnr set dias_licnr = 30 where id_liqlicnr = 27;
-update seg_liq_licnr set dias_licnr = 30 where id_liqlicnr = 28;
-update seg_liq_licnr set dias_licnr = 30 where id_liqlicnr = 30;
-update seg_liq_licnr set dias_licnr = 30 where id_liqlicnr = 32;
-update seg_liq_licnr set dias_licnr = 29 where id_liqlicnr = 35;
+UPDATE `seg_liq_prima_nav` SET `corte`= '2023-04-08' WHERE `id_liq_privac` = 4;
+UPDATE `seg_liq_prima_nav` SET `corte`= '2023-01-17' WHERE `id_liq_privac` = 9;
+UPDATE `seg_liq_prima_nav` SET `corte`= '2023-01-01' WHERE `id_liq_privac` = 10;
+UPDATE `seg_liq_prima_nav` SET `corte`= '2023-03-09' WHERE `id_liq_privac` = 13;
+UPDATE `seg_liq_prima_nav` SET `corte`= '2023-01-05' WHERE `id_liq_privac` = 14;
+UPDATE `seg_liq_prima_nav` SET `corte`= '2023-01-24' WHERE `id_liq_privac` = 15;
+UPDATE `seg_liq_prima_nav` SET `corte`= '2023-01-14' WHERE `id_liq_privac` = 20;

@@ -389,12 +389,21 @@ if (esta === -1) {
             language: setIdioma,
             buttons: [
                 'excel'
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#dataTablePermiso').DataTable({
             "autoWidth": true,
             language: setIdioma,
-            paging: false,
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('.bttn-excel button').html('<span class="fas fa-file-excel fa-lg"></span>');
         $('.bttn-excel').attr('title', 'Exportar a Excel');

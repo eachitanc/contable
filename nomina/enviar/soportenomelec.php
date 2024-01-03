@@ -1,5 +1,8 @@
 <?php
 session_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 if (!isset($_SESSION['user'])) {
     echo '<script>window.location.replace("../../index.php");</script>';
     exit();
@@ -99,7 +102,31 @@ if ($mes === '06' || $mes === '12') {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-    $sql = "SELECT fech_inicio, fec_retiro, mes, correo, telefono, codigo_netc, seg_tipo_empleado.codigo AS tip_emp, seg_subtipo_empl.codigo AS subt_emp,alto_riesgo_pension, seg_tipos_documento.codigo AS tip_doc, codigo_ne, no_documento, apellido1, apellido2, nombre1, nombre2, codigo_pais, codigo_dpto, nombre_dpto, codigo_municipio, nom_municipio, direccion, salario_integral, seg_tipo_contrato.codigo AS tip_contrato, salario_basico, seg_empleado.id_empleado
+    $sql = "SELECT 
+                fech_inicio
+                , fec_retiro
+                , mes
+                , correo
+                , telefono
+                , codigo_netc
+                , seg_tipo_empleado.codigo AS tip_emp
+                , seg_subtipo_empl.codigo AS subt_emp,alto_riesgo_pension
+                , seg_tipos_documento.codigo AS tip_doc
+                , codigo_ne
+                , no_documento
+                , apellido1
+                , apellido2
+                , nombre1
+                , nombre2
+                , codigo_pais
+                , codigo_dpto
+                , nombre_dpto
+                , codigo_municipio
+                , nom_municipio
+                , direccion
+                , salario_integral
+                , seg_tipo_contrato.codigo AS tip_contrato
+                , seg_empleado.id_empleado
             FROM
                 seg_empleado
             INNER JOIN seg_tipos_documento 
@@ -116,8 +143,6 @@ try {
                 ON (seg_municipios.id_departamento = seg_departamento.id_dpto) AND (seg_empleado.municipio = seg_municipios.id_municipio)
             INNER JOIN seg_tipo_contrato 
                 ON (seg_empleado.tipo_contrato = seg_tipo_contrato.id_tip_contrato)
-            INNER JOIN seg_salarios_basico 
-                ON (seg_salarios_basico.id_empleado = seg_empleado.id_empleado)
             INNER JOIN seg_liq_salario 
                 ON (seg_liq_salario.id_empleado = seg_empleado.id_empleado)
             WHERE `seg_liq_salario`.`id_nomina` = $id_nomina";
@@ -159,7 +184,7 @@ try {
                 ON (seg_empleado.id_banco = seg_bancos.id_banco)
             INNER JOIN seg_tipo_cta 
                 ON (seg_empleado.tipo_cta = seg_tipo_cta.id_tipo_cta)
-            WHERE mes = '$mes' AND anio = '$anio' AND estado='1'";
+            WHERE seg_liq_salario.id_nomina = $id_nomina";
     $rs = $cmd->query($sql);
     $bancaria = $rs->fetchAll();
     $cmd = null;
@@ -171,7 +196,7 @@ try {
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT *
             FROM seg_liq_dlab_auxt
-            WHERE mes_liq = '$mes' AND anio_liq = '$anio'";
+            WHERE `id_nomina` = $id_nomina";
     $rs = $cmd->query($sql);
     $liqdialab = $rs->fetchAll();
     $cmd = null;
@@ -440,14 +465,10 @@ if ($mes) {
                 $sPaymentForm = $sPaymentMethod = $sBankName = $sBankAccountType = $sBankAccountNo = $lPaymentDates = $lPaymentDates = null;
             }
             $key = array_search($id, array_column($liqdialab, 'id_empleado'));
-            if (false !== $key) {
-                $nDaysWorked = intval($liqdialab[$key]['dias_liq']);
-                $nAuxilioTransporte = floatval($liqdialab[$key]['val_liq_auxt']);
-                $salMensual = floatval($liqdialab[$key]['val_liq_dias']);
-                $nAuxilioAlimenta = floatval($liqdialab[$key]['aux_alim']);
-            } else {
-                $nDaysWorked = $nAuxilioTransporte = $salMensual = null;
-            }
+            $nDaysWorked = false !== $key ? intval($liqdialab[$key]['dias_liq']) : 0;
+            $nAuxilioTransporte = false !== $key ? floatval($liqdialab[$key]['val_liq_auxt']) : 0;
+            $salMensual = false !== $key ? floatval($liqdialab[$key]['val_liq_dias']) : 0;
+            $nAuxilioAlimenta = false !== $key ? floatval($liqdialab[$key]['aux_alim']) : 0;
             $key = array_search($id, array_column($presoc, 'id_empleado'));
             if (false !== $key) {
                 $valcesant = floatval($presoc[$key]['val_cesantia']);
@@ -619,7 +640,7 @@ if ($mes) {
         ];*/
             $aContract = [
                 [
-                    'nsalarybase' => floatval($o['salario_basico']),
+                    'nsalarybase' => floatval($salMensual),
                     'wcontracttype' => mb_strtoupper($o['codigo_netc']),
                     'tcontractsince' => $o['fech_inicio'],
                     'tcontractuntil' => $o['fec_retiro'],
@@ -716,7 +737,7 @@ if ($mes) {
                             'ndaysworked' => $nDaysWorked,
                             'ntotalincomes' => $devengado,
                             'ntotaldeductions' =>  $deducciones,
-                            'nperiodbasesalary' => floatval($o['salario_basico']),
+                            'nperiodbasesalary' => floatval($salMensual),
                             'npayable' => $devengado - $deducciones,
                             'aIncomes' => $aIncomes,
                             'aDeductions' => $aDeductions,
@@ -830,7 +851,7 @@ if ($mes) {
     }
 }
 $file = 'loglastsend.txt';
-file_put_contents($file, $resnom);
+//file_put_contents($file, $resnom);
 $response = [
     'msg' => 'ok',
     'procesados' => "Se ha procesado <b>" . $procesado . "</b> soporte(s) para nómina electrónica",

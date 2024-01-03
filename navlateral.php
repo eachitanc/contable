@@ -235,6 +235,16 @@ $rol = $_SESSION['rol'];
                                                 </div>
                                             </div>
                                         </a>
+                                        <a class="nav-link collapsed sombra" href="<?php echo $_SESSION['urlin'] ?>/nomina/liquidar_nomina/listempliquidar_cesantias.php">
+                                            <div class="form-row">
+                                                <div class="div-icono">
+                                                    <i class="fas fa-piggy-bank fa-sm" style="color: #BB8FCE;"></i>
+                                                </div>
+                                                <div>
+                                                    Cesantías
+                                                </div>
+                                            </div>
+                                        </a>
                                     <?php }
                                     if ($_SESSION['caracter'] == '1') { ?>
                                         <a class="nav-link collapsed sombra" href="<?php echo $_SESSION['urlin'] ?>/nomina/liquidar_nomina/liquidar_contrato.php">
@@ -260,7 +270,7 @@ $rol = $_SESSION['rol'];
                                     </a>
                                 </nav>
                             </div>
-                            <?php if ($_SESSION['caracter'] == '1') { ?>
+                            <?php if ($_SESSION['caracter'] == '2') { ?>
                                 <a class="nav-link sombra" href="<?php echo $_SESSION['urlin'] ?>/nomina/soportes/nom_electronica.php">
                                     <div class="form-row">
                                         <div class="div-icono">

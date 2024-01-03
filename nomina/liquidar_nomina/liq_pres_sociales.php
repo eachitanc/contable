@@ -282,29 +282,45 @@ if (count($empleado) > 0) {
     $date = new DateTime('now', new DateTimeZone('America/Bogota'));
     $descripcion = "LIQUIDACIÓN PRESTACIONES SOCIALES";
     $mesreg = date('m');
-    /*
     try {
         $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
         $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-        $sql = "INSERT INTO `seg_nominas` (`tipo`, `vigencia`, `descripcion`,`fec_reg`, `mes`, `id_user_reg`) VALUES (?, ?, ?, ?, ?, ?)";
-        $sql = $cmd->prepare($sql);
-        $sql->bindParam(1, $tipo, PDO::PARAM_STR);
-        $sql->bindParam(2, $vigencia, PDO::PARAM_STR);
-        $sql->bindParam(3, $descripcion, PDO::PARAM_STR);
-        $sql->bindValue(4, $date->format('Y-m-d H:i:s'));
-        $sql->bindParam(5, $mesreg, PDO::PARAM_STR);
-        $sql->bindParam(6, $id_user, PDO::PARAM_INT);
-        $sql->execute();
-        $id_nomina = $cmd->lastInsertId();
-        if (!($id_nomina > 0)) {
-            echo $sql->errorInfo()[2] . 'NOM';
-            exit();
-        }
+        $sql = "SELECT 
+                    MAX(`id_nomina`) AS `id_nomina`
+                FROM 
+                    `seg_nominas`
+                WHERE `tipo` = 'PS' AND `estado` = 1";
+        $rs = $cmd->query($sql);
+        $lastID = $rs->fetch();
         $cmd = null;
     } catch (PDOException $e) {
         echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
-    }*/
-    $id_nomina = 12;
+    }
+    if ($lastID['id_nomina'] > 0) {
+        $id_nomina = $lastID['id_nomina'];
+    } else {
+        try {
+            $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+            $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+            $sql = "INSERT INTO `seg_nominas` (`tipo`, `vigencia`, `descripcion`,`fec_reg`, `mes`, `id_user_reg`) VALUES (?, ?, ?, ?, ?, ?)";
+            $sql = $cmd->prepare($sql);
+            $sql->bindParam(1, $tipo, PDO::PARAM_STR);
+            $sql->bindParam(2, $vigencia, PDO::PARAM_STR);
+            $sql->bindParam(3, $descripcion, PDO::PARAM_STR);
+            $sql->bindValue(4, $date->format('Y-m-d H:i:s'));
+            $sql->bindParam(5, $mesreg, PDO::PARAM_STR);
+            $sql->bindParam(6, $id_user, PDO::PARAM_INT);
+            $sql->execute();
+            $id_nomina = $cmd->lastInsertId();
+            if (!($id_nomina > 0)) {
+                echo $sql->errorInfo()[2] . 'NOM';
+                exit();
+            }
+            $cmd = null;
+        } catch (PDOException $e) {
+            echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getMessage();
+        }
+    }
     foreach ($empleado as $e) {
         $id = $e['id_empleado'];
         $key = array_search($id, array_column($salario, 'id_empleado'));

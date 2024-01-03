@@ -345,7 +345,7 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-    $sql = "SELECT `id_nomina`, `estado`, `planilla`, `mes`, `vigencia` 
+    $sql = "SELECT `id_nomina`, `estado`, `planilla`, `mes`, `vigencia`, `tipo` 
             FROM `seg_nominas` WHERE `id_nomina` = $id_nomina";
     $rs = $cmd->query($sql);
     $nom = $rs->fetch(PDO::FETCH_ASSOC);
@@ -605,6 +605,7 @@ EOT;
             $key = array_search($id_empleado, array_column($retfte, 'id_empleado'));
             $val_rtefte = $key !== false ? $retfte[$key]['val_ret'] : 0;
             $representacion = $o['representacion'] == 1 ? $grepre['valor'] : 0;
+            $representacion = $nom['tipo'] == 'N' ? $representacion : 0;
             $key = array_search($id_empleado, array_column($cesantias, 'id_empleado'));
             $val_ces = $key !== false ? $cesantias[$key]['val_cesantias'] : 0;
             $val_ices = $key !== false ? $cesantias[$key]['val_icesantias'] : 0;

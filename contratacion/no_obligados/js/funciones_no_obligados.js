@@ -1,4 +1,4 @@
-(function($) {
+(function ($) {
     //Superponer modales
     function pesos(amount, decimals) {
         amount += ''; // por si pasan un numero en vez de un string
@@ -14,26 +14,26 @@
             amount_parts[0] = amount_parts[0].replace(regexp, '$1' + '.' + '$2');
         return '$' + amount_parts.join(',');
     }
-    $(document).on('show.bs.modal', '.modal', function() {
+    $(document).on('show.bs.modal', '.modal', function () {
         var zIndex = 1040 + (10 * $('.modal:visible').length);
         $(this).css('z-index', zIndex);
-        setTimeout(function() {
+        setTimeout(function () {
             $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');
         }, 0);
     });
-    var reloadtable = function(nom) {
-        $(document).ready(function() {
+    var reloadtable = function (nom) {
+        $(document).ready(function () {
             var table = $('#' + nom).DataTable();
             table.ajax.reload();
         });
     };
-    var confdel = function(i, t) {
+    var confdel = function (i, t) {
         $.ajax({
             type: 'POST',
             dataType: 'json',
             url: window.urlin + '/almacen/eliminar/confirdel.php',
             data: { id: i, tip: t }
-        }).done(function(res) {
+        }).done(function (res) {
             $('#divModalConfDel').modal('show');
             $('#divMsgConfdel').html(res.msg);
             $('#divBtnsModalDel').html(res.btns);
@@ -71,14 +71,14 @@
             "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>";
     }
 
-    $(document).ready(function() {
+    $(document).ready(function () {
         //dataTable facturas no obligados
         $('#tableFacurasNoObligados').DataTable({
             dom: setdom,
             buttons: [{
                 //Registar nueva factura no obligado
-                action: function(e, dt, node, config) {
-                    $.post("datos/registrar/formadd_factura_no.php", function(he) {
+                action: function (e, dt, node, config) {
+                    $.post("datos/registrar/formadd_factura_no.php", function (he) {
                         $('#divTamModalForms').removeClass('modal-lg');
                         $('#divTamModalForms').removeClass('modal-sm');
                         $('#divTamModalForms').addClass('modal-xl');
@@ -107,13 +107,18 @@
             ],
             "order": [
                 [0, "desc"]
-            ]
+            ],
+            "lengthMenu": [
+                [10, 25, 50, -1],
+                [10, 25, 50, 'TODO'],
+            ],
+            "pageLength": -1
         });
         $('#tableFacurasNoObligados').wrap('<div class="overflow" />');
         $('.bttn-plus-dt span').html('<span class="icon-dt fas fa-plus-circle fa-lg"></span>');
     });
     //Agregar detalles de factura no obligado
-    $('#divForms').on('click', '#btnMasDetalleFactura', function() {
+    $('#divForms').on('click', '#btnMasDetalleFactura', function () {
         if ($('#txtDetalleFactura').val() === '') {
             $('#divModalError').modal('show');
             $('#divMsgError').html('Detalle de la factura no puede estar vacío');
@@ -125,7 +130,7 @@
         }
         return false;
     });
-    $('#divModalForms').on('click', '.delDetalleFNO', function() {
+    $('#divModalForms').on('click', '.delDetalleFNO', function () {
         let cant = parseInt($('.delDetalleFNO').length) - 1;
         if (cant == 0) {
             $('#validaDetalles').val('0');
@@ -134,7 +139,7 @@
         return false;
     });
     //Registrar factura no obligado
-    $('#divForms').on('click', '#btnFacturaNO', function() {
+    $('#divForms').on('click', '#btnFacturaNO', function () {
         var opcion = $(this).attr('value');
         var aprobar = 1;
         $(".form-control").removeClass('border-danger');
@@ -211,7 +216,7 @@
             $('#divModalError').modal('show');
             $('#divMsgError').html('Dirección no puede estar vacío');
         } else {
-            $('input[name="txtDescripcion[]"]').each(function() {
+            $('input[name="txtDescripcion[]"]').each(function () {
                 let val = $(this).val();
                 let row = $(this).closest('tr');
                 let val_u = row.find('input[name="numValorUnitario[]"]').val();
@@ -263,7 +268,7 @@
                         type: 'POST',
                         url: url,
                         data: datos,
-                        success: function(r) {
+                        success: function (r) {
                             if (r == '1') {
                                 let id = 'tableFacurasNoObligados';
                                 reloadtable(id);
@@ -282,7 +287,7 @@
         return false;
     });
     //actualizar factura no obligado
-    $('#divForms').on('click', '#btnUpFacturaNO', function() {
+    $('#divForms').on('click', '#btnUpFacturaNO', function () {
         var aprobar = 1;
         $(".form-control").removeClass('border-danger');
         if ($('#fecCompraNO').val() == '') {
@@ -363,7 +368,7 @@
             $('#divMsgError').html('Valor IVA debe ser mayor o igual a cero');
         } else {
             if ($('.porimpuesto').length > 0) {
-                $('input[type=number]').each(function() {
+                $('input[type=number]').each(function () {
                     var min = parseInt($(this).attr('min'));
                     var max = parseInt($(this).attr('max'));
                     var val = $(this).val().length ? parseInt($(this).val()) : 'NO';
@@ -386,7 +391,7 @@
                     }
                 });
             }
-            $('input[type=text]').each(function() {
+            $('input[type=text]').each(function () {
                 var val = $(this).val();
                 $(this).removeClass('border-danger');
                 if (val == '') {
@@ -412,7 +417,7 @@
                     type: 'POST',
                     url: 'actualizar/up_factura_no.php',
                     data: datos,
-                    success: function(r) {
+                    success: function (r) {
                         if (r == '1') {
                             let id = 'tableFacurasNoObligados';
                             reloadtable(id);
@@ -429,7 +434,7 @@
         }
         return false;
     });
-    $('#divModalForms').on('change', '.form-check-input', function() {
+    $('#divModalForms').on('change', '.form-check-input', function () {
         var id = $(this).attr('id');
         if ($(this).prop('checked') == true) {
             let input = '<input type="number" name="' + id + '" class="form-control form-control-sm altura porimpuesto" min="0" max="100" placeholder="% Ej: 4.5">';
@@ -438,9 +443,9 @@
             $('#div' + id).html('');
         }
     });
-    $('#tableFacurasNoObligados').on('click', '.modificar', function() {
+    $('#tableFacurasNoObligados').on('click', '.modificar', function () {
         var id = $(this).attr('value');
-        $.post("datos/actualizar/formup_factura_nob.php", { id: id }, function(he) {
+        $.post("datos/actualizar/formup_factura_nob.php", { id: id }, function (he) {
             $('#divTamModalForms').removeClass('modal-lg');
             $('#divTamModalForms').removeClass('modal-sm');
             $('#divTamModalForms').addClass('modal-xl');
@@ -449,19 +454,19 @@
         });
 
     });
-    $('#tableFacurasNoObligados').on('click', '.borrar', function() {
+    $('#tableFacurasNoObligados').on('click', '.borrar', function () {
         var id = $(this).attr('value');
         let tip = 'FacNoOblig';
         confdel(id, tip);
     });
-    $('#tableFacurasNoObligados').on('click', '.verSoporte', function() {
+    $('#tableFacurasNoObligados').on('click', '.verSoporte', function () {
         var id = $(this).attr('value');
         $.ajax({
             type: 'POST',
             url: 'datos/soporte/ver_html.php',
             dataType: 'json',
             data: { id: id },
-            success: function(r) {
+            success: function (r) {
                 if (r.status == '1') {
                     window.open(r.msg, '_blank');
                 } else {
@@ -472,14 +477,14 @@
         });
         return false;
     });
-    $('#divModalConfDel').on('click', '#btnConfirDelFacNoOblig', function() {
+    $('#divModalConfDel').on('click', '#btnConfirDelFacNoOblig', function () {
         let id = $(this).attr('value');
         $('#divModalConfDel').modal('hide');
         $.ajax({
             type: 'POST',
             url: 'eliminar/del_factura_no.php',
             data: { id: id },
-            success: function(r) {
+            success: function (r) {
                 if (r == '1') {
                     let id = 'tableFacurasNoObligados';
                     reloadtable(id);
@@ -493,7 +498,7 @@
         });
         return false;
     });
-    $('#tableFacurasNoObligados').on('click', '.enviar', function() {
+    $('#tableFacurasNoObligados').on('click', '.enviar', function () {
         var id = $(this).attr('value');
         $('#divModalProcess').modal('show');
         $.ajax({
@@ -501,7 +506,7 @@
             url: 'datos/soporte/enviar_factura_no.php',
             dataType: 'json',
             data: { id: id },
-            success: function(r) {
+            success: function (r) {
                 let id = 'tableFacurasNoObligados';
                 reloadtable(id);
                 $('#divModalProcess').modal('hide');
@@ -512,7 +517,7 @@
         });
     });
     // Agregar fila a la tabla de facturas no obligados
-    $('#divModalForms').on('click', '#btnAddRowFNO', function() {
+    $('#divModalForms').on('click', '#btnAddRowFNO', function () {
         let id = 'tableFacNoObliga';
         let row = '<tr>' +
             '<td class="border" colspan="1">' +
@@ -557,13 +562,13 @@
             '</tr>';
         $('#' + id + ' tbody').append(row);
     });
-    $('#divModalForms').on('click', '.btnDelRowFNO', function() {
+    $('#divModalForms').on('click', '.btnDelRowFNO', function () {
         $(this).closest('tr').remove();
         calcSubTotal();
         calcImpuestos();
     });
     //calcular valor total de la factura no obligado
-    $('#divModalForms').on('input', '.valfno', function() {
+    $('#divModalForms').on('input', '.valfno', function () {
         var row = $(this).closest('tr');
         var cantidad = Number(row.find('input[name="numCantidad[]"]').val());
         var valorUnitario = Number(row.find('input[name="numValorUnitario[]"]').val());
@@ -598,16 +603,16 @@
         calcImpuestos();
         return false;
     });
-    $('#divModalForms').on('change', '.pImpToCalc', function() {
+    $('#divModalForms').on('change', '.pImpToCalc', function () {
         calcSubTotal();
         calcImpuestos();
         return false;
     });
-    var calcSubTotal = function() {
+    var calcSubTotal = function () {
         var total = iva = descuento = 0;
         var row, cantidad, valorUnitario, porcIva, porcDcto, baseImp, valIva, valDcto, valTotal, bruto;
 
-        $('input[name="numValorUnitario[]"]').each(function() {
+        $('input[name="numValorUnitario[]"]').each(function () {
             row = $(this).closest('tr');
             cantidad = Number(row.find('input[name="numCantidad[]"]').val());
             valorUnitario = Number(row.find('input[name="numValorUnitario[]"]').val());
@@ -644,7 +649,7 @@
         $('input[name="valDctofno"]').val(descuento);
         $('.valDctofno').html(descuento > 0 ? '-' + pesos(descuento, 2) : pesos(descuento, 2));
     };
-    var calcImpuestos = function() {
+    var calcImpuestos = function () {
         let stotal = $('input[name="valSubTotal"]').val();
         let iva = $('input[name="valIVAfno"]').val();
         let dcto = $('input[name="valDctofno"]').val();
@@ -675,14 +680,14 @@
         $('.valpretiva').html(pesos(val_reteiva, 2));
         $('.valfac').html('<b>' + pesos(val_fac, 2) + '</b>');
     };
-    $('#divModalForms').on('input', '#numNoDoc', function() {
+    $('#divModalForms').on('input', '#numNoDoc', function () {
         let noDoc = $('#numNoDoc').val();
         $.ajax({
             url: 'datos/listar/tercero_noobligado.php',
             type: 'POST',
             dataType: 'json',
             data: { noDoc: noDoc },
-            success: function(r) {
+            success: function (r) {
                 if (r.status == 1) {
                     $('#slcProcedencia').val(r.procedencia);
                     $('#slcTipoOrg').val(r.tipo_org);
@@ -702,7 +707,7 @@
                         type: 'POST',
                         url: window.urlin + '/nomina/empleados/registrar/slcmunicipio.php',
                         data: { dpto: dpto },
-                        success: function(data) {
+                        success: function (data) {
                             $('#slcMunicipioEmp').html(data);
                             $('#slcMunicipioEmp').val(city);
                         }
@@ -724,7 +729,7 @@
             }
         });
     });
-    $('#divModalForms').on('change', '#dctoCondicionado', function() {
+    $('#divModalForms').on('change', '#dctoCondicionado', function () {
         if ($(this).prop('checked') == true) {
             $('input[name="numPDcto[]"]').val(0)
             $('.valDcto').html('$0.00');
@@ -747,7 +752,7 @@
         }
         return false;
     });
-    $('#divModalForms').on('input', 'input[name="ifDcto"]', function() {
+    $('#divModalForms').on('input', 'input[name="ifDcto"]', function () {
         calcSubTotal();
         let dcto = parseFloat($(this).val());
         var stotal = parseFloat($('input[name="valSubTotal"]').val());
@@ -757,7 +762,7 @@
         $('input[name="valDctofno"]').val(valor);
         calcImpuestos();
     });
-    $('#divModalForms').on('change', 'select[name="ifIVA"]', function() {
+    $('#divModalForms').on('change', 'select[name="ifIVA"]', function () {
         $('select[name="numPIVA[]"]').val(0);
         $('input[name="valIva[]"]').val(0);
         $('.valIVA').html('$0.00');
