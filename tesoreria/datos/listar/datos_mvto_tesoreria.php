@@ -38,7 +38,7 @@ try {
 }
 // consultar la fecha de cierre del periodo del módulo de presupuesto 
 try {
-    $sql = "SELECT fecha_cierre FROM seg_fin_periodos WHERE id_modulo=6";
+    $sql = "SELECT `fecha_cierre` FROM `seg_fin_periodos` WHERE `id_modulo`= 6";
     $rs = $cmd->query($sql);
     $fecha_cierre = $rs->fetch();
     $fecha_cierre = $fecha_cierre['fecha_cierre'];
@@ -49,11 +49,14 @@ try {
 if (!empty($listappto)) {
 
     $ids = [];
+    $id_cta = [];
     foreach ($listappto as $lp) {
         if ($lp['id_tercero'] !== null) {
             $ids[] = $lp['id_tercero'];
         }
+        $id_cta[] = $lp['id_ctb_doc'];
     }
+    $id_cta = implode(',', $id_cta);
     $payload = json_encode($ids);
     //API URL
     $url = $api . 'terceros/datos/res/lista/terceros';
@@ -66,6 +69,18 @@ if (!empty($listappto)) {
     $result = curl_exec($ch);
     curl_close($ch);
     $terceros = json_decode($result, true);
+    try {
+        $sql = "SELECT 
+                    `id_ctb_doc`
+                    , SUM(`debito`) as `debito`
+                    , SUM(`credito`) as `credito` 
+                FROM `seg_ctb_libaux` 
+                WHERE `id_ctb_doc`IN ($id_cta) GROUP BY `id_ctb_doc`";
+        $rs = $cmd->query($sql);
+        $suma = $rs->fetchAll();
+    } catch (PDOException $e) {
+        echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+    }
     foreach ($listappto as $lp) {
         $id_ctb = $lp['id_ctb_doc'];
         $estado = $lp['estado'];
@@ -83,15 +98,15 @@ if (!empty($listappto)) {
             $enviar = '<button id ="enviar_' . $id_ctb . '" value="' . $lp['id_nomina'] . '" onclick="EnviarNomina(this)" class="btn btn-outline-primary btn-sm btn-circle shadow-gb"  title="Procesar nómina (Soporte Electrónico)"><span class="fas fa-paper-plane fa-lg"></span></button>';
         }
         // fin api terceros
-        // consultar la suma de debito y credito en la tabla seg_ctb_libaux para el documento
-        $sql = "SELECT sum(debito) as debito, sum(credito) as credito FROM seg_ctb_libaux WHERE id_ctb_doc=$id_ctb GROUP BY id_ctb_doc";
-        $rs3 = $cmd->query($sql);
-        $suma = $rs3->fetch();
-        $dif = $suma['debito'] - $suma['credito'];
+        $dif = NULL;
+        $key = array_search($id_ctb, array_column($suma, 'id_ctb_doc'));
+        if ($key !== false) {
+            $dif = $suma[$key]['debito'] - $suma[$key]['credito'];
+        }
         if ($dif != 0) {
             $valor_total = 'Error';
         } else {
-            $valor_total = number_format($suma['credito'], 2, ',', '.');
+            $valor_total = number_format($suma[$key]['credito'], 2, ',', '.');
         }
         $fecha = date('Y-m-d', strtotime($lp['fecha']));
 
@@ -157,10 +172,11 @@ if (!empty($listappto)) {
             $enviar = null;
             $dato = '<span class="badge badge-pill badge-danger">Anulado</span>';
         }
+        /*
         if ($id_ctb == 3684) {
-            $enviar = '<button id ="enviar_' . $id_ctb . '" value="12" onclick="EnviarNomina(this)" class="btn btn-outline-primary btn-sm bt-sm btn-circle shadow-gb"  title="Procesar nómina (Soporte Electrónico)"><span class="fas fa-paper-plane fa-lg"></span></button>';
+            $enviar = '<button id ="enviar_' . $id_ctb . '" value="14" onclick="EnviarNomina(this)" class="btn btn-outline-primary btn-sm bt-sm btn-circle shadow-gb"  title="Procesar nómina (Soporte Electrónico)"><span class="fas fa-paper-plane fa-lg"></span></button>';
         }
-
+*/
         $data[] = [
 
             'numero' =>  $lp['id_manu'],

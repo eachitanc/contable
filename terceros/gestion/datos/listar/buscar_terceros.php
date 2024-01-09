@@ -48,7 +48,7 @@ $data = [];
 $buscar = mb_strtoupper($_POST['term']);
 if ($buscar == '%%') {
     foreach ($terceros as $s) {
-        $nom_tercero = mb_strtoupper($s['apellido1'] . ' ' . $s['apellido2'] . ' ' . $s['nombre1'] . ' ' . $s['nombre2'] . $s['razon_social']);
+        $nom_tercero = mb_strtoupper($s['apellido1'] . ' ' . $s['apellido2'] . ' ' . $s['nombre1'] . ' ' . $s['nombre2'] . $s['razon_social']) . ' -> ' . $s['cc_nit'];
         $data[] = [
             'id' => $s['id_tercero'],
             'label' => $nom_tercero,
@@ -56,7 +56,7 @@ if ($buscar == '%%') {
     }
 } else {
     foreach ($terceros as $s) {
-        $nom_tercero = mb_strtoupper($s['apellido1'] . ' ' . $s['apellido2'] . ' ' . $s['nombre1'] . ' ' . $s['nombre2'] . $s['razon_social']);
+        $nom_tercero = mb_strtoupper($s['apellido1'] . ' ' . $s['apellido2'] . ' ' . $s['nombre1'] . ' ' . $s['nombre2'] . $s['razon_social']) . ' -> ' . $s['cc_nit'];
         $pos = strpos($nom_tercero, $buscar);
         if ($pos !== false) {
             $data[] = [

@@ -42,6 +42,10 @@ if (!empty($nominas)) {
             $solcdp = '<button value="' . $n['id_nomina'] . '" type="button" class="btn btn-outline-success btn-sm btn-circle solcdp" title="Imprimir solicitud de CDP"><i class="fa fa-print"></i></button>';
             $cdpPatron = '<button value="' . $n['id_nomina'] . '" type="button" class="btn btn-outline-info btn-sm btn-circle cpdPatronal" title="Imprimir solicitud de CDP Patronal"><i class="fa fa-print"></i></button>';
         }
+        if ($n['estado'] == 0) {
+            $estado = '<span class="badge badge-bill badge-secondary">OTRO</span>';
+            $solcdp = $cdpPatron = $pdf =  $compare = $cargue_patron = NULL;
+        }
         if ($n['estado'] > 1) {
             $compare = $cargue_patron = null;
         }

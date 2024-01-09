@@ -19,6 +19,27 @@ include '../../financiero/consultas.php';
 $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
 $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 //
+
+$sqlDelete = "DELETE FROM tmp_ctb_libaux";
+$deleteResult = $cmd->query($sqlDelete);
+// Cargo la informacion de la tabla tmp_ctb_libaux
+// Cargar la información del archivo SQL en la tabla tmp_ctb_libaux
+$sqlFilePath = "/home/admin/in2.sql"; // Ruta al archivo SQL
+$sqlContent = file_get_contents($sqlFilePath); // Leer el contenido del archivo
+
+if ($sqlContent !== false) {
+    // Ejecutar el contenido del archivo SQL como consulta
+    $sqlin = $cmd->exec($sqlContent);
+
+    if ($sqlin !== false) {
+        echo "Carga de datos exitosa.";
+    } else {
+        echo "Error al cargar datos: " . implode(" ", $cmd->errorInfo());
+    }
+} else {
+    echo "Error al leer el archivo SQL.";
+}
+
 try {
     $sql = "SELECT 
     seg_pto_cargue.cod_pptal
@@ -59,7 +80,7 @@ FROM (
             INNER JOIN seg_pto_mvto ON (seg_pto_cargue.cod_pptal = seg_pto_mvto.rubro)
             INNER JOIN seg_pto_documento ON (seg_pto_mvto.id_pto_doc = seg_pto_documento.id_pto_doc)
             INNER JOIN seg_pto_presupuestos ON (seg_pto_documento.id_pto_presupuestos = seg_pto_presupuestos.id_pto_presupuestos)
-        WHERE seg_pto_presupuestos.id_pto_tipo = 1 AND seg_pto_mvto.tipo_mov = 'ADI' AND seg_pto_documento.fecha BETWEEN '$fecha_ini' AND '$fecha_corte' 
+        WHERE seg_pto_mvto.tipo_mov = 'ADI' AND seg_pto_documento.fecha BETWEEN '$fecha_ini' AND '$fecha_corte' 
         GROUP BY seg_pto_cargue.cod_pptal
         ) AS adicion ON (seg_pto_cargue.cod_pptal=adicion.cod_pptal)
         LEFT JOIN (
@@ -72,7 +93,7 @@ FROM (
             INNER JOIN seg_pto_mvto ON (seg_pto_cargue.cod_pptal = seg_pto_mvto.rubro)
             INNER JOIN seg_pto_documento ON (seg_pto_mvto.id_pto_doc = seg_pto_documento.id_pto_doc)
             INNER JOIN seg_pto_presupuestos ON (seg_pto_documento.id_pto_presupuestos = seg_pto_presupuestos.id_pto_presupuestos)
-        WHERE seg_pto_presupuestos.id_pto_tipo = 1 AND seg_pto_mvto.tipo_mov = 'ADI' AND seg_pto_documento.fecha BETWEEN '$fecha_ini_mes' AND '$fecha_corte' 
+        WHERE  seg_pto_mvto.tipo_mov = 'ADI' AND seg_pto_documento.fecha BETWEEN '$fecha_ini_mes' AND '$fecha_corte' 
         GROUP BY seg_pto_cargue.cod_pptal
         ) AS adicion_mes ON (seg_pto_cargue.cod_pptal=adicion_mes.cod_pptal)
         LEFT JOIN (
@@ -117,11 +138,11 @@ FROM (
             SELECT
                 seg_pto_cargue.cod_pptal
                 , seg_pto_cargue.nom_rubro    
-                , vista_ctb_libaux.valordeb AS valor    
+                , tmp_ctb_libaux.valordeb AS valor    
             FROM
                 seg_pto_cargue
-                INNER JOIN vista_ctb_libaux ON (vista_ctb_libaux.cuenta=seg_pto_cargue.cod_pptal)
-            WHERE vista_ctb_libaux.fecha BETWEEN '$fecha_ini' AND '$fecha_corte' AND vista_ctb_libaux.tipo = 'RAD'
+                INNER JOIN tmp_ctb_libaux ON (tmp_ctb_libaux.cuenta=seg_pto_cargue.cod_pptal)
+            WHERE tmp_ctb_libaux.fecha BETWEEN '$fecha_ini' AND '$fecha_corte' AND tmp_ctb_libaux.tipo = 'RAD'
         ) AS rec GROUP BY cod_pptal	 
         ) AS reconocimiento ON (seg_pto_cargue.cod_pptal=reconocimiento.cod_pptal)
         LEFT JOIN (
@@ -140,11 +161,11 @@ FROM (
             SELECT
                 seg_pto_cargue.cod_pptal
                 , seg_pto_cargue.nom_rubro    
-                , vista_ctb_libaux.valordeb AS valor    
+                , tmp_ctb_libaux.valordeb AS valor    
             FROM
                 seg_pto_cargue
-                INNER JOIN vista_ctb_libaux ON (vista_ctb_libaux.cuenta=seg_pto_cargue.cod_pptal)
-            WHERE vista_ctb_libaux.fecha BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND vista_ctb_libaux.tipo = 'RAD'
+                INNER JOIN tmp_ctb_libaux ON (tmp_ctb_libaux.cuenta=seg_pto_cargue.cod_pptal)
+            WHERE tmp_ctb_libaux.fecha BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND tmp_ctb_libaux.tipo = 'RAD'
         ) AS rec GROUP BY cod_pptal	 
         ) AS reconocimiento_mes ON (seg_pto_cargue.cod_pptal=reconocimiento_mes.cod_pptal)
         LEFT JOIN (
@@ -163,11 +184,11 @@ FROM (
             SELECT
                 seg_pto_cargue.cod_pptal
                 , seg_pto_cargue.nom_rubro    
-                , vista_ctb_libaux.valordeb AS valor    
+                , tmp_ctb_libaux.valordeb AS valor    
             FROM
                 seg_pto_cargue
-                INNER JOIN vista_ctb_libaux ON (vista_ctb_libaux.cuenta=seg_pto_cargue.cod_pptal)
-            WHERE vista_ctb_libaux.fecha BETWEEN '$fecha_ini' AND '$fecha_corte' AND vista_ctb_libaux.tipo = 'REC'
+                INNER JOIN tmp_ctb_libaux ON (tmp_ctb_libaux.cuenta=seg_pto_cargue.cod_pptal)
+            WHERE tmp_ctb_libaux.fecha BETWEEN '$fecha_ini' AND '$fecha_corte' AND tmp_ctb_libaux.tipo = 'REC'
         ) AS rec GROUP BY cod_pptal	 
         ) AS recaudo ON (seg_pto_cargue.cod_pptal=recaudo.cod_pptal)
         LEFT JOIN (
@@ -186,11 +207,11 @@ FROM (
             SELECT
                 seg_pto_cargue.cod_pptal
                 , seg_pto_cargue.nom_rubro    
-                , vista_ctb_libaux.valordeb AS valor    
+                , tmp_ctb_libaux.valordeb AS valor    
             FROM
                 seg_pto_cargue
-                INNER JOIN vista_ctb_libaux ON (vista_ctb_libaux.cuenta=seg_pto_cargue.cod_pptal)
-            WHERE vista_ctb_libaux.fecha BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND vista_ctb_libaux.tipo = 'REC'
+                INNER JOIN tmp_ctb_libaux ON (tmp_ctb_libaux.cuenta=seg_pto_cargue.cod_pptal)
+            WHERE tmp_ctb_libaux.fecha BETWEEN '$fecha_ini_mes' AND '$fecha_corte' AND tmp_ctb_libaux.tipo = 'REC'
         ) AS rec GROUP BY cod_pptal	 
     ) AS recaudo_mes ON (seg_pto_cargue.cod_pptal=recaudo_mes.cod_pptal)                    
         

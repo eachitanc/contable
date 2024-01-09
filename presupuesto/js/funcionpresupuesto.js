@@ -688,6 +688,12 @@
       .appendTo("body")
       .submit();
   });
+  $("#modificarPresupuesto").on("click", ".homologa", function () {
+    let id_pto = $(this).attr("value");
+    $('<form action="lista_homologacion_pto.php" method="post"><input type="hidden" name="id_pto" value="' + id_pto + '" /></form>')
+      .appendTo("body")
+      .submit();
+  });
   // 3. Agregar modificaciones al presupuestos
   $("#modificarPresupuesto").on("click", ".modifica", function () {
     let id_pto = $(this).attr("value");

@@ -12,15 +12,15 @@ try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT
-    id_pto_presupuestos
-    ,`seg_pto_presupuestos`.`nombre`
-    , `seg_pto_tipo`.`nombre` as tipo
-    , `seg_pto_presupuestos`.`vigencia`
-FROM
-    `seg_pto_presupuestos`
-    INNER JOIN `seg_pto_tipo` 
-        ON (`seg_pto_presupuestos`.`id_pto_tipo` = `seg_pto_tipo`.`id_pto_tipo`)
-        WHERE seg_pto_presupuestos.vigencia= $_SESSION[vigencia] ";
+                `id_pto_presupuestos`
+                ,`seg_pto_presupuestos`.`nombre`
+                , `seg_pto_tipo`.`nombre` as tipo
+                , `seg_pto_presupuestos`.`vigencia`
+            FROM
+                `seg_pto_presupuestos`
+                INNER JOIN `seg_pto_tipo` 
+                    ON (`seg_pto_presupuestos`.`id_pto_tipo` = `seg_pto_tipo`.`id_pto_tipo`)
+            WHERE `seg_pto_presupuestos`.`vigencia`= $_SESSION[vigencia] ";
     $rs = $cmd->query($sql);
     $listappto = $rs->fetchAll();
     $cmd = null;
@@ -41,6 +41,7 @@ if (!empty($listappto)) {
             <a value="' . $id_pto . '" class="dropdown-item sombra carga" href="#">Cargar presupuesto</a>
             <a value="' . $id_pto . '" class="dropdown-item sombra modifica" href="#">Modificaciones</a>
             <a value="' . $id_pto . '" class="dropdown-item sombra ejecuta" href="#">Ejecución</a>
+            <a value="' . $id_pto . '" class="dropdown-item sombra homologa" href="#">Homologación</a>
             </div>';
         } else {
             $editar = null;

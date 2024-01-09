@@ -109,7 +109,19 @@ try {
 } catch (PDOException $e) {
     echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
 }
-
+try {
+    $sql = "SELECT COUNT(`id_pto_mvto`) AS liquidado FROM `seg_pto_mvto` WHERE `id_auto_dep` = $id_pto_cdp AND tipo_mov = 'LRP';";
+    $rs = $cmd->query($sql);
+    $cantidad = $rs->fetch();
+    $con_liquidacion = $cantidad['liquidado'];
+    if ($con_liquidacion > 0) {
+        $automatico = '';
+        $tercero = '';
+        $id_tercero = '';
+    }
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
 
 $fecha_cierre =  date("Y-m-d", strtotime($datosCdp['fecha']));
 $fecha_max = date("Y-m-d", strtotime($_SESSION['vigencia'] . '-12-31'));
@@ -145,7 +157,7 @@ $fecha = date('Y-m-d'); //, strtotime($datosCdp['fecha']));
                                             <div class="col-2">
                                                 <div class="col"><label for="fecha" class="small">NUMERO CRP:</label></div>
                                             </div>
-                                            <div class="col-2"><input type="number" name="numCdp" id="numCdp" class="form-control form-control-sm" value="" onchange="buscarCdp(value,'CRP')" <?php echo $automatico; ?> required>
+                                            <div class="col-2"><input type="number" name="numCdp" id="numCdp" class="form-control form-control-sm" value="" onchange="buscarCdp(value,'CRP')" readonly required>
                                                 <input type="hidden" id="id_pto_ppto" name="id_pto_presupuestos" value="<?php echo $datosCdp['id_pto_presupuestos']; ?>">
 
                                             </div>
