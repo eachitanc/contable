@@ -25,6 +25,19 @@ try {
 try {
     $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
     $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $sql = "SELECT
+                `id_situacion`,
+                `concepto`
+            FROM `seg_pto_situacion`";
+    $rs = $cmd->query($sql);
+    $situacion = $rs->fetchAll();
+    $cmd = null;
+} catch (PDOException $e) {
+    echo $e->getCode() == 2002 ? 'Sin Conexión a Mysql (Error: 2002)' : 'Error: ' . $e->getCode();
+}
+try {
+    $cmd = new PDO("$bd_driver:host=$bd_servidor;dbname=$bd_base;$charset", $bd_usuario, $bd_clave);
+    $cmd->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $sql = "SELECT `nombre` 
             FROM `seg_pto_presupuestos` 
             WHERE `id_pto_presupuestos`= $id_pto_presupuestos";
@@ -62,88 +75,125 @@ try {
                         </div>
                         <div class="card-body" id="divCuerpoPag">
                             <div class="table-responsive">
-                                <table id="tableHomologaPto" class="table table-striped table-bordered table-sm nowrap table-hover shadow" style="width:100%">
-                                    <thead>
-                                        <tr class="text-center">
-                                            <?php
-                                            if ($id_pto_presupuestos == 1) {
-                                            ?>
-                                                <th>Código</th>
-                                                <th>Nombre</th>
-                                                <th>Tipo</th>
-                                                <th>Presupuesto<br>Definitivo</th>
-                                                <th>Código CGR</th>
-                                                <th>CPC</th>
-                                                <th>Fuente</th>
-                                                <th>Terceros</th>
-                                                <th>Política<br>Pública</th>
-                                                <th>Situación<br>Fondos</th>
-                                            <?php
-                                            } else if ($id_pto_presupuestos == 2) {
-                                            ?>
-                                                <th>Código</th>
-                                                <th>Nombre</th>
-                                                <th>Tipo</th>
-                                                <th>Presupuesto<br>Definitivo</th>
-                                                <th>Codigo CGR</th>
-                                                <th>Vigencia</th>
-                                                <th>Sección<br>Presupuesto</th>
-                                                <th>Sector</th>
-                                                <th>CPC</th>
-                                                <th>Fuente</th>
-                                                <th>Situación<br>Fondos</th>
-                                                <th>Política<br>Pública</th>
-                                                <th>Terceros</th>
-                                                <th>Código SIA</th>
-                                                <th>Clase de<br>pago SIA</th>
+                                <form id="formDataHomolPto">
+                                    <table id="tableHomologaPto" class="table table-striped table-bordered table-sm nowrap shadow" style="width:100%">
+                                        <thead>
+                                            <tr class="text-center">
+                                                <?php
+                                                if ($id_pto_presupuestos == 1) {
+                                                ?>
+                                                    <th>Código</th>
+                                                    <th>Nombre</th>
+                                                    <th>Tipo</th>
+                                                    <th>
+                                                        <div class=center-block px-4'>
+                                                            <input type='checkbox' id='desmarcar' title='Desmarcar Todos'>
+                                                        </div>
+                                                    </th>
+                                                    <th>Código CGR</th>
+                                                    <th>CPC</th>
+                                                    <th>Fuente</th>
+                                                    <th>Terceros</th>
+                                                    <th>Política<br>Pública</th>
+                                                    <th>SIHO</th>
+                                                    <th>Situación<br>Fondos</th>
+                                                <?php
+                                                } else if ($id_pto_presupuestos == 2) {
+                                                ?>
+                                                    <th>Código</th>
+                                                    <th>Nombre</th>
+                                                    <th>Tipo</th>
+                                                    <th>Codigo CGR</th>
+                                                    <th>Vigencia</th>
+                                                    <th>Sección<br>Presupuesto</th>
+                                                    <th>Sector</th>
+                                                    <th>CPC</th>
+                                                    <th>Fuente</th>
+                                                    <th>Situación<br>Fondos</th>
+                                                    <th>Política<br>Pública</th>
+                                                    <th>Terceros</th>
+                                                    <th>Código SIA</th>
+                                                    <th>Clase de<br>pago SIA</th>
 
+                                                <?php
+                                                }
+                                                ?>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="modificaHomologaPto">
                                             <?php
+                                            foreach ($rubros as $rb) {
+                                                $tp_cta = $rb['tipo_dato'] == 0 ? 'M' : 'D';
+                                                echo "<tr>";
+                                                echo "<td>" . $rb['cod_pptal'] . "</td>";
+                                                echo "<td>" . $rb['nom_rubro'] . "</td>";
+                                                echo "<td class='text-center'>" . $tp_cta . "</td>";
+                                                if ($id_pto_presupuestos == 1) {
+                                                    if ($tp_cta == 'D') {
+                                                        echo "<td class='text-center'>
+                                                            <div class='center-block'>
+                                                                <input type='checkbox' class='dupLine' value='" . $rb['id_pto_cargue'] . "' title='Copiar datos de otra linea'>
+                                                            </div>
+                                                        </td>";
+                                                        echo "<td class='p-0'>
+                                                                <input tipo='1' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='uno[" . $rb['id_pto_cargue'] . "]'>
+                                                                <input type='hidden' class='validaPto' name='codCgr[" . $rb['id_pto_cargue'] . "]' value='0'>
+                                                            </td>";
+                                                        echo "<td class='p-0'>
+                                                                <input tipo='2' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='dos[" . $rb['id_pto_cargue'] . "]'>
+                                                                <input type='hidden' class='validaPto' name='cpc[" . $rb['id_pto_cargue'] . "]' value='0'>
+                                                            </td>";
+                                                        echo "<td class='p-0'>
+                                                                <input tipo='3' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='tres[" . $rb['id_pto_cargue'] . "]'>
+                                                                <input type='hidden' class='validaPto' name='fuente[" . $rb['id_pto_cargue'] . "]' value='0'>
+                                                            </td>";
+                                                        echo "<td class='p-0'>
+                                                                <input tipo='4' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='cuatro[" . $rb['id_pto_cargue'] . "]'>
+                                                                <input type='hidden' class='validaPto' name='tercero[" . $rb['id_pto_cargue'] . "]' value='0'>
+                                                            </td>";
+                                                        echo "<td class='p-0'>
+                                                                <input tipo='5' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='cinco[" . $rb['id_pto_cargue'] . "]'>
+                                                                <input type='hidden' class='validaPto' name='polPub[" . $rb['id_pto_cargue'] . "]' value='0'>
+                                                            </td>";
+                                                        echo "<td class='p-0'>
+                                                            <input tipo='6' type='text' class='form-control form-control-sm py-0 px-1 homologaPTO' name='seis[" . $rb['id_pto_cargue'] . "]'>
+                                                            <input type='hidden' class='validaPto' name='siho[" . $rb['id_pto_cargue'] . "]' value='0'>
+                                                        </td>";
+                                                        echo "<td class='p-0'>
+                                                                <select class='form-control form-control-sm py-0 px-1 homologaPTO validaPto'  name='situacion[" . $rb['id_pto_cargue'] . "]'>
+                                                                    <option value='0'>--Seleccionar--</option>";
+
+                                                        foreach ($situacion as $s) {
+                                                            echo '<option value="' . $s['id_situacion'] . '">' . $s['concepto'] . '</option>';
+                                                        }
+                                                        echo        "</select>
+                                                            </td>";
+                                                    } else {
+                                                        echo "<td colspan='8'></td>";
+                                                    }
+                                                } else if ($id_pto_presupuestos == 2) {
+                                                    echo "<td></td>";
+                                                    echo "<td></td>";
+                                                    echo "<td></td>";
+                                                    echo "<td></td>";
+                                                    echo "<td></td>";
+                                                    echo "<td></td>";
+                                                    echo "<td></td>";
+                                                    echo "<td></td>";
+                                                    echo "<td></td>";
+                                                    echo "<td></td>";
+                                                    echo "<td></td>";
+                                                }
+                                                echo "</tr>";
                                             }
                                             ?>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="modificaHomologaPto">
-                                        <?php
-                                        foreach ($rubros as $rb) {
-                                            $tp_cta = $rb['tipo_dato'] == 0 ? 'M' : 'D';
-                                            echo "<tr>";
-                                            echo "<td>" . $rb['cod_pptal'] . "</td>";
-                                            echo "<td>" . $rb['nom_rubro'] . "</td>";
-                                            echo "<td class='text-center'>" . $tp_cta . "</td>";
-                                            if ($id_pto_presupuestos == 1) {
-                                                if ($tp_cta == 'D') {
-                                                    echo "<td class='p-0'><input type='text' class='form-control form-control-sm py-0 px-1' name='proDef[" . $rb['id_pto_cargue'] . "]'></td>";
-                                                    echo "<td class='p-0'><input type='text' class='form-control form-control-sm py-0 px-1' name='codCgr[" . $rb['id_pto_cargue'] . "]'></td>";
-                                                    echo "<td class='p-0'><input type='text' class='form-control form-control-sm py-0 px-1' name='cpc[" . $rb['id_pto_cargue'] . "]'></td>";
-                                                    echo "<td class='p-0'><input type='text' class='form-control form-control-sm py-0 px-1' name='fuente[" . $rb['id_pto_cargue'] . "]'></td>";
-                                                    echo "<td class='p-0'><input type='text' class='form-control form-control-sm py-0 px-1' name='tercero[" . $rb['id_pto_cargue'] . "]'></td>";
-                                                    echo "<td class='p-0'><input type='text' class='form-control form-control-sm py-0 px-1' name='polPub[" . $rb['id_pto_cargue'] . "]'></td>";
-                                                    echo "<td class='p-0'><input type='text' class='form-control form-control-sm py-0 px-1' name='sitFondo[" . $rb['id_pto_cargue'] . "]'></td>";
-                                                } else {
-                                                    echo "<td colspan=7></td>";
-                                                }
-                                            } else if ($id_pto_presupuestos == 2) {
-                                                echo "<td></td>";
-                                                echo "<td></td>";
-                                                echo "<td></td>";
-                                                echo "<td></td>";
-                                                echo "<td></td>";
-                                                echo "<td></td>";
-                                                echo "<td></td>";
-                                                echo "<td></td>";
-                                                echo "<td></td>";
-                                                echo "<td></td>";
-                                                echo "<td></td>";
-                                                echo "<td></td>";
-                                            }
-                                            echo "</tr>";
-                                        }
-                                        ?>
-                                    </tbody>
-                                </table>
+                                        </tbody>
+                                    </table>
+                                </form>
                             </div>
                             <div class="text-center pt-4">
-                                <a type="button" class="btn btn-secondary" style="width: 7rem;" href="lista_presupuestos.php"> Regresar</a>
+                                <a type="button" class="btn btn-secondary" style="width: 7rem;" href="lista_presupuestos.php">Regresar</a>
+                                <button type="button" class="btn btn-success" style="width: 7rem;" id="setHomologacionPto">Modificar</button>
                             </div>
                         </div>
 
