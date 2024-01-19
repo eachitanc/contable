@@ -1,8 +1,5 @@
 <?php
 session_start();
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
 if (!isset($_SESSION['user'])) {
     echo '<script>window.location.replace("../../index.php");</script>';
     exit();
@@ -49,6 +46,7 @@ try {
                     , `seg_tipo_contrata`.`tipo_contrato`
                     , `seg_bien_servicio`.`id_tipo_bn_sv`
                     , `seg_tipo_bien_servicio`.`tipo_bn_sv`
+                    , `seg_tipo_bien_servicio`.`cta_contable`
                     , `seg_bien_servicio`.`id_b_s`
                     , `seg_bien_servicio`.`bien_servicio`
                     , `seg_detalle_entrada_almacen`.`valu_ingresa`
@@ -124,6 +122,7 @@ if ($check ==  0) {
         $datas[$consumo]['bodega'][$bdg][$tipo]['valor'] = $valor + ($fila['valu_ingresa'] * $fila['cantidad'] * (1 + ($fila['iva'] / 100)));
         $datas[$consumo]['bodega'][$bdg][$tipo]['id_tipo'] = $fila['id_tipo_bn_sv'];
         $datas[$consumo]['bodega'][$bdg][$tipo]['cuenta'] = $cta_contable;
+        $datas[$consumo]['bodega'][$bdg][$tipo]['cuenta_15'] = $fila['cta_contable'];
     }
 } else if ($check == 1) {
     foreach ($datos as $fila) {
@@ -145,6 +144,7 @@ if ($check ==  0) {
         $datas[$consumo]['bodega'][$bdg][$tipo]['valor'] = $valor + ($fila['valu_ingresa'] * $fila['cantidad'] * (1 + ($fila['iva'] / 100)));
         $datas[$consumo]['bodega'][$bdg][$tipo]['id_tipo'] = $fila['id_tipo_bn_sv'];
         $datas[$consumo]['bodega'][$bdg][$tipo]['cuenta'] = $cta_contable;
+        $datas[$consumo]['bodega'][$bdg][$tipo]['cuenta_15'] = $fila['cta_contable'];
     }
 } else if ($check == 2) {
     foreach ($datos as $fila) {
@@ -156,6 +156,8 @@ if ($check ==  0) {
         $valor = isset($datas[$consumo]['bodega'][$bdg][$tipo]['valor']) ? $datas[$consumo]['bodega'][$bdg][$tipo]['valor'] : 0;
         $datas[$consumo]['bodega'][$bdg][$tipo]['valor'] = $valor + ($fila['valu_ingresa'] * $fila['cantidad'] * (1 + ($fila['iva'] / 100)));
         $datas[$consumo]['bodega'][$bdg][$tipo]['id_tipo'] = $fila['id_tipo_bn_sv'];
+        $datas[$consumo]['bodega'][$bdg][$tipo]['cuenta'] = '';
+        $datas[$consumo]['bodega'][$bdg][$tipo]['cuenta_15'] = '';
     }
 }
 $date = new DateTime('now', new DateTimeZone('America/Bogota'));
@@ -258,9 +260,9 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                 </tr>
                 <tr style="background-color: #CED3D3; width:100%">
                     <th>ID</th>
-                    <th>Cuenta</th>
+                    <th colspan="2">Cuentas</th>
                     <th><?php echo  $check == 0 ? 'Fecha' : ''; ?></th>
-                    <th colspan="5">Almacén</th>
+                    <th colspan="4">Almacén</th>
                     <th>Vr. Total</th>
                     <th><?php echo  $check == 0 ? 'Estado' : ''; ?></th>
                 </tr>
@@ -285,7 +287,8 @@ $date = new DateTime('now', new DateTimeZone('America/Bogota'));
                                 $row_tipo .=  '<tr class="resaltar">';
                                 $row_tipo .= '<td colspan="1" style="text-align:left">' . $dt['id_tipo'] . '</td>';
                                 $row_tipo .= '<td colspan="1" style="text-align:left">' . $dt['cuenta'] . '</td>';
-                                $row_tipo .= '<td colspan="6" style="text-align:left">' . $tp . '</td>';
+                                $row_tipo .= '<td colspan="1" style="text-align:left">' . $dt['cuenta_15'] . '</td>';
+                                $row_tipo .= '<td colspan="5" style="text-align:left">' . $tp . '</td>';
                                 $row_tipo .= '<td style="text-align:right">' . number_format($dt['valor'], 2, ',', '.') . '</td>';
                                 $row_tipo .= '<td></td>';
                                 $row_tipo .= '</tr>';

@@ -927,8 +927,9 @@ $('#tableHomologaPto').on('click', '#desmarcar', function () {
 $('#modificaHomologaPto').on('click', '.dupLine', function () {
     var elemento = $(this);
     var id = $(this).val();
-    var cgr = cpc = fte = tercero = politica = siho = situacion = '0';
-    var txtcgr = txtcpc = txtfte = txttercero = txtpolitica = txtsiho = '';
+    var cgr = cpc = fte = tercero = politica = siho = sia = situacion = vig = secc = sect = csia = '0';
+    var txtcgr = txtcpc = txtfte = txttercero = txtpolitica = txtsiho = txtsia = txtvig = txtsecc = txtsect = txtcsia = '';
+    var ppto = $('#id_pto_ppto').val();
     if (elemento.is(':checked')) {
         $('#desmarcar').prop("checked", true);
         $('.dupLine').each(function () {
@@ -937,15 +938,27 @@ $('#modificaHomologaPto').on('click', '.dupLine', function () {
                 cgr = $('input[name="codCgr[' + id_pto + ']"]').val();
                 txtcgr = $('input[name="uno[' + id_pto + ']"]').val();
                 cpc = $('input[name="cpc[' + id_pto + ']"]').val();
-                txtcpc = $('input[name="dos[' + id_pto + ']"]').val();
+                txtcpc = $('input[name="cinco[' + id_pto + ']"]').val();
                 fte = $('input[name="fuente[' + id_pto + ']"]').val();
-                txtfte = $('input[name="tres[' + id_pto + ']"]').val();
+                txtfte = $('input[name="seis[' + id_pto + ']"]').val();
                 tercero = $('input[name="tercero[' + id_pto + ']"]').val();
-                txttercero = $('input[name="cuatro[' + id_pto + ']"]').val();
+                txttercero = $('input[name="siete[' + id_pto + ']"]').val();
                 politica = $('input[name="polPub[' + id_pto + ']"]').val();
-                txtpolitica = $('input[name="cinco[' + id_pto + ']"]').val();
+                txtpolitica = $('input[name="ocho[' + id_pto + ']"]').val();
                 siho = $('input[name="siho[' + id_pto + ']"]').val();
-                txtsiho = $('input[name="seis[' + id_pto + ']"]').val();
+                txtsiho = $('input[name="nueve[' + id_pto + ']"]').val();
+                sia = $('input[name="sia[' + id_pto + ']"]').val();
+                txtsia = $('input[name="diez[' + id_pto + ']"]').val();
+                if (ppto == '2') {
+                    vig = $('input[name="vigencia[' + id_pto + ']"]').val();
+                    txtvig = $('input[name="dos[' + id_pto + ']"]').val();
+                    secc = $('input[name="seccion[' + id_pto + ']"]').val();
+                    txtsecc = $('input[name="tres[' + id_pto + ']"]').val();
+                    sect = $('input[name="sector[' + id_pto + ']"]').val();
+                    txtsect = $('input[name="cuatro[' + id_pto + ']"]').val();
+                    csia = $('input[name="csia[' + id_pto + ']"]').val();
+                    txtcsia = $('input[name="once[' + id_pto + ']"]').val();
+                }
                 situacion = $('select[name="situacion[' + id_pto + ']"]').val();
                 return false;
 
@@ -954,16 +967,28 @@ $('#modificaHomologaPto').on('click', '.dupLine', function () {
         $('input[name="codCgr[' + id + ']"]').val(cgr);
         $('input[name="uno[' + id + ']"]').val(txtcgr);
         $('input[name="cpc[' + id + ']"]').val(cpc);
-        $('input[name="dos[' + id + ']"]').val(txtcpc);
+        $('input[name="cinco[' + id + ']"]').val(txtcpc);
         $('input[name="fuente[' + id + ']"]').val(fte);
-        $('input[name="tres[' + id + ']"]').val(txtfte);
+        $('input[name="seis[' + id + ']"]').val(txtfte);
         $('input[name="tercero[' + id + ']"]').val(tercero);
-        $('input[name="cuatro[' + id + ']"]').val(txttercero);
+        $('input[name="siete[' + id + ']"]').val(txttercero);
         $('input[name="polPub[' + id + ']"]').val(politica);
-        $('input[name="cinco[' + id + ']"]').val(txtpolitica);
+        $('input[name="ocho[' + id + ']"]').val(txtpolitica);
         $('input[name="siho[' + id + ']"]').val(siho);
-        $('input[name="seis[' + id + ']"]').val(txtsiho);
+        $('input[name="nueve[' + id + ']"]').val(txtsiho);
+        $('input[name="sia[' + id + ']"]').val(sia);
+        $('input[name="diez[' + id + ']"]').val(txtsia);
         $('select[name="situacion[' + id + ']"]').val(situacion);
+        if (ppto == '2') {
+            $('input[name="vigencia[' + id + ']"]').val(vig);
+            $('input[name="dos[' + id + ']"]').val(txtvig);
+            $('input[name="seccion[' + id + ']"]').val(secc);
+            $('input[name="tres[' + id + ']"]').val(txtsecc);
+            $('input[name="sector[' + id + ']"]').val(sect);
+            $('input[name="cuatro[' + id + ']"]').val(txtsect);
+            $('input[name="csia[' + id + ']"]').val(csia);
+            $('input[name="once[' + id + ']"]').val(txtcsia);
+        }
     }
 });
 $('#setHomologacionPto').on('click', '', function () {
@@ -988,6 +1013,8 @@ $('#setHomologacionPto').on('click', '', function () {
             data: data,
             success: function (r) {
                 if (r == 'ok') {
+                    $('#divModalDone a').attr('data-dismiss', '');
+                    $('#divModalDone a').attr('href', 'javascript:location.reload()');
                     $('#divModalDone').modal('show');
                     $('#divMsgDone').html('Homologación realizada correctamente');
                 } else {
@@ -2371,10 +2398,13 @@ const cargarReportePresupuesto = (id) => {
         url = "informes/informe_ejecucion_ing_xls_mes_form.php";
     }
     if (id == 6) {
-        url = "informes/informe_ejecucion_ing_xls_mes_form.php";
+        url = "informes/informe_ejecucion_form.php";
     }
     if (id == 7) {
         url = "informes/informe_ejecucion_gas_libros_anula.php";
+    }
+    if (id == 8) {
+        url = "informes/informe_ejecucion2_form.php";
     }
     fetch(url, {
         method: "POST",
@@ -2392,7 +2422,12 @@ const cargarReportePresupuesto = (id) => {
 // Funcion para generar formato de Modificaciones
 const generarInforme = (boton) => {
     let id = boton.value;
-    let fecha_corte = fecha.value;
+    let fecha_corte = fecha.length ? fecha.value : '';
+    let t_ppto = document.getElementById('tipo_pto');
+    if (t_ppto && t_ppto.length > 0) {
+        var tipo = t_ppto.value;
+        fecha_corte = [tipo, fecha_corte]
+    }
     let archivo = '';
     const areaImprimir = document.getElementById("areaImprimir");
     if (id == 1) {
@@ -2405,10 +2440,13 @@ const generarInforme = (boton) => {
         archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_gas_xls_mes.php";
     }
     if (id == 4) {
-        archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_ing_xls_mes.php";
+        archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_trimestral.php";
     }
     if (id == 5) {
         archivo = window.urlin + "/presupuesto/informes/informe_ejecucion_gas_xls_consulta.php";
+    }
+    if (id == 6) {
+        archivo = window.urlin + "/presupuesto/informes/informe_ejecucion2_trimestral.php";
     }
     boton.disabled = true;
     var span = boton.querySelector("span")

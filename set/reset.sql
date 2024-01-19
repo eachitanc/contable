@@ -1,1 +1,17 @@
-
+("TP1","Para Nómina"),
+("TP2","Contribuciones Inherentes a la Nómina"),
+("TP3","Prestaciones Sociales"),
+("TP4","Viáticos y Gastos de Transporte"),
+("TP5","Servicio de la Deuda"),
+("C1","Contratos de Prestación de Servicios"),
+("C2","Consultorías"),
+("C3","Mantenimiento yo Reparación"),
+("C4","Obra Pública"),
+("C5","Compra Ventas yo Suministro"),
+("C6","Concesión"),
+("C7","Comodatos"),
+("C8","Arrendamientos"),
+("C9","Seguros"),
+("C10","Convenios"),
+("C11","Emprestitos"),
+("C12","Otro");

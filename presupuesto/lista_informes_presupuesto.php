@@ -50,6 +50,7 @@ include '../financiero/consultas.php';
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item sombra" href="#" onclick="abrirLink(1);">Contraloría SIA</a>
                                     <a class="dropdown-item sombra" href="#" onclick="cargarReportePresupuesto(6);">Contraloría General - Cuipo</a>
+                                    <a class="dropdown-item sombra" href="#" onclick="cargarReportePresupuesto(8);">Contraloría General - Ejecución</a>
                                     <div class="dropdown-divider"></div>
                                     <a class="dropdown-item sombra" href="#" onclick="abrirLink(13);">Sia Observa</a>
                                 </div>

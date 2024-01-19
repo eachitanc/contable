@@ -24,7 +24,7 @@ $sqlDelete = "DELETE FROM tmp_ctb_libaux";
 $deleteResult = $cmd->query($sqlDelete);
 // Cargo la informacion de la tabla tmp_ctb_libaux
 // Cargar la información del archivo SQL en la tabla tmp_ctb_libaux
-$sqlFilePath = "/home/admin/in2.sql"; // Ruta al archivo SQL
+$sqlFilePath = "C:/Users/LCM01/Downloads/in2.sql"; // Ruta al archivo SQL
 $sqlContent = file_get_contents($sqlFilePath); // Leer el contenido del archivo
 
 if ($sqlContent !== false) {
@@ -296,7 +296,7 @@ FROM
 <table style="width:100% !important; border-collapse: collapse;">
     <thead>
         <tr>
-            <td rowspan="2" style="text-align:center"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
+            <td rowspan="4" style="text-align:center"><label class="small"><img src="<?php echo $_SESSION['urlin'] ?>/images/logos/logo.png" width="100"></label></td>
             <td colspan="12" style="text-align:center"><?php echo $empresa['nombre']; ?></td>
         </tr>
         <tr>

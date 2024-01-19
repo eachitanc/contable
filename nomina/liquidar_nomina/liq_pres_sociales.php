@@ -60,7 +60,7 @@ try {
                 , `t3`.`corte_prim_sv`
                 , `t4`.`val_liq_pv`
                 , `t4`.`corte_prim_nav`
-                , `t5`.`fec_inicial` as `corte_vac`
+                , `t5`.`corte` as `corte_vac`
                 , `t5`.`val_liq`
                 , `t5`.`val_prima_vac`
                 , `t5`.`val_bon_recrea`
@@ -93,7 +93,7 @@ try {
                 LEFT JOIN 
                 (SELECT
                     `seg_vacaciones`.`id_empleado`
-                    , `seg_vacaciones`.`fec_inicial`
+                    , `seg_vacaciones`.`corte` 
                     , `seg_liq_vac`.`val_liq`
                     , `seg_liq_vac`.`val_prima_vac`
                     , `seg_liq_vac`.`val_bon_recrea`
@@ -375,7 +375,7 @@ if (count($empleado) > 0) {
             $feci_bsp = date('Y-m-d', strtotime($datos['anio'] . '-' . $mes_bsp . '-' . $fin_mes . ' + 1 day'));
         }
         $diasToBsp = calcularDias($feci_bsp, $fec_retiro, $id);
-        $diasToBsp = $diasToBsp > 360 ? 360 : $diasToBsp;
+        //$diasToBsp = $diasToBsp > 360 ? 360 : $diasToBsp;
         $bsp = $bsp_dia * $diasToBsp;
         $bsp_salarial = $bsp;
         if ($bsp > 0) {
